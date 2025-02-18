@@ -6,7 +6,7 @@ from io import BytesIO
 # Load data from GitHub repository
 @st.cache_data
 def load_data():
-    url = "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/agent-dashboard/main/AP%20Final.xlsx"
+    url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
     response = requests.get(url)
     xls = pd.ExcelFile(BytesIO(response.content))
     return xls.parse('Agents')
