@@ -4,8 +4,11 @@ import requests
 from io import BytesIO
 import tempfile
 
+# ✅ Ensure this is the first Streamlit command
+st.set_page_config(page_title="Agent Overview", layout="wide")
+
 # Load data from GitHub repository
-@st.cache_data(ttl=0)  # Force reload every time
+@st.cache_data(ttl=0)  # Forces reload every time
 def load_data():
     url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
     response = requests.get(url_agents)
@@ -30,15 +33,7 @@ if agents_data is None or ranks_data is None:
     st.stop()
 
 # Streamlit App
-st.set_page_config(page_title="Agent Overview", layout="wide")
 st.title("Agent Overview Dashboard")
-
-# Load agent images (placeholder example, should be updated with actual URLs)
-agent_images = {
-    "Andrew Scott": "https://example.com/andrew_scott.jpg",
-    "Darren Hermiston": "https://example.com/darren_hermiston.jpg",
-    # Add more agents as needed
-}
 
 # Search functionality
 agent_names = ranks_data['Agent Name'].dropna().replace(['', '(blank)', 'Grand Total'], pd.NA).dropna()
@@ -55,11 +50,7 @@ header_col1, header_col2 = st.columns([3, 1])
 with header_col1:
     st.header(f"{selected_agent} - {agent_info['Agency Name']}")
 
-with header_col2:
-    agent_image_url = agent_images.get(selected_agent, "https://via.placeholder.com/150")  # Default placeholder
-    st.image(agent_image_url, width=150)
-
-st.subheader("📊 Six-Year Financial Breakdown")
+st.subheader("📊 Financial Breakdown")
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Dollar Index", f"${rank_info['Dollar Index']:.2f}")
