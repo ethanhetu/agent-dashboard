@@ -76,7 +76,7 @@ def agent_dashboard():
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
     st.subheader("🏆 Biggest Clients")
-    st.write("(Feature Coming Soon: Auto-fetch player images and details)")
+    st.write("(To Do: Auto-fetch player images and details)")
 
 def project_definitions():
     st.title("📚 Project Definitions")
