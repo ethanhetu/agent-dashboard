@@ -44,7 +44,7 @@ rank_info = ranks_data[ranks_data['Agent Name'] == selected_agent].iloc[0]
 
 # Display Agent Info
 st.header(f"{selected_agent} - {agent_info['Agency Name']}")
-st.subheader("📊 Financial Breakdown")
+st.subheader("📊 Six-Year Financial Breakdown")
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Dollar Index", f"${rank_info['Dollar Index']:.2f}")
