@@ -33,6 +33,13 @@ if agents_data is None or ranks_data is None:
 st.set_page_config(page_title="Agent Overview", layout="wide")
 st.title("Agent Overview Dashboard")
 
+# Load agent images (placeholder example, should be updated with actual URLs)
+agent_images = {
+    "Andrew Scott": "https://example.com/andrew_scott.jpg",
+    "Darren Hermiston": "https://example.com/darren_hermiston.jpg",
+    # Add more agents as needed
+}
+
 # Search functionality
 agent_names = ranks_data['Agent Name'].dropna().replace(['', '(blank)', 'Grand Total'], pd.NA).dropna()
 agent_names = sorted(agent_names, key=lambda name: name.split()[-1])
@@ -42,8 +49,16 @@ selected_agent = st.selectbox("Select an Agent:", agent_names)
 agent_info = agents_data[agents_data['Agent Name'] == selected_agent].iloc[0]
 rank_info = ranks_data[ranks_data['Agent Name'] == selected_agent].iloc[0]
 
-# Display Agent Info
-st.header(f"{selected_agent} - {agent_info['Agency Name']}")
+# Layout for name & image
+header_col1, header_col2 = st.columns([3, 1])
+
+with header_col1:
+    st.header(f"{selected_agent} - {agent_info['Agency Name']}")
+
+with header_col2:
+    agent_image_url = agent_images.get(selected_agent, "https://via.placeholder.com/150")  # Default placeholder
+    st.image(agent_image_url, width=150)
+
 st.subheader("📊 Six-Year Financial Breakdown")
 
 col1, col2, col3, col4 = st.columns(4)
