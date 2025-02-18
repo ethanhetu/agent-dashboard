@@ -77,7 +77,6 @@ page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard"])
 
 if page == "Home":
     st.title("Agent Project Insights Dashboard")
-    st.write("Here is where the key findings of my Agent Analysis project are hosted.")
     st.subheader("Key Elements")
     st.write("- AGENT PROFILES - each agent has a profile page containing the key metrics used to evaluate agent performance.")
     st.write("- AGENCY PROFILES - similar to agent profiles, only split by agency, rather than by individual agents.")
