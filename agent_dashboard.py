@@ -5,7 +5,7 @@ from io import BytesIO
 import tempfile
 
 # Load data from GitHub repository
-@st.cache_data
+@st.cache_data(ttl=0)  # Force reload every time
 def load_data():
     url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
     response = requests.get(url_agents)
