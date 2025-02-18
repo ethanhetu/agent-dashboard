@@ -82,5 +82,5 @@ if page == "Home":
     st.write("- AGENCY PROFILES - similar to agent profiles, only split by agency, rather than by individual agents.")
     st.write("- KEY TAKEAWAYS - an overall look at the findings of the project and what can be learned about agent negotiation patterns")
 
-elif page == "Agent Dashboard":
+elif page == "Agent Profiles":
     agent_dashboard()
