@@ -84,7 +84,7 @@ def project_definitions():
 
     st.subheader("Key Terms")
     st.markdown("""
-    - **Dollar Index**: The key metric of the project. The Dollar Index is quite simple: for every dollar of on-ice value delivered by a client to his team, how many dollars is the agent delivering to his client? So, a mark of $0.75 means an agent is successfully capturing 75 cents for every dollar his client is delivering on the ice.
+    - **Dollar Index**: The key metric of the project. The Dollar Index is simple: for every dollar of on-ice value delivered by a client to his team, how many dollars is the agent delivering to his client? So, a mark of $0.75 means an agent is successfully capturing 75 cents for every dollar his client is delivering on the ice.
     - **Win %**: The percentage of successful contract negotiations based on defined criteria.
     - **Contracts Tracked**: Total number of contracts managed by the agent included in this dataset.
     - **Total Contract Value**: The cumulative monetary value of all tracked contracts for an agent.
