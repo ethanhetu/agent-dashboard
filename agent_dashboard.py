@@ -28,12 +28,11 @@ def load_data():
     return agents_data, ranks_data
 
 def home_page():
-    st.title("Welcome to the Agent Insights Dashboard")
-    st.write("This site provides detailed insights on player agents, rankings, and financial statistics.")
-    st.subheader("Key Takeaways")
-    st.write("- Agents are ranked based on financial efficiency and contract success.")
-    st.write("- Player and agent trends reveal negotiation patterns.")
-    st.write("- Use the Agent Dashboard for deep dives into individual agents.")
+    st.title("Agent Project Insights Dashboard")
+    st.subheader("Key Elements")
+    st.write("- AGENT PROFILES - each agent has a profile page containing the key metrics used to evaluate agent performance.")
+    st.write("- AGENCY PROFILES - similar to agent profiles, only split by agency, rather than by individual agents.")
+    st.write("- KEY TAKEAWAYS - an overall look at the findings of the project and what can be learned about agent negotiation patterns")
 
 def agent_dashboard():
     agents_data, ranks_data = load_data()
