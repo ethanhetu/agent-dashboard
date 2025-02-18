@@ -87,8 +87,8 @@ def project_definitions():
     - **Dollar Index**: The key metric of the project. The Dollar Index is simple: for every dollar of on-ice value delivered by a client to his team, how many dollars is the agent delivering to his or her client? A Dollar Index of $0.75 means an agent is successfully capturing 75 cents for every dollar his client is delivering on the ice.
     - **Win %**: An agent's "Win Rate" is the number of "win" contract years an agent has, divided by the total number of contract years the agent has to his or her name. A "win" year is defined as a contract year in which a client's compensation exceeded the value he provided on the ice.
     - **Contracts Tracked**: The total number of NHL contracts negotiated by an agent within the project's designated timeframe. (2018-19 through 2023-24)
-    - **Total Contract Value**: The cumulative monetary value of all tracked contracts for an agent.
-    - **Total Player Value**: Estimated total on-ice contributions from all players represented by the agent.
+    - **Total Contract Value**: The cumulative monetary value of all tracked contracts for an agent. This is not to be confused with cap hit, for players on two-way contracts, an estimation of final compensation using NHL and AHL games played was used.
+    - **Total Player Value**: The cumulative monetary value of all on-ice contributions of tracked players. Data encompasses both NHL and AHL contributions. Dataset courtesy of BenchRates. 
     """)
 
     st.subheader("How to Interpret Rankings")
