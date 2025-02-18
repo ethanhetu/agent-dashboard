@@ -31,7 +31,7 @@ if agents_data is None or ranks_data is None:
 
 # Streamlit App
 st.set_page_config(page_title="Agent Overview", layout="wide")
-st.title("🏒 Agent Overview Dashboard")
+st.title("Agent Overview Dashboard")
 
 # Search functionality
 agent_names = agents_data['Agent Name'].unique()
@@ -59,7 +59,6 @@ col2.metric("Win Percentage Rank", f"#{int(rank_info['WinR'])}/90")
 col3.metric("Contracts Tracked Rank", f"#{int(rank_info['CTR'])}/90")
 col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
 col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
-st.write(f"Win Percentage Rank: #{int(rank_info['WinR'])}/52")
 st.write(f"Contracts Tracked Rank: #{int(rank_info['CTR'])}/52")
 st.write(f"Total Contract Value Rank: #{int(rank_info['TCV R'])}/52")
 st.write(f"Total Player Value Rank: #{int(rank_info['TPV R'])}/52")
