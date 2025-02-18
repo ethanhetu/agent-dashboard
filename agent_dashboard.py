@@ -34,7 +34,7 @@ st.set_page_config(page_title="Agent Overview", layout="wide")
 st.title("Agent Overview Dashboard")
 
 # Search functionality
-agent_names = agents_data['Agent Name'].unique()
+agent_names = ranks_data['Agent Name'].unique()
 selected_agent = st.selectbox("Select an Agent:", agent_names)
 
 # Filter data
