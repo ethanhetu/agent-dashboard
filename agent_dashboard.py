@@ -91,9 +91,6 @@ def project_definitions():
     - **Total Player Value**: The cumulative monetary value of all on-ice contributions of tracked players. Data encompasses both NHL and AHL contributions. Dataset courtesy of BenchRates. 
     """)
 
-    st.subheader("How to Interpret Rankings")
-    st.write("Higher ranks indicate better performance relative to peers in the dataset. For example, a higher Dollar Index rank reflects greater financial efficiency.")
-
 # Navigation menu
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Project Definitions"])
