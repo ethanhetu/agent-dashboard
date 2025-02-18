@@ -34,7 +34,8 @@ st.set_page_config(page_title="Agent Overview", layout="wide")
 st.title("Agent Overview Dashboard")
 
 # Search functionality
-agent_names = ranks_data['Agent Name'].dropna().replace(['', '(blank)', 'Grand Total'], pd.NA).dropna().sort_values()
+agent_names = ranks_data['Agent Name'].dropna().replace(['', '(blank)', 'Grand Total'], pd.NA).dropna()
+agent_names = sorted(agent_names, key=lambda name: name.split()[-1])
 selected_agent = st.selectbox("Select an Agent:", agent_names)
 
 # Filter data
