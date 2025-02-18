@@ -28,7 +28,7 @@ def load_data():
     return agents_data, ranks_data
 
 def home_page():
-    st.title("🏒 Welcome to the Agent Insights Dashboard")
+    st.title("Welcome to the Agent Insights Dashboard")
     st.write("This site provides detailed insights on player agents, rankings, and financial statistics.")
     st.subheader("Key Takeaways")
     st.write("- Agents are ranked based on financial efficiency and contract success.")
