@@ -159,8 +159,8 @@ def agent_dashboard():
             else:
                 st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=200)
 
-            # Centered player name in bold, larger font
-            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
+            # Left-aligned player name in bold, larger font
+            st.markdown(f"<h4 style='text-align:left; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
             st.markdown(f"**Age:** {calculate_age(player['Birth Date'])}")
 
             # Six-Year Agent Delivery with conditional color formatting
