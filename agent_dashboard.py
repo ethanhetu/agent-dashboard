@@ -153,34 +153,38 @@ def agent_dashboard():
     client_cols = st.columns(len(top_clients))
     for idx, (_, player) in enumerate(top_clients.iterrows()):
         with client_cols[idx]:
+            st.markdown("""
+                <div style='display: flex; flex-direction: column; align-items: center;'>
+            """, unsafe_allow_html=True)
+
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
                 st.image(img_path, width=200)
             else:
                 st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=200)
 
-            # Left-aligned player name in bold, larger font
+            # Center-aligned player name in bold, larger font
             st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
 
             # Boxed section for key metrics
-            with st.container():
-                st.markdown("""
-                    <div style='border: 2px solid #f0f0f0; border-radius: 10px; padding: 15px; text-align: left;'>
-                        <p><strong>Age:</strong> {}</p>
-                        <p><strong>Six-Year Agent Delivery:</strong> {}</p>
-                        <p><strong>Six-Year Player Cost:</strong> ${:,.0f}</p>
-                        <p><strong>Six-Year Player Contribution:</strong> ${:,.0f}</p>
-                    </div>
-                    <div style='text-align:center; padding-top: 10px;'>
-                        <h5 style='color:#041e41; font-weight:bold;'>Value Capture Percentage: {:.2%}</h5>
-                    </div>
-                """.format(
-                    calculate_age(player['Birth Date']),
-                    format_delivery_value(player['Dollars Captured Above/ Below Value']),
-                    player['Total Cost'],
-                    player['Total PC'],
-                    player['Value Capture %']
-                ), unsafe_allow_html=True)
+            st.markdown("""
+                <div style='border: 2px solid #f0f0f0; border-radius: 10px; padding: 15px; text-align: center; width:100%;'>
+                    <p><strong>Age:</strong> {}</p>
+                    <p><strong>Six-Year Agent Delivery:</strong> {}</p>
+                    <p><strong>Six-Year Player Cost:</strong> ${:,.0f}</p>
+                    <p><strong>Six-Year Player Contribution:</strong> ${:,.0f}</p>
+                </div>
+                <div style='text-align:center; padding-top: 10px;'>
+                    <h5 style='color:#041e41; font-weight:bold;'>Value Capture Percentage: {:.2%}</h5>
+                </div>
+                </div>
+            """.format(
+                calculate_age(player['Birth Date']),
+                format_delivery_value(player['Dollars Captured Above/ Below Value']),
+                player['Total Cost'],
+                player['Total PC'],
+                player['Value Capture %']
+            ), unsafe_allow_html=True)
 
 def project_definitions():
     st.title("📚 Project Definitions")
