@@ -8,16 +8,25 @@ import zipfile
 import os
 import base64
 import plotly.graph_objects as go
+from st_pages import Page, show_pages, add_page_title
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
+
+# Setup multi-page navigation
+show_pages([
+    Page("agent_dashboard.py", "Agent Dashboard"),
+    Page("player_page.py", "Player Details"),
+    Page("project_definitions.py", "Project Definitions"),
+])
+add_page_title()
 
 # Global variable to store the headshots directory
 HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
 # Load data from GitHub repository
-@st.cache_data(ttl=0)  # Forces reload every time
+@st.cache_data(ttl=0)
 def load_data():
     url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
     response = requests.get(url_agents)
@@ -34,7 +43,7 @@ def load_data():
     agents_data = xls.parse('Agents')
     ranks_data = xls.parse('Just Agent Ranks')
     piba_data = xls.parse('PIBA')
-    piba_data.columns = piba_data.columns.str.strip()  # Remove extra spaces in column names
+    piba_data.columns = piba_data.columns.str.strip()
     return agents_data, ranks_data, piba_data
 
 @st.cache_data(ttl=0)
@@ -58,7 +67,6 @@ def extract_headshots():
             except zipfile.BadZipFile:
                 st.error("❌ NHL.Headshots.zip is not a valid ZIP archive.")
 
-# Retrieve headshot path
 def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
@@ -74,7 +82,6 @@ def get_headshot_path(player_name):
             pass
     return None
 
-# Calculate age
 def calculate_age(birthdate):
     try:
         birth_date = pd.to_datetime(birthdate)
@@ -83,14 +90,19 @@ def calculate_age(birthdate):
     except:
         return "N/A"
 
-# Player detail graph (Cost vs Value per year)
+def format_delivery_value(value):
+    if value > 0:
+        return f"<span style='color:#006400;'>${value:,.0f}</span>"
+    else:
+        return f"<span style='color:#8B0000;'>${value:,.0f}</span>"
+
 def plot_player_detail(player_data):
     years = ['2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24']
     cost_columns = ['COST 18-19', 'COST 19-20', 'COST 20-21', 'COST 21-22', 'COST 22-23', 'COST 23-24']
     value_columns = ['PC 18-19', 'PC 19-20', 'PC 20-21', 'PC 21-22', 'PC 22-23', 'PC 23-24']
 
-    cost_values = [player_data[col] for col in cost_columns]
-    value_values = [player_data[col] for col in value_columns]
+    cost_values = [player_data.get(col, 0) for col in cost_columns]
+    value_values = [player_data.get(col, 0) for col in value_columns]
 
     fig = go.Figure()
 
@@ -121,13 +133,14 @@ def plot_player_detail(player_data):
 
     st.plotly_chart(fig, use_container_width=True)
 
-# Display player details page
 def player_page(player_name, piba_data):
-    player_data = piba_data[piba_data['Combined Names'] == player_name].iloc[0]
-    st.title(f"Player Details: {player_name}")
-    plot_player_detail(player_data)
+    if player_name in piba_data['Combined Names'].values:
+        player_data = piba_data[piba_data['Combined Names'] == player_name].iloc[0]
+        st.title(f"Player Details: {player_name}")
+        plot_player_detail(player_data)
+    else:
+        st.error("Player data not found. Please return and select a valid player.")
 
-# Display player card section
 def display_player_section(title, player_df):
     st.subheader(title)
     client_cols = st.columns(3)
@@ -135,51 +148,29 @@ def display_player_section(title, player_df):
         with client_cols[idx % 3]:
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
-                st.markdown(
-                    f"""
-                    <div style='text-align:center;'>
-                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" 
-                             style='width:200px; height:200px; display:block; margin:auto;'/>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                st.image(img_path, width=200)
             else:
-                st.markdown(
-                    f"""
-                    <div style='text-align:center;'>
-                        <img src="{PLACEHOLDER_IMAGE_URL}" 
-                             style='width:200px; height:200px; display:block; margin:auto;'/>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                st.image(PLACEHOLDER_IMAGE_URL, width=200)
 
-            # Clickable player name
-            if st.button(player['Combined Names'], key=player['Combined Names']):
-                st.session_state['selected_player'] = player['Combined Names']
-                st.experimental_rerun()
+            player_url = f"/Player%20Details?player={player['Combined Names'].replace(' ', '%20')}"
+            st.markdown(f"""
+                <a href="{player_url}" style="text-decoration:none; color:#041E41; font-weight:bold; font-size:20px;">
+                    {player['Combined Names']}
+                </a>
+            """, unsafe_allow_html=True)
 
-            box_html = f"""
+            st.markdown(f"""
             <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
                 <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
                 <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
                 <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
             </div>
-            """
-            st.markdown(box_html, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
     extract_headshots()
-
-    if 'selected_player' in st.session_state:
-        player_page(st.session_state['selected_player'], piba_data)
-        return
-
-    if agents_data is None or ranks_data is None or piba_data is None:
-        st.stop()
 
     st.title("Agent Overview Dashboard")
 
@@ -190,44 +181,11 @@ def agent_dashboard():
     agent_info = agents_data[agents_data['Agent Name'] == selected_agent].iloc[0]
     rank_info = ranks_data[ranks_data['Agent Name'] == selected_agent].iloc[0]
 
-    header_col1, header_col2 = st.columns([3, 1])
-    with header_col1:
-        st.header(f"{selected_agent} - {agent_info['Agency Name']}")
+    st.header(f"{selected_agent} - {agent_info['Agency Name']}")
 
-    st.subheader("📊 Financial Breakdown")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Dollar Index", f"${rank_info['Dollar Index']:.2f}")
-    col2.metric("Win %", f"{agent_info['Won%']:.3f}")
-    col3.metric("Contracts Tracked", int(agent_info['CT']))
-    col4.metric("Total Contract Value", f"${agent_info['Total Contract Value']:,.0f}")
-
-    st.subheader("📈 Agent Rankings")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Dollar Index Rank", f"#{int(rank_info['Index R'])}/90")
-    col2.metric("Win Percentage Rank", f"#{int(rank_info['WinR'])}/90")
-    col3.metric("Contracts Tracked Rank", f"#{int(rank_info['CTR'])}/90")
-    col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
-    col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
-
-    st.subheader("🏆 Biggest Clients")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
-
-    st.subheader("🏅 Agent 'Wins' (Top 3 by Six-Year Agent Delivery)")
-    top_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
-    display_player_section("Top 3 Clients by Delivery", top_delivery_clients)
-
-    st.subheader("❌ Agent 'Losses' (Bottom 3 by Six-Year Agent Delivery)")
-    bottom_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
-    display_player_section("Bottom 3 Clients by Delivery", bottom_delivery_clients)
-
-    st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
-
-    st.subheader("📋 All Clients")
-    agent_players['Last Name'] = agent_players['Combined Names'].apply(lambda x: x.split()[-1])
-    all_clients_sorted = agent_players.sort_values(by='Last Name')
-    display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
 
 def project_definitions():
     st.title("📚 Project Definitions")
