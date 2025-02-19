@@ -94,9 +94,9 @@ def format_value_capture_percentage(value):
 
 def display_player_section(title, player_df):
     st.subheader(title)
-    client_cols = st.columns(len(player_df))
+    client_cols = st.columns(3)
     for idx, (_, player) in enumerate(player_df.iterrows()):
-        with client_cols[idx]:
+        with client_cols[idx % 3]:
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
                 st.markdown(
@@ -130,6 +130,7 @@ def display_player_section(title, player_df):
             {format_value_capture_percentage(player['Value Capture %'])}
             """
             st.markdown(box_html, unsafe_allow_html=True)
+
 
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
@@ -179,6 +180,14 @@ def agent_dashboard():
     # Agent Losses Section (by lowest Six-Year Agent Delivery)
     bottom_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
     display_player_section("❌ Agent 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
+
+    # Divider line
+    st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
+
+    # All Clients Section
+    st.subheader("📋 All Clients")
+    all_clients_sorted = agent_players.sort_values(by=lambda x: x['Combined Names'].str.split().str[-1])
+    display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
 
 def project_definitions():
     st.title("📚 Project Definitions")
