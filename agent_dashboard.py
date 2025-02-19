@@ -104,7 +104,7 @@ def display_player_section(title, player_df):
                     f"""
                     <div style='text-align:center;'>
                         <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" 
-                             style='width:200px; display:block; margin:auto;'/>
+                             style='width:200px; height:200px; display:block; margin:auto;'/>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -114,7 +114,7 @@ def display_player_section(title, player_df):
                     f"""
                     <div style='text-align:center;'>
                         <img src="{PLACEHOLDER_IMAGE_URL}" 
-                             style='width:200px; display:block; margin:auto;'/>
+                             style='width:200px; height:200px; display:block; margin:auto;'/>
                     </div>
                     """,
                     unsafe_allow_html=True,
