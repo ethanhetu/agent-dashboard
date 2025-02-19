@@ -7,7 +7,6 @@ from datetime import datetime
 import zipfile
 import os
 import base64
-import plotly.express as px
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -116,28 +115,18 @@ def calculate_vcp_per_year(agent_players):
             vcp_results[year] = None
     return vcp_results
 
-# Plot the VCP line graph with a 100% reference line
+# Plot the VCP line graph with a 100% reference line using st.line_chart
 def plot_vcp_line_graph(vcp_per_year):
-    vcp_df = pd.DataFrame({"Year": list(vcp_per_year.keys()), "VCP": list(vcp_per_year.values())})
-    fig = px.line(
-        vcp_df,
-        x="Year",
-        y="VCP",
-        markers=True,
-        title="Year-by-Year Value Capture Percentage Trend",
-        line_shape="linear",
-    )
-    fig.update_traces(line=dict(color="#041E41"))
-    fig.update_layout(yaxis=dict(range=[0, 200]))
-    fig.add_shape(
-        type="line",
-        x0=0, x1=1, xref='paper',
-        y0=100, y1=100,
-        line=dict(color="gray", width=2, dash="dot")
-    )
-    fig.update_xaxes(tickangle=0)
-    fig.update_yaxes(ticksuffix="%", title="Value Capture Percentage (VCP)")
-    st.plotly_chart(fig, use_container_width=True)
+    years = list(vcp_per_year.keys())
+    vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
+    ref_line = [100 for _ in years]  # 100% reference line
+
+    vcp_df = pd.DataFrame({
+        "VCP": vcp_values,
+        "100% Reference": ref_line
+    }, index=years)
+
+    st.line_chart(vcp_df, height=300, use_container_width=True)
 
 def display_player_section(title, player_df):
     st.subheader(title)
