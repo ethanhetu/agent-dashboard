@@ -6,7 +6,6 @@ import tempfile
 from datetime import datetime
 import zipfile
 import os
-import re
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -35,78 +34,44 @@ def load_data():
     piba_data = xls.parse('PIBA')
     return agents_data, ranks_data, piba_data
 
-# ✅ Advanced download function for large Google Drive files
-def download_large_file_from_google_drive(file_id, destination):
-    URL = "https://docs.google.com/uc?export=download"
-    session = requests.Session()
-
-    response = session.get(URL, params={'id': file_id}, stream=True)
-    token = get_confirm_token_advanced(response.text)
-
-    if token:
-        st.write(f"🔑 Confirmation token found: {token}")
-        params = {'id': file_id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
-    else:
-        st.write("⚠️ No confirmation token found. Proceeding with original response.")
-
-    save_response_content(response, destination)
-
-
-def get_confirm_token_advanced(html_content):
-    token_match = re.search(r"confirm=([0-9A-Za-z_]+)", html_content)
-    if token_match:
-        return token_match.group(1)
-    return None
-
-
-def save_response_content(response, destination, chunk_size=32768):
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(chunk_size):
-            if chunk:
-                f.write(chunk)
-
-# ✅ Download and extract headshots with enhanced confirmation handling
+# ✅ Download and extract all headshots from multiple ZIP files hosted on GitHub Releases
 @st.cache_data(ttl=0)
 def extract_headshots():
     global HEADSHOTS_DIR
-    drive_file_id = "1KgSXYIekXg6K55wAGhG4FZyU9YNW1etA"
+    release_base_url = "https://github.com/ethanhetu/agent-dashboard/releases/download/v1.0-headshots-multi-zip/"
+    zip_files = [f"headshots{i}.zip" for i in range(1, 10)]  # Adjust range if more files added
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        zip_path = os.path.join(tmpdir, "headshots.zip")
-        st.write(f"Attempting to download headshots.zip to: {zip_path}")
-
-        try:
-            download_large_file_from_google_drive(drive_file_id, zip_path)
-            st.write("✅ Download successful!")
-            st.write(f"📏 Downloaded file size: {os.path.getsize(zip_path)} bytes")
-
-            # Inspect first few lines if extraction fails
-            with open(zip_path, 'rb') as file:
-                preview = file.read(500)
-                st.write(f"🔍 File preview (first 500 bytes): {preview[:200]}")
-        except Exception as e:
-            st.error(f"❌ Failed to download headshots.zip: {e}")
-            return
-
-        if not os.path.exists(zip_path):
-            st.error("❌ headshots.zip was not found after download.")
-            return
-
-        st.write("📂 headshots.zip found. Proceeding to extract...")
-
-        # Extract the zip file
         extract_path = os.path.join(tmpdir, "headshots")
-        try:
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(extract_path)
-                HEADSHOTS_DIR = extract_path
-                st.write(f"✅ Extraction successful at: {extract_path}")
-                st.write(f"📁 Files extracted: {os.listdir(extract_path)[:10]} ...")
-        except Exception as e:
-            st.error(f"❌ Extraction failed: {e}")
+        os.makedirs(extract_path, exist_ok=True)
 
-# Function to retrieve headshot path based on player name with debug output
+        for zip_file in zip_files:
+            zip_url = release_base_url + zip_file
+            zip_path = os.path.join(tmpdir, zip_file)
+
+            st.write(f"📥 Downloading {zip_file} from: {zip_url}")
+            response = requests.get(zip_url, stream=True)
+            if response.status_code == 200:
+                with open(zip_path, "wb") as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+                st.write(f"✅ Downloaded {zip_file}")
+
+                # Extract this ZIP file
+                try:
+                    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                        zip_ref.extractall(extract_path)
+                        st.write(f"📂 Extracted {zip_file}")
+                except Exception as e:
+                    st.error(f"❌ Extraction failed for {zip_file}: {e}")
+            else:
+                st.error(f"❌ Failed to download {zip_file}: Status code {response.status_code}")
+
+        HEADSHOTS_DIR = extract_path
+        st.write(f"🎉 All headshots extracted to: {extract_path}")
+
+# Function to retrieve headshot path based on player name
 def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
     st.write(f"🔎 Looking for headshot for: {formatted_name}")
@@ -114,7 +79,7 @@ def get_headshot_path(player_name):
     if HEADSHOTS_DIR:
         try:
             available_files = os.listdir(HEADSHOTS_DIR)
-            st.write(f"📂 Files in HEADSHOTS_DIR: {available_files[:10]} ...")
+            st.write(f"📂 Files available: {available_files[:10]} ...")
 
             for file in available_files:
                 if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
@@ -122,6 +87,7 @@ def get_headshot_path(player_name):
                     if "_away" not in file:
                         return os.path.join(HEADSHOTS_DIR, file)
 
+            # Fallback if only '_away' file exists
             for file in available_files:
                 if file.lower().startswith(formatted_name + "_"):
                     st.write(f"⚠️ Only '_away' file found: {file}")
