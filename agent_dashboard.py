@@ -34,16 +34,17 @@ def load_data():
     piba_data = xls.parse('PIBA')
     return agents_data, ranks_data, piba_data
 
-# Function to download large files from Google Drive without gdown
-def download_file_from_google_drive(id, destination):
+# ✅ Function to download large Google Drive file with confirmation handling
+def download_large_file_from_google_drive(file_id, destination):
     URL = "https://docs.google.com/uc?export=download"
     session = requests.Session()
 
-    response = session.get(URL, params={'id': id}, stream=True)
+    response = session.get(URL, params={'id': file_id}, stream=True)
     token = get_confirm_token(response)
 
     if token:
-        params = {'id': id, 'confirm': token}
+        st.write("🔑 Confirmation token received, retrying download...")
+        params = {'id': file_id, 'confirm': token}
         response = session.get(URL, params=params, stream=True)
 
     save_response_content(response, destination)
@@ -62,7 +63,7 @@ def save_response_content(response, destination, chunk_size=32768):
             if chunk:
                 f.write(chunk)
 
-# Function to download and extract headshots zip from Google Drive with debug
+# ✅ Function to download and extract headshots zip from Google Drive
 @st.cache_data(ttl=0)
 def extract_headshots():
     global HEADSHOTS_DIR
@@ -73,7 +74,7 @@ def extract_headshots():
         st.write(f"Attempting to download headshots.zip to: {zip_path}")
 
         try:
-            download_file_from_google_drive(drive_file_id, zip_path)
+            download_large_file_from_google_drive(drive_file_id, zip_path)
             st.write("✅ Download successful!")
             st.write(f"📏 Downloaded file size: {os.path.getsize(zip_path)} bytes")
 
