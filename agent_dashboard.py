@@ -138,7 +138,7 @@ def agent_dashboard():
             else:
                 st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=237)
 
-            st.markdown(f"<h4 style='text-align:left; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
+            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
             box_html = f"""
             <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
