@@ -13,6 +13,7 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 
 # Global variable to store the headshots directory
 HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
+PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
 # Load data from GitHub repository
 @st.cache_data(ttl=0)  # Forces reload every time
@@ -110,9 +111,9 @@ def display_player_section(title, player_df):
                 )
             else:
                 st.markdown(
-                    """
+                    f"""
                     <div style='text-align:center;'>
-                        <img src="https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png" 
+                        <img src="{PLACEHOLDER_IMAGE_URL}" 
                              style='width:200px; display:block; margin:auto;'/>
                     </div>
                     """,
