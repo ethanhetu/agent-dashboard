@@ -160,16 +160,27 @@ def agent_dashboard():
                 st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=200)
 
             # Left-aligned player name in bold, larger font
-            st.markdown(f"<h4 style='text-align:left; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
-            st.markdown(f"**Age:** {calculate_age(player['Birth Date'])}")
+            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
 
-            # Six-Year Agent Delivery with conditional color formatting
-            delivery_html = format_delivery_value(player['Dollars Captured Above/ Below Value'])
-            st.markdown(f"**Six-Year Agent Delivery:** {delivery_html}", unsafe_allow_html=True)
-
-            st.markdown(f"**Value Capture Percentage:** {player['Value Capture %']:.2%}")
-            st.markdown(f"**Six-Year Player Cost:** ${player['Total Cost']:,.0f}")
-            st.markdown(f"**Six-Year Player Contribution:** ${player['Total PC']:,.0f}")
+            # Boxed section for key metrics
+            with st.container():
+                st.markdown("""
+                    <div style='border: 2px solid #f0f0f0; border-radius: 10px; padding: 15px; text-align: left;'>
+                        <p><strong>Age:</strong> {}</p>
+                        <p><strong>Six-Year Agent Delivery:</strong> {}</p>
+                        <p><strong>Six-Year Player Cost:</strong> ${:,.0f}</p>
+                        <p><strong>Six-Year Player Contribution:</strong> ${:,.0f}</p>
+                    </div>
+                    <div style='text-align:center; padding-top: 10px;'>
+                        <h5 style='color:#041e41; font-weight:bold;'>Value Capture Percentage: {:.2%}</h5>
+                    </div>
+                """.format(
+                    calculate_age(player['Birth Date']),
+                    format_delivery_value(player['Dollars Captured Above/ Below Value']),
+                    player['Total Cost'],
+                    player['Total PC'],
+                    player['Value Capture %']
+                ), unsafe_allow_html=True)
 
 def project_definitions():
     st.title("📚 Project Definitions")
