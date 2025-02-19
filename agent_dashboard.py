@@ -15,10 +15,21 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
-# Load data from uploaded file (AP Final.xlsx)
+# Load data from GitHub repository
 @st.cache_data(ttl=0)
 def load_data():
-    xls = pd.ExcelFile("/mnt/data/AP Final.xlsx")
+    url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
+    response = requests.get(url_agents)
+
+    if response.status_code != 200:
+        st.error("Error fetching data. Please check the file URL and permissions.")
+        return None, None, None
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+        tmp.write(response.content)
+        tmp_path = tmp.name
+
+    xls = pd.ExcelFile(tmp_path)
     agents_data = xls.parse('Agents')
     ranks_data = xls.parse('Just Agent Ranks')
     piba_data = xls.parse('PIBA')
