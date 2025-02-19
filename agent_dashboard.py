@@ -8,18 +8,9 @@ import zipfile
 import os
 import base64
 import plotly.graph_objects as go
-from st_pages import Page, show_pages, add_page_title
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
-
-# Setup multi-page navigation
-show_pages([
-    Page("agent_dashboard.py", "Agent Dashboard"),
-    Page("player_page.py", "Player Details"),
-    Page("project_definitions.py", "Project Definitions"),
-])
-add_page_title()
 
 # Global variable to store the headshots directory
 HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
@@ -152,12 +143,9 @@ def display_player_section(title, player_df):
             else:
                 st.image(PLACEHOLDER_IMAGE_URL, width=200)
 
-            player_url = f"/Player%20Details?player={player['Combined Names'].replace(' ', '%20')}"
-            st.markdown(f"""
-                <a href="{player_url}" style="text-decoration:none; color:#041E41; font-weight:bold; font-size:20px;">
-                    {player['Combined Names']}
-                </a>
-            """, unsafe_allow_html=True)
+            if st.button(f"View {player['Combined Names']}", key=player['Combined Names']):
+                st.session_state['selected_player'] = player['Combined Names']
+                st.experimental_rerun()
 
             st.markdown(f"""
             <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
@@ -171,6 +159,10 @@ def display_player_section(title, player_df):
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
     extract_headshots()
+
+    if 'selected_player' in st.session_state:
+        player_page(st.session_state['selected_player'], piba_data)
+        return
 
     st.title("Agent Overview Dashboard")
 
