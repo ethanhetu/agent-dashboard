@@ -7,6 +7,7 @@ from datetime import datetime
 import zipfile
 import os
 import base64
+import matplotlib.pyplot as plt
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -132,6 +133,27 @@ def display_player_section(title, player_df):
             """
             st.markdown(box_html, unsafe_allow_html=True)
 
+def plot_yearly_vcp(agent_players):
+    years = ['2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24']
+    cost_columns = ['H', 'J', 'L', 'N', 'P', 'R']
+    value_columns = ['I', 'K', 'M', 'O', 'Q', 'S']
+
+    yearly_vcp = []
+    for cost_col, val_col in zip(cost_columns, value_columns):
+        total_cost = agent_players[cost_col].sum()
+        total_value = agent_players[val_col].sum()
+        vcp = (total_cost / total_value) if total_value != 0 else 0
+        yearly_vcp.append(vcp * 100)  # Convert to percentage
+
+    fig, ax = plt.subplots()
+    ax.plot(years, yearly_vcp, marker='o', linestyle='-', color='orange')
+    ax.set_title("Year-by-Year Value Capture Percentage (VCP)")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("VCP (%)")
+    ax.set_ylim([0, 200])  # Fixed Y-axis range 0% to 200%
+    ax.grid(True)
+    st.pyplot(fig)
+
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
     extract_headshots()
@@ -167,9 +189,13 @@ def agent_dashboard():
     col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
+    # Year-by-Year Trend Graph (VCP per year)
+    st.subheader("📊 Year-by-Year Value Capture Trend")
+    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
+    plot_yearly_vcp(agent_players)
+
     # Biggest Clients Section
     st.subheader("🏆 Biggest Clients")
-    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
 
