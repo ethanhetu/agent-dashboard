@@ -82,9 +82,9 @@ def calculate_age(birthdate):
 # Color Six-Year Agent Delivery
 def format_delivery_value(value):
     if value > 0:
-        return f"<span style='color:#228B22;'>${value:,.0f}</span>"
+        return f"<span style='color:#228B22;'>${{value:,.0f}}</span>"
     else:
-        return f"<span style='color:#B22222;'>${value:,.0f}</span>"
+        return f"<span style='color:#B22222;'>${{value:,.0f}}</span>"
 
 def home_page():
     st.title("🏒 Welcome to the Agent Insights Dashboard")
@@ -112,18 +112,18 @@ def agent_dashboard():
 
     st.subheader("📊 Financial Breakdown")
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Dollar Index", f"${rank_info['Dollar Index']:.2f}")
-    col2.metric("Win %", f"{agent_info['Won%']:.3f}")
+    col1.metric("Dollar Index", f"${{rank_info['Dollar Index']:.2f}}")
+    col2.metric("Win %", f"{{agent_info['Won%']:.3f}}")
     col3.metric("Contracts Tracked", int(agent_info['CT']))
-    col4.metric("Total Contract Value", f"${agent_info['Total Contract Value']:,.0f}")
+    col4.metric("Total Contract Value", f"${{agent_info['Total Contract Value']:,.0f}}")
 
     st.subheader("📈 Agent Rankings")
     col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Dollar Index Rank", f"#{int(rank_info['Index R'])}/90")
-    col2.metric("Win Percentage Rank", f"#{int(rank_info['WinR'])}/90")
-    col3.metric("Contracts Tracked Rank", f"#{int(rank_info['CTR'])}/90")
-    col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
-    col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
+    col1.metric("Dollar Index Rank", f"#{{int(rank_info['Index R'])}}/90")
+    col2.metric("Win Percentage Rank", f"#{{int(rank_info['WinR'])}}/90")
+    col3.metric("Contracts Tracked Rank", f"#{{int(rank_info['CTR'])}}/90")
+    col4.metric("Total Contract Value Rank", f"#{{int(rank_info['TCV R'])}}/90")
+    col5.metric("Total Player Value Rank", f"#{{int(rank_info['TPV R'])}}/90")
 
     st.subheader("🏆 Biggest Clients")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
@@ -134,19 +134,21 @@ def agent_dashboard():
         with client_cols[idx]:
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
-                st.image(img_path, width=200; image-align:center, use_container_width=False)
+                st.image(img_path, width=250, use_container_width=False)
             else:
-                st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=200)
+                st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=250)
 
-            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
+            # ✅ Middle-locked player name text (only change made)
+            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{{player['Combined Names']}}</h4>", unsafe_allow_html=True)
+
             box_html = f"""
             <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
-                <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
-                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
-                <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
-                <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
+                <p><strong>Age:</strong> {{calculate_age(player['Birth Date'])}}</p>
+                <p><strong>Six-Year Agent Delivery:</strong> {{format_delivery_value(player['Dollars Captured Above/ Below Value'])}}</p>
+                <p><strong>Six-Year Player Cost:</strong> ${{player['Total Cost']:,.0f}}</p>
+                <p><strong>Six-Year Player Contribution:</strong> ${{player['Total PC']:,.0f}}</p>
             </div>
-            <p style='font-weight:bold; text-align:center;'>Value Capture Percentage: {player['Value Capture %']:.2%}</p>
+            <p style='font-weight:bold; text-align:center;'>Value Capture Percentage: {{player['Value Capture %']:.2%}}</p>
             """
             st.markdown(box_html, unsafe_allow_html=True)
 
