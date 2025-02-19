@@ -35,7 +35,7 @@ def load_data():
     piba_data = xls.parse('PIBA')
     return agents_data, ranks_data, piba_data
 
-# Function to download and extract headshots zip from Google Drive
+# Function to download and extract headshots zip from Google Drive with debug statements
 @st.cache_data(ttl=0)
 def extract_headshots():
     global HEADSHOTS_DIR
@@ -44,34 +44,60 @@ def extract_headshots():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         zip_path = os.path.join(tmpdir, "headshots.zip")
+        st.write(f"Attempting to download headshots.zip to: {zip_path}")
 
         # Download using gdown
         try:
             subprocess.run(["pip", "install", "gdown"], check=True)
             import gdown
             gdown.download(gdown_url, zip_path, quiet=False)
+            st.write("✅ Download successful!")
         except Exception as e:
-            st.error(f"Failed to download headshots.zip from Google Drive: {e}")
+            st.error(f"❌ Failed to download headshots.zip from Google Drive: {e}")
             return
+
+        # Verify file exists
+        if not os.path.exists(zip_path):
+            st.error("❌ headshots.zip was not found after download.")
+            return
+
+        st.write("📂 headshots.zip found. Proceeding to extract...")
 
         # Extract the zip file
         extract_path = os.path.join(tmpdir, "headshots")
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_path)
-            HEADSHOTS_DIR = extract_path
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(extract_path)
+                HEADSHOTS_DIR = extract_path
+                st.write(f"✅ Extraction successful at: {extract_path}")
+                st.write(f"📁 Files extracted: {os.listdir(extract_path)}")
+        except Exception as e:
+            st.error(f"❌ Extraction failed: {e}")
 
-# Function to retrieve headshot path based on player name
+# Function to retrieve headshot path based on player name with debug output
 def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
+    st.write(f"🔎 Looking for headshot for: {formatted_name}")
+
     if HEADSHOTS_DIR:
-        for file in os.listdir(HEADSHOTS_DIR):
-            if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
-                if "_away" not in file:
+        try:
+            available_files = os.listdir(HEADSHOTS_DIR)
+            st.write(f"📂 Files in HEADSHOTS_DIR: {available_files[:10]} ...")  # Show first 10 files
+
+            for file in available_files:
+                if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
+                    st.write(f"✅ Found file: {file}")
+                    if "_away" not in file:
+                        return os.path.join(HEADSHOTS_DIR, file)
+
+            for file in available_files:
+                if file.lower().startswith(formatted_name + "_"):
+                    st.write(f"⚠️ Only '_away' file found: {file}")
                     return os.path.join(HEADSHOTS_DIR, file)
-        # If only '_away' version exists
-        for file in os.listdir(HEADSHOTS_DIR):
-            if file.lower().startswith(formatted_name + "_"):
-                return os.path.join(HEADSHOTS_DIR, file)
+        except Exception as e:
+            st.error(f"❌ Error while searching for headshot: {e}")
+
+    st.write("❓ Headshot not found, using placeholder.")
     return None
 
 # Function to calculate age from birthdate
