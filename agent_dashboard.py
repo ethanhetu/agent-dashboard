@@ -39,7 +39,20 @@ def load_data():
 def extract_headshots():
     global HEADSHOTS_DIR
     release_base_url = "https://github.com/ethanhetu/agent-dashboard/releases/download/v1.0-headshots-multi-zip/"
-    zip_files = [f"headshots{i}.zip" for i in range(1, 10)]  # Adjust range if more files added
+    zip_files = []
+
+    # Dynamically detect available ZIP files (1-20 range just in case)
+    for i in range(1, 21):
+        test_url = release_base_url + f"headshots{i}.zip"
+        response = requests.head(test_url)
+        if response.status_code == 200:
+            zip_files.append(f"headshots{i}.zip")
+        else:
+            break  # Stop when a file in the sequence is not found
+
+    if not zip_files:
+        st.error("❌ No headshot ZIP files found at the specified release URL.")
+        return
 
     with tempfile.TemporaryDirectory() as tmpdir:
         extract_path = os.path.join(tmpdir, "headshots")
