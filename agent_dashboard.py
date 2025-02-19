@@ -98,37 +98,21 @@ def display_player_section(title, player_df):
     client_cols = st.columns(3)
     for idx, (_, player) in enumerate(player_df.iterrows()):
         with client_cols[idx % 3]:
-            img_path = get_headshot_path(player['Combined Names'])
-            if img_path:
-                st.markdown(
-                    f"""
-                    <div style='text-align:center;'>
-                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" 
-                             style='width:200px; height:200px; display:block; margin:auto;'/>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    f"""
-                    <div style='text-align:center;'>
-                        <img src="{PLACEHOLDER_IMAGE_URL}" 
-                             style='width:200px; height:200px; display:block; margin:auto;'/>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
             box_html = f"""
-            <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
-                <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
-                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
-                <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
-                <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
+            <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px; text-align:center;'>
+                <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
+                    <img src="{PLACEHOLDER_IMAGE_URL}" 
+                         style='width:200px; height:200px; display:block; margin:auto;'/>
+                    <h4 style='color:black; font-weight:bold; font-size:24px; margin-top:10px;'>{player['Combined Names']}</h4>
+                </div>
+                <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px; margin-top:10px;'>
+                    <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
+                    <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
+                    <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
+                    <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
+                </div>
+                {format_value_capture_percentage(player['Value Capture %'])}
             </div>
-            {format_value_capture_percentage(player['Value Capture %'])}
             """
             st.markdown(box_html, unsafe_allow_html=True)
 
