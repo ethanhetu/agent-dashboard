@@ -172,13 +172,13 @@ def agent_dashboard():
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
 
-    # Agent Wins Section
-    top_vcp_clients = agent_players.sort_values(by='Value Capture %', ascending=False).head(3)
-    display_player_section("🏅 Agent 'Wins' (Top 3 by Value Capture %)", top_vcp_clients)
+    # Agent Wins Section (by highest Six-Year Agent Delivery)
+    top_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
+    display_player_section("🏅 Agent 'Wins' (Top 3 by Six-Year Agent Delivery)", top_delivery_clients)
 
-    # Agent Losses Section
-    bottom_vcp_clients = agent_players.sort_values(by='Value Capture %', ascending=True).head(3)
-    display_player_section("❌ Agent 'Losses' (Bottom 3 by Value Capture %)", bottom_vcp_clients)
+    # Agent Losses Section (by lowest Six-Year Agent Delivery)
+    bottom_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
+    display_player_section("❌ Agent 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
 
 def project_definitions():
     st.title("📚 Project Definitions")
