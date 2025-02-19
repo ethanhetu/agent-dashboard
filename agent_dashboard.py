@@ -7,6 +7,7 @@ from datetime import datetime
 import zipfile
 import os
 import base64
+import matplotlib.pyplot as plt
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -104,16 +105,30 @@ def calculate_vcp_per_year(agent_players):
         ('2022-23', 'COST 22-23', 'PC 22-23'),
         ('2023-24', 'COST 23-24', 'PC 23-24')
     ]
-    
+
     vcp_results = {}
     for year, cost_col, value_col in years:
         try:
             total_cost = agent_players[cost_col].sum()
             total_value = agent_players[value_col].sum()
-            vcp_results[year] = f"{(total_cost / total_value) * 100:.2f}%" if total_value != 0 else "N/A"
+            vcp_results[year] = (total_cost / total_value) * 100 if total_value != 0 else None
         except KeyError as e:
-            vcp_results[year] = f"Missing Column: {e}"
+            vcp_results[year] = None
     return vcp_results
+
+# Plot the VCP line graph
+def plot_vcp_line_graph(vcp_per_year):
+    years = list(vcp_per_year.keys())
+    vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
+
+    plt.figure(figsize=(8, 4))
+    plt.plot(years, vcp_values, marker='o', linestyle='-', color='orange')
+    plt.ylim(0, 200)
+    plt.ylabel("Value Capture Percentage (VCP) %")
+    plt.xlabel("Year")
+    plt.title("Year-by-Year Value Capture Percentage Trend")
+    plt.grid(True, linestyle='--', alpha=0.6)
+    st.pyplot(plt)
 
 def display_player_section(title, player_df):
     st.subheader(title)
@@ -189,12 +204,11 @@ def agent_dashboard():
     col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
-    # Year-by-Year VCP Section (Text Only)
-    st.subheader("📅 Year-by-Year Value Capture Percentage (VCP)")
+    # Year-by-Year VCP Line Graph
+    st.subheader("📅 Year-by-Year Value Capture Percentage (VCP) Trend")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     vcp_per_year = calculate_vcp_per_year(agent_players)
-    vcp_text = " | ".join([f"{year}: {vcp_per_year[year]}" for year in vcp_per_year])
-    st.markdown(f"<p style='font-size:18px; text-align:center;'>{vcp_text}</p>", unsafe_allow_html=True)
+    plot_vcp_line_graph(vcp_per_year)
 
     # Biggest Clients Section
     st.subheader("🏆 Biggest Clients")
