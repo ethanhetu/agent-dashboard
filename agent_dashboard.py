@@ -34,7 +34,7 @@ def load_data():
     piba_data = xls.parse('PIBA')
     return agents_data, ranks_data, piba_data
 
-# ✅ Download and extract all headshots from specified URLs
+# ✅ Download and extract all headshots from specified URLs with validation
 @st.cache_data(ttl=0)
 def extract_headshots():
     global HEADSHOTS_DIR
@@ -59,22 +59,30 @@ def extract_headshots():
 
             st.write(f"📥 Downloading {zip_file} from: {zip_url}")
             response = requests.get(zip_url, stream=True)
-            if response.status_code == 200:
+
+            # ✅ Content-type validation
+            content_type = response.headers.get("Content-Type", "Unknown")
+            st.write(f"📜 Content-Type: {content_type}")
+            st.write(f"📏 Downloaded file size: {len(response.content)} bytes")
+
+            if response.status_code == 200 and "zip" in content_type:
                 with open(zip_path, "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
                 st.write(f"✅ Downloaded {zip_file}")
 
-                # Extract this ZIP file
+                # ✅ Validate file signature before extraction
                 try:
                     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                         zip_ref.extractall(extract_path)
                         st.write(f"📂 Extracted {zip_file}")
+                except zipfile.BadZipFile:
+                    st.error(f"❌ {zip_file} is not a valid ZIP archive. Please verify file integrity.")
                 except Exception as e:
                     st.error(f"❌ Extraction failed for {zip_file}: {e}")
             else:
-                st.error(f"❌ Failed to download {zip_file}: Status code {response.status_code}")
+                st.error(f"❌ Failed to download {zip_file}: Status {response.status_code} or invalid content type {content_type}")
 
         HEADSHOTS_DIR = extract_path
         st.write(f"🎉 All headshots extracted to: {extract_path}")
