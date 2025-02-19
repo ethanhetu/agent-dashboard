@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 from io import BytesIO
 import tempfile
-import os
+from datetime import datetime
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -16,7 +16,7 @@ def load_data():
 
     if response.status_code != 200:
         st.error("Error fetching data. Please check the file URL and permissions.")
-        return None, None
+        return None, None, None
 
     # Save file to a temporary location
     with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
@@ -26,12 +26,12 @@ def load_data():
     xls = pd.ExcelFile(tmp_path)
     agents_data = xls.parse('Agents')
     ranks_data = xls.parse('Just Agent Ranks')
-    return agents_data, ranks_data
+    piba_data = xls.parse('PIBA')
+    return agents_data, ranks_data, piba_data
 
 # Function to retrieve headshot URL based on player name
 def get_headshot_url(player_name):
     base_url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/"
-    # Format player name to match file naming convention
     formatted_name = player_name.lower().replace(" ", "_")
 
     # Since files have extra text after the last underscore, we'll search for partial matches
@@ -47,6 +47,15 @@ def get_headshot_url(player_name):
     # Default placeholder image if no match found
     return "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png"
 
+# Function to calculate age from birthdate
+def calculate_age(birthdate):
+    try:
+        birth_date = pd.to_datetime(birthdate)
+        today = datetime.today()
+        return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    except:
+        return "N/A"
+
 def home_page():
     st.title("🏒 Welcome to the Agent Insights Dashboard")
     st.write("This site provides detailed insights on player agents, rankings, and financial statistics.")
@@ -56,9 +65,9 @@ def home_page():
     st.write("- Use the Agent Dashboard for deep dives into individual agents.")
 
 def agent_dashboard():
-    agents_data, ranks_data = load_data()
+    agents_data, ranks_data, piba_data = load_data()
 
-    if agents_data is None or ranks_data is None:
+    if agents_data is None or ranks_data is None or piba_data is None:
         st.stop()
 
     st.title("Agent Overview Dashboard")
@@ -96,16 +105,22 @@ def agent_dashboard():
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
     st.subheader("🏆 Biggest Clients")
-    st.write("(Player headshots dynamically loaded where available)")
 
-    # Example player list (replace with actual data pull if available)
-    biggest_clients = agent_info.get("Biggest Clients", "").split(", ")
-    for player in biggest_clients:
+    # Filter PIBA data for the selected agent and get top 3 clients by Total Cost (Column V)
+    agent_players = piba_data[piba_data['agent name'] == selected_agent]
+    top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
+
+    for _, player in top_clients.iterrows():
         player_col1, player_col2 = st.columns([1, 4])
         with player_col1:
-            st.image(get_headshot_url(player), width=100)
+            st.image(get_headshot_url(player['combined name']), width=100)
         with player_col2:
-            st.write(f"**{player}**")
+            st.markdown(f"**{player['combined name']}**")
+            st.write(f"**Age:** {calculate_age(player['birth date'])}")
+            st.write(f"**Dollars Captured Above/Below Market Value:** ${player['Dollars Captured Above/Below Market Value']:,.0f}")
+            st.write(f"**Value Capture Percentage:** {player['Value Capture Percentage']:.2%}")
+            st.write(f"**Total Cost:** ${player['Total Cost']:,.0f}")
+            st.write(f"**Total PC:** ${player['Total PC']:,.0f}")
 
 def project_definitions():
     st.title("📚 Project Definitions")
@@ -118,6 +133,8 @@ def project_definitions():
     - **Contracts Tracked**: Total number of contracts managed by the agent included in this dataset.
     - **Total Contract Value**: The cumulative monetary value of all tracked contracts for an agent.
     - **Total Player Value**: Estimated total on-ice contributions from all players represented by the agent.
+    - **Dollars Captured Above/Below Market Value**: Shows how much more or less the player earned compared to their market value.
+    - **Value Capture Percentage**: The percentage of the player's market value actually captured in earnings.
     """)
 
     st.subheader("How to Interpret Rankings")
