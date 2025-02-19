@@ -144,7 +144,7 @@ def agent_dashboard():
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
                 <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
                 <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
-                <p><strong>Six-Year Player Contribution:</strong> ${player['Total PC']:,.0f}</p>
+                <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
             </div>
             <p style='font-weight:bold; text-align:center;'>Value Capture Percentage: {player['Value Capture %']:.2%}</p>
             """
