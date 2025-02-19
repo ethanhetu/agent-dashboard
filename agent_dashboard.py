@@ -106,19 +106,19 @@ def agent_dashboard():
 
     st.subheader("🏆 Biggest Clients")
 
-    # Filter PIBA data for the selected agent and get top 3 clients by Total Cost (Column V)
-    agent_players = piba_data[piba_data['agent name'] == selected_agent]
+    # Filter PIBA data for the selected agent and get top 3 clients by Total Cost
+    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
 
     for _, player in top_clients.iterrows():
         player_col1, player_col2 = st.columns([1, 4])
         with player_col1:
-            st.image(get_headshot_url(player['combined name']), width=100)
+            st.image(get_headshot_url(player['Combined Names']), width=100)
         with player_col2:
-            st.markdown(f"**{player['combined name']}**")
-            st.write(f"**Age:** {calculate_age(player['birth date'])}")
-            st.write(f"**Dollars Captured Above/Below Market Value:** ${player['Dollars Captured Above/Below Market Value']:,.0f}")
-            st.write(f"**Value Capture Percentage:** {player['Value Capture Percentage']:.2%}")
+            st.markdown(f"**{player['Combined Names']}**")
+            st.write(f"**Age:** {calculate_age(player['Birth Date'])}")
+            st.write(f"**Dollars Captured Above/Below Market Value:** ${player['Dollars Captured Above/ Below Value']:,.0f}")
+            st.write(f"**Value Capture Percentage:** {player['Value Capture %']:.2%}")
             st.write(f"**Total Cost:** ${player['Total Cost']:,.0f}")
             st.write(f"**Total PC:** ${player['Total PC']:,.0f}")
 
