@@ -6,6 +6,7 @@ import tempfile
 from datetime import datetime
 import zipfile
 import os
+import re
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -34,26 +35,28 @@ def load_data():
     piba_data = xls.parse('PIBA')
     return agents_data, ranks_data, piba_data
 
-# ✅ Function to download large Google Drive file with confirmation handling
+# ✅ Advanced download function for large Google Drive files
 def download_large_file_from_google_drive(file_id, destination):
     URL = "https://docs.google.com/uc?export=download"
     session = requests.Session()
 
     response = session.get(URL, params={'id': file_id}, stream=True)
-    token = get_confirm_token(response)
+    token = get_confirm_token_advanced(response.text)
 
     if token:
-        st.write("🔑 Confirmation token received, retrying download...")
+        st.write(f"🔑 Confirmation token found: {token}")
         params = {'id': file_id, 'confirm': token}
         response = session.get(URL, params=params, stream=True)
+    else:
+        st.write("⚠️ No confirmation token found. Proceeding with original response.")
 
     save_response_content(response, destination)
 
 
-def get_confirm_token(response):
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            return value
+def get_confirm_token_advanced(html_content):
+    token_match = re.search(r"confirm=([0-9A-Za-z_]+)", html_content)
+    if token_match:
+        return token_match.group(1)
     return None
 
 
@@ -63,7 +66,7 @@ def save_response_content(response, destination, chunk_size=32768):
             if chunk:
                 f.write(chunk)
 
-# ✅ Function to download and extract headshots zip from Google Drive
+# ✅ Download and extract headshots with enhanced confirmation handling
 @st.cache_data(ttl=0)
 def extract_headshots():
     global HEADSHOTS_DIR
