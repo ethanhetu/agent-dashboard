@@ -6,6 +6,7 @@ import tempfile
 from datetime import datetime
 import zipfile
 import os
+import base64
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -134,9 +135,25 @@ def agent_dashboard():
         with client_cols[idx]:
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
-                st.image(img_path, width=200, use_container_width=False)
+                st.markdown(
+                    f"""
+                    <div style='text-align:center;'>
+                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" 
+                             style='width:200px; display:block; margin:auto;'/>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
             else:
-                st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=200)
+                st.markdown(
+                    """
+                    <div style='text-align:center;'>
+                        <img src="https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png" 
+                             style='width:200px; display:block; margin:auto;'/>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
             st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
             box_html = f"""
