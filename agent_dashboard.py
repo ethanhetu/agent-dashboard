@@ -9,7 +9,7 @@ import os
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
-st.write("🚀 Running the UPDATED code with SINGLE ZIP integration.")  # Debug line to confirm code version
+st.write("🚀 Running the UPDATED code with SINGLE ZIP integration (Content-Type relaxed check).")  # Debug line
 
 # Global variable to store the headshots directory
 HEADSHOTS_DIR = None
@@ -50,11 +50,10 @@ def extract_headshots():
         st.write(f"📥 Downloading full headshots ZIP from: {zip_url}")
         response = requests.get(zip_url, stream=True)
 
-        content_type = response.headers.get("Content-Type", "Unknown")
-        st.write(f"📜 Content-Type: {content_type}")
+        st.write(f"📜 Content-Type: {response.headers.get('Content-Type', 'Unknown')}")
         st.write(f"📏 Downloaded file size: {len(response.content)} bytes")
 
-        if response.status_code == 200 and "zip" in content_type:
+        if response.status_code == 200:
             with open(zip_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
@@ -64,6 +63,7 @@ def extract_headshots():
             # ✅ Validate file signature before extraction
             try:
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    st.write("🔍 ZIP file validation passed. Extracting now...")
                     zip_ref.extractall(extract_path)
                     st.write(f"📂 Extracted NHL.Headshots.zip successfully")
             except zipfile.BadZipFile:
@@ -71,7 +71,7 @@ def extract_headshots():
             except Exception as e:
                 st.error(f"❌ Extraction failed: {e}")
         else:
-            st.error(f"❌ Failed to download: Status {response.status_code} or invalid content type {content_type}")
+            st.error(f"❌ Failed to download: Status {response.status_code}")
 
         HEADSHOTS_DIR = extract_path
         st.write(f"🎉 All headshots extracted to: {extract_path}")
