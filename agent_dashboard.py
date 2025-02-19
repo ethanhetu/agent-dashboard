@@ -7,6 +7,7 @@ from datetime import datetime
 import zipfile
 import os
 import base64
+from difflib import get_close_matches
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -55,18 +56,24 @@ def extract_headshots():
             except zipfile.BadZipFile:
                 st.error("❌ NHL.Headshots.zip is not a valid ZIP archive.")
 
-# Retrieve headshot path
+# Retrieve headshot path with approximate matching
 def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
         try:
-            for file in os.listdir(HEADSHOTS_DIR):
-                if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
-                    if "_away" not in file:
-                        return os.path.join(HEADSHOTS_DIR, file)
-            for file in os.listdir(HEADSHOTS_DIR):
-                if file.lower().startswith(formatted_name + "_"):
+            files = [file for file in os.listdir(HEADSHOTS_DIR) if file.endswith(".png")]
+
+            # Exact match preferred
+            for file in files:
+                if file.lower().startswith(formatted_name + "_") and "_away" not in file:
                     return os.path.join(HEADSHOTS_DIR, file)
+
+            # Approximate match if no exact match
+            closest_match = get_close_matches(formatted_name, [f.lower().split("_")[0] for f in files], n=1, cutoff=0.7)
+            if closest_match:
+                for file in files:
+                    if file.lower().startswith(closest_match[0]):
+                        return os.path.join(HEADSHOTS_DIR, file)
         except:
             pass
     return None
