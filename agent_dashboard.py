@@ -7,7 +7,6 @@ from datetime import datetime
 import zipfile
 import os
 import base64
-import matplotlib.pyplot as plt
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -16,21 +15,10 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
-# Load data from GitHub repository
-@st.cache_data(ttl=0)  # Forces reload every time
+# Load data from uploaded file (AP Final.xlsx)
+@st.cache_data(ttl=0)
 def load_data():
-    url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
-    response = requests.get(url_agents)
-
-    if response.status_code != 200:
-        st.error("Error fetching data. Please check the file URL and permissions.")
-        return None, None, None
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-        tmp.write(response.content)
-        tmp_path = tmp.name
-
-    xls = pd.ExcelFile(tmp_path)
+    xls = pd.ExcelFile("/mnt/data/AP Final.xlsx")
     agents_data = xls.parse('Agents')
     ranks_data = xls.parse('Just Agent Ranks')
     piba_data = xls.parse('PIBA')
@@ -135,24 +123,18 @@ def display_player_section(title, player_df):
 
 def plot_yearly_vcp(agent_players):
     years = ['2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24']
-    cost_columns = ['H', 'J', 'L', 'N', 'P', 'R']
-    value_columns = ['I', 'K', 'M', 'O', 'Q', 'S']
+    cost_cols = ['H', 'J', 'L', 'N', 'P', 'R']
+    value_cols = ['I', 'K', 'M', 'O', 'Q', 'S']
 
-    yearly_vcp = []
-    for cost_col, val_col in zip(cost_columns, value_columns):
+    vcp_data = {}
+    for year, cost_col, value_col in zip(years, cost_cols, value_cols):
         total_cost = agent_players[cost_col].sum()
-        total_value = agent_players[val_col].sum()
-        vcp = (total_cost / total_value) if total_value != 0 else 0
-        yearly_vcp.append(vcp * 100)  # Convert to percentage
+        total_value = agent_players[value_col].sum()
+        vcp = (total_cost / total_value) * 100 if total_value != 0 else 0
+        vcp_data[year] = vcp
 
-    fig, ax = plt.subplots()
-    ax.plot(years, yearly_vcp, marker='o', linestyle='-', color='orange')
-    ax.set_title("Year-by-Year Value Capture Percentage (VCP)")
-    ax.set_xlabel("Year")
-    ax.set_ylabel("VCP (%)")
-    ax.set_ylim([0, 200])  # Fixed Y-axis range 0% to 200%
-    ax.grid(True)
-    st.pyplot(fig)
+    vcp_df = pd.DataFrame(list(vcp_data.items()), columns=['Year', 'VCP']).set_index('Year')
+    st.line_chart(vcp_df, height=400, use_container_width=True)
 
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
