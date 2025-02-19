@@ -7,7 +7,7 @@ from datetime import datetime
 import zipfile
 import os
 import base64
-from difflib import get_close_matches
+from fuzzywuzzy import process
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -56,24 +56,19 @@ def extract_headshots():
             except zipfile.BadZipFile:
                 st.error("❌ NHL.Headshots.zip is not a valid ZIP archive.")
 
-# Retrieve headshot path with approximate matching
+# Retrieve headshot path with fuzzy matching
 def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
         try:
             files = [file for file in os.listdir(HEADSHOTS_DIR) if file.endswith(".png")]
+            file_names = [f.lower().rsplit("_", 1)[0] for f in files]  # Remove trailing suffixes
 
-            # Exact match preferred
-            for file in files:
-                if file.lower().startswith(formatted_name + "_") and "_away" not in file:
-                    return os.path.join(HEADSHOTS_DIR, file)
-
-            # Approximate match if no exact match
-            closest_match = get_close_matches(formatted_name, [f.lower().split("_")[0] for f in files], n=1, cutoff=0.7)
-            if closest_match:
-                for file in files:
-                    if file.lower().startswith(closest_match[0]):
-                        return os.path.join(HEADSHOTS_DIR, file)
+            # Fuzzy match to find the closest name
+            best_match, score = process.extractOne(formatted_name, file_names)
+            if score >= 80:  # Threshold for match confidence
+                matched_index = file_names.index(best_match)
+                return os.path.join(HEADSHOTS_DIR, files[matched_index])
         except:
             pass
     return None
