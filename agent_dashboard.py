@@ -34,55 +34,43 @@ def load_data():
     piba_data = xls.parse('PIBA')
     return agents_data, ranks_data, piba_data
 
-# ✅ Download and extract all headshots from specified URLs with validation
+# ✅ Download and extract the full headshots ZIP from GitHub Releases
 @st.cache_data(ttl=0)
 def extract_headshots():
     global HEADSHOTS_DIR
-    zip_files = [
-        ("headshots1.zip", "https://github.com/user-attachments/files/18873454/headshots1.zip"),
-        ("headshots2.zip", "https://github.com/user-attachments/files/18873459/headshots2.zip"),
-        ("headshots3.zip", "https://github.com/user-attachments/files/18873461/headshots3.zip"),
-        ("headshots4.zip", "https://github.com/user-attachments/files/18873462/headshots4.zip"),
-        ("headshots5.zip", "https://github.com/user-attachments/files/18873464/headshots5.zip"),
-        ("headshots6.zip", "https://github.com/user-attachments/files/18873467/headshots6.zip"),
-        ("headshots7.zip", "https://github.com/user-attachments/files/18873476/headshots7.zip"),
-        ("headshots8.zip", "https://github.com/user-attachments/files/18873478/headshots8.zip"),
-        ("headshots9.zip", "https://github.com/user-attachments/files/18873475/headshots9.zip")
-    ]
+    zip_url = "https://github.com/ethanhetu/agent-dashboard/releases/download/v1.0-headshots-full/NHL.Headshots.zip"
 
     with tempfile.TemporaryDirectory() as tmpdir:
         extract_path = os.path.join(tmpdir, "headshots")
         os.makedirs(extract_path, exist_ok=True)
 
-        for zip_file, zip_url in zip_files:
-            zip_path = os.path.join(tmpdir, zip_file)
+        zip_path = os.path.join(tmpdir, "NHL.Headshots.zip")
 
-            st.write(f"📥 Downloading {zip_file} from: {zip_url}")
-            response = requests.get(zip_url, stream=True)
+        st.write(f"📥 Downloading full headshots ZIP from: {zip_url}")
+        response = requests.get(zip_url, stream=True)
 
-            # ✅ Content-type validation
-            content_type = response.headers.get("Content-Type", "Unknown")
-            st.write(f"📜 Content-Type: {content_type}")
-            st.write(f"📏 Downloaded file size: {len(response.content)} bytes")
+        content_type = response.headers.get("Content-Type", "Unknown")
+        st.write(f"📜 Content-Type: {content_type}")
+        st.write(f"📏 Downloaded file size: {len(response.content)} bytes")
 
-            if response.status_code == 200 and "zip" in content_type:
-                with open(zip_path, "wb") as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
-                st.write(f"✅ Downloaded {zip_file}")
+        if response.status_code == 200 and "zip" in content_type:
+            with open(zip_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+            st.write(f"✅ Downloaded NHL.Headshots.zip")
 
-                # ✅ Validate file signature before extraction
-                try:
-                    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                        zip_ref.extractall(extract_path)
-                        st.write(f"📂 Extracted {zip_file}")
-                except zipfile.BadZipFile:
-                    st.error(f"❌ {zip_file} is not a valid ZIP archive. Please verify file integrity.")
-                except Exception as e:
-                    st.error(f"❌ Extraction failed for {zip_file}: {e}")
-            else:
-                st.error(f"❌ Failed to download {zip_file}: Status {response.status_code} or invalid content type {content_type}")
+            # ✅ Validate file signature before extraction
+            try:
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(extract_path)
+                    st.write(f"📂 Extracted NHL.Headshots.zip successfully")
+            except zipfile.BadZipFile:
+                st.error(f"❌ NHL.Headshots.zip is not a valid ZIP archive. Please verify file integrity.")
+            except Exception as e:
+                st.error(f"❌ Extraction failed: {e}")
+        else:
+            st.error(f"❌ Failed to download: Status {response.status_code} or invalid content type {content_type}")
 
         HEADSHOTS_DIR = extract_path
         st.write(f"🎉 All headshots extracted to: {extract_path}")
