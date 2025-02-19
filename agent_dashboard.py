@@ -154,7 +154,7 @@ def agent_dashboard():
     for idx, (_, player) in enumerate(top_clients.iterrows()):
         with client_cols[idx]:
             st.markdown("""
-                <div style='display: flex; flex-direction: column; align-items: center;'>
+                <div style='display: flex; flex-direction: column; align-items: center; transform: translateX(20px);'>
             """, unsafe_allow_html=True)
 
             img_path = get_headshot_path(player['Combined Names'])
