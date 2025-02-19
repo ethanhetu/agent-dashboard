@@ -7,6 +7,7 @@ from datetime import datetime
 import zipfile
 import os
 import base64
+import plotly.graph_objects as go
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -110,17 +111,45 @@ def calculate_vcp_per_year(agent_players):
         try:
             total_cost = agent_players[cost_col].sum()
             total_value = agent_players[value_col].sum()
-            vcp_results[year] = (total_cost / total_value) * 100 if total_value != 0 else None
+            vcp_results[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
         except KeyError as e:
             vcp_results[year] = None
     return vcp_results
 
-# Plot the VCP line graph using st.line_chart
+# Plot the VCP line graph using Plotly with customizations
 def plot_vcp_line_graph(vcp_per_year):
-    vcp_df = pd.DataFrame({"Year": list(vcp_per_year.keys()), "VCP": list(vcp_per_year.values())})
-    vcp_df.set_index("Year", inplace=True)
-    st.line_chart(vcp_df, height=300, use_container_width=True)
+    years = list(vcp_per_year.keys())
+    vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
 
+    fig = go.Figure()
+
+    # Main VCP line
+    fig.add_trace(go.Scatter(
+        x=years,
+        y=vcp_values,
+        mode='lines+markers',
+        name='VCP',
+        line=dict(color='#041E41', width=3),
+        hovertemplate='%{y:.2f}%'
+    ))
+
+    # 100% reference line (light grey dotted)
+    fig.add_trace(go.Scatter(
+        x=years,
+        y=[100] * len(years),
+        mode='lines',
+        name='100% Reference',
+        line=dict(color='lightgrey', width=2, dash='dot')
+    ))
+
+    fig.update_layout(
+        title="Year-by-Year Value Capture Percentage Trend",
+        xaxis=dict(title='Year', tickangle=0),
+        yaxis=dict(title='VCP (%)', range=[0, 200]),
+        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 def display_player_section(title, player_df):
     st.subheader(title)
