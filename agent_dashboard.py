@@ -83,9 +83,14 @@ def calculate_age(birthdate):
 # Color Six-Year Agent Delivery
 def format_delivery_value(value):
     if value > 0:
-        return f"<span style='color:#228B22;'>${value:,.0f}</span>"
+        return f"<span style='color:#006400;'>${value:,.0f}</span>"  # Dark green
     else:
-        return f"<span style='color:#B22222;'>${value:,.0f}</span>"
+        return f"<span style='color:#8B0000;'>${value:,.0f}</span>"  # Dark red
+
+# Color Value Capture Percentage
+def format_value_capture_percentage(value):
+    color = "#006400" if value >= 1 else "#8B0000"  # Dark green if >=100%, dark red otherwise
+    return f"<p style='font-weight:bold; text-align:center; color:{color};'>Value Capture Percentage: {value:.2%}</p>"
 
 def home_page():
     st.title("🏒 Welcome to the Agent Insights Dashboard")
@@ -163,7 +168,7 @@ def agent_dashboard():
                 <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
                 <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
             </div>
-            <p style='font-weight:bold; text-align:center;'>Value Capture Percentage: {player['Value Capture %']:.2%}</p>
+            {format_value_capture_percentage(player['Value Capture %'])}
             """
             st.markdown(box_html, unsafe_allow_html=True)
 
