@@ -62,7 +62,7 @@ def save_response_content(response, destination, chunk_size=32768):
             if chunk:
                 f.write(chunk)
 
-# Function to download and extract headshots zip from Google Drive with requests
+# Function to download and extract headshots zip from Google Drive with debug
 @st.cache_data(ttl=0)
 def extract_headshots():
     global HEADSHOTS_DIR
@@ -75,6 +75,12 @@ def extract_headshots():
         try:
             download_file_from_google_drive(drive_file_id, zip_path)
             st.write("✅ Download successful!")
+            st.write(f"📏 Downloaded file size: {os.path.getsize(zip_path)} bytes")
+
+            # Inspect first few lines if extraction fails
+            with open(zip_path, 'rb') as file:
+                preview = file.read(500)
+                st.write(f"🔍 File preview (first 500 bytes): {preview[:200]}")
         except Exception as e:
             st.error(f"❌ Failed to download headshots.zip: {e}")
             return
