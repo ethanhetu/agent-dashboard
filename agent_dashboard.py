@@ -33,6 +33,7 @@ def load_data():
     agents_data = xls.parse('Agents')
     ranks_data = xls.parse('Just Agent Ranks')
     piba_data = xls.parse('PIBA')
+    piba_data.columns = piba_data.columns.str.strip()  # Remove extra spaces in column names
     return agents_data, ranks_data, piba_data
 
 @st.cache_data(ttl=0)
@@ -92,6 +93,27 @@ def format_delivery_value(value):
 def format_value_capture_percentage(value):
     color = "#006400" if value >= 1 else "#8B0000"  # Dark green if >=100%, dark red otherwise
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.2%}</span></p>"
+
+# Calculate VCP per year for the agent
+def calculate_vcp_per_year(agent_players):
+    years = [
+        ('2018-19', 'COST 18-19', 'PC 18-19'),
+        ('2019-20', 'COST 19-20', 'PC 19-20'),
+        ('2020-21', 'COST 20-21', 'PC 20-21'),
+        ('2021-22', 'COST 21-22', 'PC 21-22'),
+        ('2022-23', 'COST 22-23', 'PC 22-23'),
+        ('2023-24', 'COST 23-24', 'PC 23-24')
+    ]
+    
+    vcp_results = {}
+    for year, cost_col, value_col in years:
+        try:
+            total_cost = agent_players[cost_col].sum()
+            total_value = agent_players[value_col].sum()
+            vcp_results[year] = f"{(total_cost / total_value) * 100:.2f}%" if total_value != 0 else "N/A"
+        except KeyError as e:
+            vcp_results[year] = f"Missing Column: {e}"
+    return vcp_results
 
 def display_player_section(title, player_df):
     st.subheader(title)
@@ -167,9 +189,15 @@ def agent_dashboard():
     col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
+    # Year-by-Year VCP Section (Text Only)
+    st.subheader("📅 Year-by-Year Value Capture Percentage (VCP)")
+    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
+    vcp_per_year = calculate_vcp_per_year(agent_players)
+    vcp_text = " | ".join([f"{year}: {vcp_per_year[year]}" for year in vcp_per_year])
+    st.markdown(f"<p style='font-size:18px; text-align:center;'>{vcp_text}</p>", unsafe_allow_html=True)
+
     # Biggest Clients Section
     st.subheader("🏆 Biggest Clients")
-    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
 
