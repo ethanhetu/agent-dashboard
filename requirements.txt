@@ -2,4 +2,4 @@ pandas
 openpyxl
 streamlit
 plotly
-st-pages
+streamlit-pages
