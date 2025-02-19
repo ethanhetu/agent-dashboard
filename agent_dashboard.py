@@ -131,7 +131,6 @@ def display_player_section(title, player_df):
             """
             st.markdown(box_html, unsafe_allow_html=True)
 
-
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
     extract_headshots()
@@ -184,9 +183,10 @@ def agent_dashboard():
     # Divider line
     st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
 
-    # All Clients Section
+    # All Clients Section (sorted by last name)
     st.subheader("📋 All Clients")
-    all_clients_sorted = agent_players.sort_values(by=lambda x: x['Combined Names'].str.split().str[-1])
+    agent_players['Last Name'] = agent_players['Combined Names'].apply(lambda x: x.split()[-1])
+    all_clients_sorted = agent_players.sort_values(by='Last Name')
     display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
 
 def project_definitions():
