@@ -93,6 +93,22 @@ def format_value_capture_percentage(value):
     color = "#006400" if value >= 1 else "#8B0000"  # Dark green if >=100%, dark red otherwise
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.2%}</span></p>"
 
+# Calculate VCP per year for the agent
+def calculate_vcp_per_year(agent_players):
+    years = ['2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24']
+    cost_cols = ['H', 'J', 'L', 'N', 'P', 'R']
+    value_cols = ['I', 'K', 'M', 'O', 'Q', 'S']
+
+    vcp_results = {}
+    for year, cost_col, value_col in zip(years, cost_cols, value_cols):
+        total_cost = agent_players[cost_col].sum()
+        total_value = agent_players[value_col].sum()
+        if total_value == 0:
+            vcp_results[year] = "N/A"
+        else:
+            vcp_results[year] = f"{(total_cost / total_value) * 100:.2f}%"
+    return vcp_results
+
 def display_player_section(title, player_df):
     st.subheader(title)
     client_cols = st.columns(3)
@@ -167,9 +183,15 @@ def agent_dashboard():
     col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
+    # Year-by-Year VCP Section (Text Only)
+    st.subheader("📅 Year-by-Year Value Capture Percentage (VCP)")
+    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
+    vcp_per_year = calculate_vcp_per_year(agent_players)
+    vcp_text = " | ".join([f"{year}: {vcp_per_year[year]}" for year in vcp_per_year])
+    st.markdown(f"<p style='font-size:18px; text-align:center;'>{vcp_text}</p>", unsafe_allow_html=True)
+
     # Biggest Clients Section
     st.subheader("🏆 Biggest Clients")
-    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
 
