@@ -14,7 +14,7 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
 
 # Load data from GitHub repository
-@st.cache_data(ttl=0)  # Forces reload every time
+@st.cache_data(ttl=0)
 def load_data():
     url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
     response = requests.get(url_agents)
@@ -52,25 +52,18 @@ def extract_headshots():
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(HEADSHOTS_DIR)
             except zipfile.BadZipFile:
-                st.error("❌ NHL.Headshots.zip is not a valid ZIP archive.")
+                st.error(f"❌ NHL.Headshots.zip is not a valid ZIP archive.")
 
-# Retrieve headshot path
+
 def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
+
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
-        try:
-            for file in os.listdir(HEADSHOTS_DIR):
-                if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
-                    if "_away" not in file:
-                        return os.path.join(HEADSHOTS_DIR, file)
-            for file in os.listdir(HEADSHOTS_DIR):
-                if file.lower().startswith(formatted_name + "_"):
-                    return os.path.join(HEADSHOTS_DIR, file)
-        except:
-            pass
+        for file in os.listdir(HEADSHOTS_DIR):
+            if file.lower().startswith(formatted_name + "_") and file.endswith(".png") and "_away" not in file:
+                return os.path.join(HEADSHOTS_DIR, file)
     return None
 
-# Calculate age
 def calculate_age(birthdate):
     try:
         birth_date = pd.to_datetime(birthdate)
@@ -79,16 +72,11 @@ def calculate_age(birthdate):
     except:
         return "N/A"
 
-# Color Six-Year Agent Delivery
 def format_delivery_value(value):
     if value > 0:
         return f"<span style='color:#228B22;'>${value:,.0f}</span>"
     else:
         return f"<span style='color:#B22222;'>${value:,.0f}</span>"
-
-def home_page():
-    st.title("🏒 Welcome to the Agent Insights Dashboard")
-    st.write("Detailed insights on player agents, rankings, and financial statistics.")
 
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
@@ -98,7 +86,6 @@ def agent_dashboard():
         st.stop()
 
     st.title("Agent Overview Dashboard")
-
     agent_names = ranks_data['Agent Name'].dropna().replace(['', '(blank)', 'Grand Total'], pd.NA).dropna()
     agent_names = sorted(agent_names, key=lambda name: name.split()[-1])
     selected_agent = st.selectbox("Select an Agent:", agent_names)
@@ -106,24 +93,7 @@ def agent_dashboard():
     agent_info = agents_data[agents_data['Agent Name'] == selected_agent].iloc[0]
     rank_info = ranks_data[ranks_data['Agent Name'] == selected_agent].iloc[0]
 
-    header_col1, header_col2 = st.columns([3, 1])
-    with header_col1:
-        st.header(f"{selected_agent} - {agent_info['Agency Name']}")
-
-    st.subheader("📊 Financial Breakdown")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Dollar Index", f"${rank_info['Dollar Index']:.2f}")
-    col2.metric("Win %", f"{agent_info['Won%']:.3f}")
-    col3.metric("Contracts Tracked", int(agent_info['CT']))
-    col4.metric("Total Contract Value", f"${agent_info['Total Contract Value']:,.0f}")
-
-    st.subheader("📈 Agent Rankings")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Dollar Index Rank", f"#{int(rank_info['Index R'])}/90")
-    col2.metric("Win Percentage Rank", f"#{int(rank_info['WinR'])}/90")
-    col3.metric("Contracts Tracked Rank", f"#{int(rank_info['CTR'])}/90")
-    col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
-    col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
+    st.header(f"{selected_agent} - {agent_info['Agency Name']}")
 
     st.subheader("🏆 Biggest Clients")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
@@ -134,32 +104,36 @@ def agent_dashboard():
         with client_cols[idx]:
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
-                st.image(img_path, width=250, use_container_width=False)
+                st.image(img_path, width=170, output_format='PNG')  # ✅ Reduced size by 15%
             else:
-                st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=250)
+                st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=170)
 
-            st.markdown(f"<h4 style='text-align:left; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
-            box_html = f"""
-            <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
-                <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
-                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
-                <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
-                <p><strong>Six-Year Player Contribution:</strong> ${player['Total PC']:,.0f}</p>
-            </div>
-            <p style='font-weight:bold; text-align:center;'>Value Capture Percentage: {player['Value Capture %']:.2%}</p>
-            """
-            st.markdown(box_html, unsafe_allow_html=True)
+            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:22px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)  # ✅ Middle-locked name text
+
+            st.markdown("""
+                <div style='border:1px solid #ccc; border-radius:10px; padding:10px;'>
+                    <p><strong>Age:</strong> {age}</p>
+                    <p><strong>Six-Year Agent Delivery:</strong> {delivery}</p>
+                    <p><strong>Six-Year Player Cost:</strong> ${cost:,.0f}</p>
+                    <p><strong>Six-Year Player Contribution:</strong> ${contribution:,.0f}</p>
+                </div>
+                <h4 style='text-align:center; font-weight:bold;'>Value Capture Percentage: {vcp:.2%}</h4>
+            """.format(
+                age=calculate_age(player['Birth Date']),
+                delivery=format_delivery_value(player['Dollars Captured Above/ Below Value']),
+                cost=player['Total Cost'],
+                contribution=player['Total PC'],
+                vcp=player['Value Capture %']
+            ), unsafe_allow_html=True)
 
 def project_definitions():
     st.title("📚 Project Definitions")
-    st.write("Definitions for key terms and metrics used throughout the project.")
+    st.write("This section defines key terms and metrics used throughout the project.")
 
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Project Definitions"])
+page = st.sidebar.radio("Go to", ["Agent Dashboard", "Project Definitions"])
 
-if page == "Home":
-    home_page()
-elif page == "Agent Dashboard":
+if page == "Agent Dashboard":
     agent_dashboard()
 elif page == "Project Definitions":
     project_definitions()
