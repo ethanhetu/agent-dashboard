@@ -87,10 +87,10 @@ def format_delivery_value(value):
     else:
         return f"<span style='color:#8B0000;'>${value:,.0f}</span>"  # Dark red
 
-# Color Value Capture Percentage
+# Color only the percentage in Value Capture Percentage
 def format_value_capture_percentage(value):
     color = "#006400" if value >= 1 else "#8B0000"  # Dark green if >=100%, dark red otherwise
-    return f"<p style='font-weight:bold; text-align:center; color:{color};'>Value Capture Percentage: {value:.2%}</p>"
+    return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.2%}</span></p>"
 
 def home_page():
     st.title("🏒 Welcome to the Agent Insights Dashboard")
