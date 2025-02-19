@@ -9,10 +9,10 @@ import os
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
-st.write("🚀 Running the UPDATED code with SINGLE ZIP integration (Content-Type relaxed check).")  # Debug line
+st.write("🚀 Running the UPDATED code with persistent headshot directory.")  # Debug line
 
 # Global variable to store the headshots directory
-HEADSHOTS_DIR = None
+HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
 
 # Load data from GitHub repository
 @st.cache_data(ttl=0)  # Forces reload every time
@@ -41,12 +41,10 @@ def extract_headshots():
     global HEADSHOTS_DIR
     zip_url = "https://github.com/ethanhetu/agent-dashboard/releases/download/v1.0-headshots-full/NHL.Headshots.zip"
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        extract_path = os.path.join(tmpdir, "headshots")
-        os.makedirs(extract_path, exist_ok=True)
+    if not os.path.exists(HEADSHOTS_DIR):
+        os.makedirs(HEADSHOTS_DIR, exist_ok=True)
 
-        zip_path = os.path.join(tmpdir, "NHL.Headshots.zip")
-
+        zip_path = os.path.join(HEADSHOTS_DIR, "NHL.Headshots.zip")
         st.write(f"📥 Downloading full headshots ZIP from: {zip_url}")
         response = requests.get(zip_url, stream=True)
 
@@ -60,28 +58,26 @@ def extract_headshots():
                         f.write(chunk)
             st.write(f"✅ Downloaded NHL.Headshots.zip")
 
-            # ✅ Validate file signature before extraction
             try:
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     st.write("🔍 ZIP file validation passed. Extracting now...")
-                    zip_ref.extractall(extract_path)
-                    st.write(f"📂 Extracted NHL.Headshots.zip successfully")
+                    zip_ref.extractall(HEADSHOTS_DIR)
+                    st.write(f"📂 Extracted NHL.Headshots.zip successfully to {HEADSHOTS_DIR}")
             except zipfile.BadZipFile:
                 st.error(f"❌ NHL.Headshots.zip is not a valid ZIP archive. Please verify file integrity.")
             except Exception as e:
                 st.error(f"❌ Extraction failed: {e}")
         else:
             st.error(f"❌ Failed to download: Status {response.status_code}")
-
-        HEADSHOTS_DIR = extract_path
-        st.write(f"🎉 All headshots extracted to: {extract_path}")
+    else:
+        st.write(f"✅ Headshots already extracted at: {HEADSHOTS_DIR}")
 
 # Function to retrieve headshot path based on player name
 def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
     st.write(f"🔎 Looking for headshot for: {formatted_name}")
 
-    if HEADSHOTS_DIR:
+    if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
         try:
             available_files = os.listdir(HEADSHOTS_DIR)
             st.write(f"📂 Files available: {available_files[:10]} ...")
