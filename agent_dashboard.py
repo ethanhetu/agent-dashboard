@@ -83,74 +83,51 @@ def calculate_age(birthdate):
     except:
         return "N/A"
 
-# Color Six-Year Agent Delivery
-def format_delivery_value(value):
-    if value > 0:
-        return f"<span style='color:#006400;'>${value:,.0f}</span>"  # Dark green
-    else:
-        return f"<span style='color:#8B0000;'>${value:,.0f}</span>"  # Dark red
+# Player detail graph (Cost vs Value per year)
+def plot_player_detail(player_data):
+    years = ['2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24']
+    cost_columns = ['COST 18-19', 'COST 19-20', 'COST 20-21', 'COST 21-22', 'COST 22-23', 'COST 23-24']
+    value_columns = ['PC 18-19', 'PC 19-20', 'PC 20-21', 'PC 21-22', 'PC 22-23', 'PC 23-24']
 
-# Color only the percentage in Value Capture Percentage
-def format_value_capture_percentage(value):
-    color = "#006400" if value >= 1 else "#8B0000"  # Dark green if >=100%, dark red otherwise
-    return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.2%}</span></p>"
-
-# Calculate VCP per year for the agent
-def calculate_vcp_per_year(agent_players):
-    years = [
-        ('2018-19', 'COST 18-19', 'PC 18-19'),
-        ('2019-20', 'COST 19-20', 'PC 19-20'),
-        ('2020-21', 'COST 20-21', 'PC 20-21'),
-        ('2021-22', 'COST 21-22', 'PC 21-22'),
-        ('2022-23', 'COST 22-23', 'PC 22-23'),
-        ('2023-24', 'COST 23-24', 'PC 23-24')
-    ]
-
-    vcp_results = {}
-    for year, cost_col, value_col in years:
-        try:
-            total_cost = agent_players[cost_col].sum()
-            total_value = agent_players[value_col].sum()
-            vcp_results[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
-        except KeyError as e:
-            vcp_results[year] = None
-    return vcp_results
-
-# Plot the VCP line graph using Plotly with customizations
-def plot_vcp_line_graph(vcp_per_year):
-    years = list(vcp_per_year.keys())
-    vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
+    cost_values = [player_data[col] for col in cost_columns]
+    value_values = [player_data[col] for col in value_columns]
 
     fig = go.Figure()
 
-    # Main VCP line
     fig.add_trace(go.Scatter(
         x=years,
-        y=vcp_values,
+        y=cost_values,
         mode='lines+markers',
-        name='VCP',
-        line=dict(color='#041E41', width=3),
-        hovertemplate='%{y:.2f}%'
+        name='Cost',
+        line=dict(color='#8B0000', width=3),
+        hovertemplate='Cost: $%{y:,.0f}'
     ))
 
-    # 100% reference line (red dotted)
     fig.add_trace(go.Scatter(
         x=years,
-        y=[100] * len(years),
-        mode='lines',
-        name='100% Reference',
-        line=dict(color='red', width=2, dash='dot')
+        y=value_values,
+        mode='lines+markers',
+        name='Value',
+        line=dict(color='#006400', width=3),
+        hovertemplate='Value: $%{y:,.0f}'
     ))
 
     fig.update_layout(
-        title="Year-by-Year Value Capture Percentage Trend",
+        title=f"Year-by-Year Cost vs. Value for {player_data['Combined Names']}",
         xaxis=dict(title='Year', tickangle=0),
-        yaxis=dict(title='VCP (%)', range=[0, 200]),
+        yaxis=dict(title='Dollars'),
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
+# Display player details page
+def player_page(player_name, piba_data):
+    player_data = piba_data[piba_data['Combined Names'] == player_name].iloc[0]
+    st.title(f"Player Details: {player_name}")
+    plot_player_detail(player_data)
+
+# Display player card section
 def display_player_section(title, player_df):
     st.subheader(title)
     client_cols = st.columns(3)
@@ -178,7 +155,11 @@ def display_player_section(title, player_df):
                     unsafe_allow_html=True,
                 )
 
-            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
+            # Clickable player name
+            if st.button(player['Combined Names'], key=player['Combined Names']):
+                st.session_state['selected_player'] = player['Combined Names']
+                st.experimental_rerun()
+
             box_html = f"""
             <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
@@ -186,13 +167,16 @@ def display_player_section(title, player_df):
                 <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
                 <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
             </div>
-            {format_value_capture_percentage(player['Value Capture %'])}
             """
             st.markdown(box_html, unsafe_allow_html=True)
 
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
     extract_headshots()
+
+    if 'selected_player' in st.session_state:
+        player_page(st.session_state['selected_player'], piba_data)
+        return
 
     if agents_data is None or ranks_data is None or piba_data is None:
         st.stop()
@@ -225,29 +209,21 @@ def agent_dashboard():
     col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
-    # Year-by-Year VCP Line Graph
-    st.subheader("📅 Year-by-Year Value Capture Percentage (VCP) Trend")
-    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
-    vcp_per_year = calculate_vcp_per_year(agent_players)
-    plot_vcp_line_graph(vcp_per_year)
-
-    # Biggest Clients Section
     st.subheader("🏆 Biggest Clients")
+    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
 
-    # Agent Wins Section (by highest Six-Year Agent Delivery)
+    st.subheader("🏅 Agent 'Wins' (Top 3 by Six-Year Agent Delivery)")
     top_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
-    display_player_section("🏅 Agent 'Wins' (Top 3 by Six-Year Agent Delivery)", top_delivery_clients)
+    display_player_section("Top 3 Clients by Delivery", top_delivery_clients)
 
-    # Agent Losses Section (by lowest Six-Year Agent Delivery)
+    st.subheader("❌ Agent 'Losses' (Bottom 3 by Six-Year Agent Delivery)")
     bottom_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
-    display_player_section("❌ Agent 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
+    display_player_section("Bottom 3 Clients by Delivery", bottom_delivery_clients)
 
-    # Divider line
     st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
 
-    # All Clients Section (sorted by last name)
     st.subheader("📋 All Clients")
     agent_players['Last Name'] = agent_players['Combined Names'].apply(lambda x: x.split()[-1])
     all_clients_sorted = agent_players.sort_values(by='Last Name')
@@ -261,7 +237,7 @@ st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Project Definitions"])
 
 if page == "Home":
-    home_page()
+    st.title("Welcome to the Agent Insights Dashboard!")
 elif page == "Agent Dashboard":
     agent_dashboard()
 elif page == "Project Definitions":
