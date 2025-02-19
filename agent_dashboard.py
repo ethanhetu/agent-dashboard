@@ -6,7 +6,6 @@ import tempfile
 from datetime import datetime
 import zipfile
 import os
-import subprocess
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -35,28 +34,51 @@ def load_data():
     piba_data = xls.parse('PIBA')
     return agents_data, ranks_data, piba_data
 
-# Function to download and extract headshots zip from Google Drive with debug statements
+# Function to download large files from Google Drive without gdown
+def download_file_from_google_drive(id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+    session = requests.Session()
+
+    response = session.get(URL, params={'id': id}, stream=True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = {'id': id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+
+    save_response_content(response, destination)
+
+
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+    return None
+
+
+def save_response_content(response, destination, chunk_size=32768):
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(chunk_size):
+            if chunk:
+                f.write(chunk)
+
+# Function to download and extract headshots zip from Google Drive with requests
 @st.cache_data(ttl=0)
 def extract_headshots():
     global HEADSHOTS_DIR
     drive_file_id = "1KgSXYIekXg6K55wAGhG4FZyU9YNW1etA"
-    gdown_url = f"https://drive.google.com/uc?id={drive_file_id}"
 
     with tempfile.TemporaryDirectory() as tmpdir:
         zip_path = os.path.join(tmpdir, "headshots.zip")
         st.write(f"Attempting to download headshots.zip to: {zip_path}")
 
-        # Download using gdown
         try:
-            subprocess.run(["pip", "install", "gdown"], check=True)
-            import gdown
-            gdown.download(gdown_url, zip_path, quiet=False)
+            download_file_from_google_drive(drive_file_id, zip_path)
             st.write("✅ Download successful!")
         except Exception as e:
-            st.error(f"❌ Failed to download headshots.zip from Google Drive: {e}")
+            st.error(f"❌ Failed to download headshots.zip: {e}")
             return
 
-        # Verify file exists
         if not os.path.exists(zip_path):
             st.error("❌ headshots.zip was not found after download.")
             return
@@ -70,7 +92,7 @@ def extract_headshots():
                 zip_ref.extractall(extract_path)
                 HEADSHOTS_DIR = extract_path
                 st.write(f"✅ Extraction successful at: {extract_path}")
-                st.write(f"📁 Files extracted: {os.listdir(extract_path)}")
+                st.write(f"📁 Files extracted: {os.listdir(extract_path)[:10]} ...")
         except Exception as e:
             st.error(f"❌ Extraction failed: {e}")
 
@@ -82,7 +104,7 @@ def get_headshot_path(player_name):
     if HEADSHOTS_DIR:
         try:
             available_files = os.listdir(HEADSHOTS_DIR)
-            st.write(f"📂 Files in HEADSHOTS_DIR: {available_files[:10]} ...")  # Show first 10 files
+            st.write(f"📂 Files in HEADSHOTS_DIR: {available_files[:10]} ...")
 
             for file in available_files:
                 if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
@@ -192,7 +214,7 @@ def project_definitions():
     - **Total Contract Value**: The cumulative monetary value of all tracked contracts for an agent.
     - **Total Player Value**: Estimated total on-ice contributions from all players represented by the agent.
     - **Dollars Captured Above/Below Market Value**: Shows how much more or less the player earned compared to their market value.
-    - **Value Capture Percentage**: The percentage of the player's market value actually captured in earnings.
+    - **Value Capture Percentage:** The percentage of the player's market value actually captured in earnings.
     """)
 
     st.subheader("How to Interpret Rankings")
