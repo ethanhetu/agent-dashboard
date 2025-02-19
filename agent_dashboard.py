@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 from io import BytesIO
 import tempfile
+import os
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -10,7 +11,7 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 # Load data from GitHub repository
 @st.cache_data(ttl=0)  # Forces reload every time
 def load_data():
-    url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
+    url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard-test/main/AP%20Final.xlsx"
     response = requests.get(url_agents)
 
     if response.status_code != 200:
@@ -27,12 +28,32 @@ def load_data():
     ranks_data = xls.parse('Just Agent Ranks')
     return agents_data, ranks_data
 
+# Function to retrieve headshot URL based on player name
+def get_headshot_url(player_name):
+    base_url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard-test/main/headshots/"
+    # Format player name to match file naming convention
+    formatted_name = player_name.lower().replace(" ", "_")
+
+    # Since files have extra text after the last underscore, we'll search for partial matches
+    headshots_list = requests.get(
+        "https://api.github.com/repos/ethanhetu/agent-dashboard-test/contents/headshots"
+    ).json()
+
+    for file in headshots_list:
+        filename = file["name"].lower()
+        if filename.startswith(formatted_name + "_") or filename == formatted_name + ".png":
+            return base_url + file["name"]
+
+    # Default placeholder image if no match found
+    return "https://raw.githubusercontent.com/ethanhetu/agent-dashboard-test/main/headshots/placeholder.png"
+
 def home_page():
-    st.title("Agent Project Insights Dashboard")
-    st.subheader("Key Elements")
-    st.write("- AGENT PROFILES - each agent has a profile page containing the key metrics used to evaluate agent performance.")
-    st.write("- AGENCY PROFILES - similar to agent profiles, only split by agency, rather than by individual agents.")
-    st.write("- KEY TAKEAWAYS - an overall look at the findings of the project and what can be learned about agent negotiation patterns")
+    st.title("🏒 Welcome to the Agent Insights Dashboard")
+    st.write("This site provides detailed insights on player agents, rankings, and financial statistics.")
+    st.subheader("Key Takeaways")
+    st.write("- Agents are ranked based on financial efficiency and contract success.")
+    st.write("- Player and agent trends reveal negotiation patterns.")
+    st.write("- Use the Agent Dashboard for deep dives into individual agents.")
 
 def agent_dashboard():
     agents_data, ranks_data = load_data()
@@ -75,7 +96,16 @@ def agent_dashboard():
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
     st.subheader("🏆 Biggest Clients")
-    st.write("(To Do: Auto-fetch player images and details)")
+    st.write("(Player headshots dynamically loaded where available)")
+
+    # Example player list (replace with actual data pull if available)
+    biggest_clients = agent_info.get("Biggest Clients", "").split(", ")
+    for player in biggest_clients:
+        player_col1, player_col2 = st.columns([1, 4])
+        with player_col1:
+            st.image(get_headshot_url(player), width=100)
+        with player_col2:
+            st.write(f"**{player}**")
 
 def project_definitions():
     st.title("📚 Project Definitions")
@@ -83,12 +113,15 @@ def project_definitions():
 
     st.subheader("Key Terms")
     st.markdown("""
-    - **Dollar Index**: The key metric of the project. The Dollar Index is simple: for every dollar of on-ice value delivered by a client to his team, how many dollars is the agent delivering to his or her client? A Dollar Index of $0.75 means an agent is successfully capturing 75 cents for every dollar his client is delivering on the ice.
-    - **Win %**: An agent's "Win Rate" is the number of "win" contract years an agent has, divided by the total number of contract years the agent has to his or her name. A "win" year is defined as a contract year in which a client's compensation exceeded the value he provided on the ice.
-    - **Contracts Tracked**: The total number of NHL contracts negotiated by an agent within the project's designated timeframe. (2018-19 through 2023-24)
-    - **Total Contract Value**: The cumulative monetary value of all tracked contracts for an agent. This is not to be confused with cap hit, for players on two-way contracts, an estimation of final compensation using NHL and AHL games played was used.
-    - **Total Player Value**: The cumulative monetary value of all on-ice contributions of tracked players. Data encompasses both NHL and AHL contributions. Dataset courtesy of BenchRates. 
+    - **Dollar Index**: Represents the financial efficiency of an agent relative to market value.
+    - **Win %**: The percentage of successful contract negotiations based on defined criteria.
+    - **Contracts Tracked**: Total number of contracts managed by the agent included in this dataset.
+    - **Total Contract Value**: The cumulative monetary value of all tracked contracts for an agent.
+    - **Total Player Value**: Estimated total on-ice contributions from all players represented by the agent.
     """)
+
+    st.subheader("How to Interpret Rankings")
+    st.write("Higher ranks indicate better performance relative to peers in the dataset. For example, a higher Dollar Index rank reflects greater financial efficiency.")
 
 # Navigation menu
 st.sidebar.title("Navigation")
