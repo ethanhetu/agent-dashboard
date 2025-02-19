@@ -34,32 +34,27 @@ def load_data():
     piba_data = xls.parse('PIBA')
     return agents_data, ranks_data, piba_data
 
-# ✅ Download and extract all headshots from multiple ZIP files hosted on GitHub Releases
+# ✅ Download and extract all headshots from specified URLs
 @st.cache_data(ttl=0)
 def extract_headshots():
     global HEADSHOTS_DIR
-    release_base_url = "https://github.com/ethanhetu/agent-dashboard/releases/download/v1.0-headshots-multi-zip/"
-    zip_files = []
-
-    # Dynamically detect available ZIP files (1-20 range just in case)
-    for i in range(1, 21):
-        test_url = release_base_url + f"headshots{i}.zip"
-        response = requests.head(test_url)
-        if response.status_code == 200:
-            zip_files.append(f"headshots{i}.zip")
-        else:
-            break  # Stop when a file in the sequence is not found
-
-    if not zip_files:
-        st.error("❌ No headshot ZIP files found at the specified release URL.")
-        return
+    zip_files = [
+        ("headshots1.zip", "https://github.com/user-attachments/files/18873454/headshots1.zip"),
+        ("headshots2.zip", "https://github.com/user-attachments/files/18873459/headshots2.zip"),
+        ("headshots3.zip", "https://github.com/user-attachments/files/18873461/headshots3.zip"),
+        ("headshots4.zip", "https://github.com/user-attachments/files/18873462/headshots4.zip"),
+        ("headshots5.zip", "https://github.com/user-attachments/files/18873464/headshots5.zip"),
+        ("headshots6.zip", "https://github.com/user-attachments/files/18873467/headshots6.zip"),
+        ("headshots7.zip", "https://github.com/user-attachments/files/18873476/headshots7.zip"),
+        ("headshots8.zip", "https://github.com/user-attachments/files/18873478/headshots8.zip"),
+        ("headshots9.zip", "https://github.com/user-attachments/files/18873475/headshots9.zip")
+    ]
 
     with tempfile.TemporaryDirectory() as tmpdir:
         extract_path = os.path.join(tmpdir, "headshots")
         os.makedirs(extract_path, exist_ok=True)
 
-        for zip_file in zip_files:
-            zip_url = release_base_url + zip_file
+        for zip_file, zip_url in zip_files:
             zip_path = os.path.join(tmpdir, zip_file)
 
             st.write(f"📥 Downloading {zip_file} from: {zip_url}")
