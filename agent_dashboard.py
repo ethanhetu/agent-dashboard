@@ -88,6 +88,13 @@ def calculate_age(birthdate):
     except:
         return "N/A"
 
+# Function to color Six-Year Agent Delivery value
+def format_delivery_value(value):
+    if value > 0:
+        return f"<span style='color:#228B22;'>${value:,.0f}</span>"  # Dark green for positive
+    else:
+        return f"<span style='color:#B22222;'>${value:,.0f}</span>"  # Dark red for negative
+
 def home_page():
     st.title("🏒 Welcome to the Agent Insights Dashboard")
     st.write("This site provides detailed insights on player agents, rankings, and financial statistics.")
@@ -152,9 +159,14 @@ def agent_dashboard():
             else:
                 st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=200)
 
-            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
+            # Centered player name in bold, larger font
+            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
             st.markdown(f"**Age:** {calculate_age(player['Birth Date'])}")
-            st.markdown(f"**Six-Year Agent Delivery:** ${player['Dollars Captured Above/ Below Value']:,.0f}")
+
+            # Six-Year Agent Delivery with conditional color formatting
+            delivery_html = format_delivery_value(player['Dollars Captured Above/ Below Value'])
+            st.markdown(f"**Six-Year Agent Delivery:** {delivery_html}", unsafe_allow_html=True)
+
             st.markdown(f"**Value Capture Percentage:** {player['Value Capture %']:.2%}")
             st.markdown(f"**Six-Year Player Cost:** ${player['Total Cost']:,.0f}")
             st.markdown(f"**Six-Year Player Contribution:** ${player['Total PC']:,.0f}")
