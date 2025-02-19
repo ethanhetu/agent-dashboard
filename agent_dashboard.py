@@ -7,13 +7,14 @@ from datetime import datetime
 import zipfile
 import os
 import base64
+import matplotlib.pyplot as plt
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 
 # Global variable to store the headshots directory
 HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
-PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
+PLACEHOLDER_IMAGE_URL = "https://upload.wikedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
 # Load data from GitHub repository
 @st.cache_data(ttl=0)  # Forces reload every time
@@ -115,18 +116,21 @@ def calculate_vcp_per_year(agent_players):
             vcp_results[year] = None
     return vcp_results
 
-# Plot the VCP line graph with a 100% reference line using st.line_chart
+# Plot the VCP line graph with a dotted 100% reference line
 def plot_vcp_line_graph(vcp_per_year):
     years = list(vcp_per_year.keys())
     vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
-    ref_line = [100 for _ in years]  # 100% reference line
 
-    vcp_df = pd.DataFrame({
-        "VCP": vcp_values,
-        "100% Reference": ref_line
-    }, index=years)
-
-    st.line_chart(vcp_df, height=300, use_container_width=True)
+    plt.figure(figsize=(8, 4))
+    plt.plot(years, vcp_values, marker='o', linestyle='-', color='#041E41', label='VCP')
+    plt.axhline(y=100, color='lightgrey', linestyle='--', linewidth=2, label='100% Reference')
+    plt.ylim(0, 200)
+    plt.ylabel("Value Capture Percentage (VCP) %")
+    plt.xlabel("Year")
+    plt.title("Year-by-Year Value Capture Percentage Trend")
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend()
+    st.pyplot(plt)
 
 def display_player_section(title, player_df):
     st.subheader(title)
