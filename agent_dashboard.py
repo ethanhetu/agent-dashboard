@@ -148,15 +148,16 @@ def agent_dashboard():
         with client_cols[idx]:
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
-                st.image(img_path, width=200, caption=player['Combined Names'])
+                st.image(img_path, width=200)
             else:
-                st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=200, caption=player['Combined Names'])
+                st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=200)
 
+            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
             st.markdown(f"**Age:** {calculate_age(player['Birth Date'])}")
-            st.markdown(f"**Dollars Captured Above/Below Market Value:** ${player['Dollars Captured Above/ Below Value']:,.0f}")
+            st.markdown(f"**Six-Year Agent Delivery:** ${player['Dollars Captured Above/ Below Value']:,.0f}")
             st.markdown(f"**Value Capture Percentage:** {player['Value Capture %']:.2%}")
-            st.markdown(f"**Total Cost:** ${player['Total Cost']:,.0f}")
-            st.markdown(f"**Total PC:** ${player['Total PC']:,.0f}")
+            st.markdown(f"**Six-Year Player Cost:** ${player['Total Cost']:,.0f}")
+            st.markdown(f"**Six-Year Player Contribution:** ${player['Total PC']:,.0f}")
 
 def project_definitions():
     st.title("📚 Project Definitions")
@@ -169,8 +170,10 @@ def project_definitions():
     - **Contracts Tracked**: Total number of contracts managed by the agent included in this dataset.
     - **Total Contract Value**: The cumulative monetary value of all tracked contracts for an agent.
     - **Total Player Value**: Estimated total on-ice contributions from all players represented by the agent.
-    - **Dollars Captured Above/Below Market Value**: Shows how much more or less the player earned compared to their market value.
+    - **Six-Year Agent Delivery**: Shows how much more or less the player earned compared to their market value over six years.
     - **Value Capture Percentage:** The percentage of the player's market value actually captured in earnings.
+    - **Six-Year Player Cost:** The total cost of a player's contract over six years.
+    - **Six-Year Player Contribution:** The total on-ice contributions from a player over six years.
     """)
 
     st.subheader("How to Interpret Rankings")
