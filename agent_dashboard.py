@@ -34,15 +34,18 @@ def get_headshot_url(player_name):
     base_url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/"
     formatted_name = player_name.lower().replace(" ", "_")
 
-    # Since files have extra text after the last underscore, we'll search for partial matches
+    # Fetch headshot file list from GitHub
     headshots_list = requests.get(
         "https://api.github.com/repos/ethanhetu/agent-dashboard/contents/headshots"
     ).json()
 
-    for file in headshots_list:
-        filename = file["name"].lower()
-        if filename.startswith(formatted_name + "_") or filename == formatted_name + ".png":
-            return base_url + file["name"]
+    # Filter matching files ignoring extra suffixes
+    matches = [file["name"] for file in headshots_list if file["name"].lower().startswith(formatted_name + "_")]
+
+    if matches:
+        # Prioritize the file without '_away' if duplicates exist
+        matches.sort(key=lambda x: 1 if "_away" in x else 0)
+        return base_url + matches[0]
 
     # Default placeholder image if no match found
     return "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png"
