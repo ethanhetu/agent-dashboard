@@ -9,7 +9,6 @@ import os
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
-st.write("🚀 Running the UPDATED code with persistent headshot directory.")  # Debug line
 
 # Global variable to store the headshots directory
 HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
@@ -45,58 +44,39 @@ def extract_headshots():
         os.makedirs(HEADSHOTS_DIR, exist_ok=True)
 
         zip_path = os.path.join(HEADSHOTS_DIR, "NHL.Headshots.zip")
-        st.write(f"📥 Downloading full headshots ZIP from: {zip_url}")
         response = requests.get(zip_url, stream=True)
-
-        st.write(f"📜 Content-Type: {response.headers.get('Content-Type', 'Unknown')}")
-        st.write(f"📏 Downloaded file size: {len(response.content)} bytes")
 
         if response.status_code == 200:
             with open(zip_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
                         f.write(chunk)
-            st.write(f"✅ Downloaded NHL.Headshots.zip")
 
             try:
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                    st.write("🔍 ZIP file validation passed. Extracting now...")
                     zip_ref.extractall(HEADSHOTS_DIR)
-                    st.write(f"📂 Extracted NHL.Headshots.zip successfully to {HEADSHOTS_DIR}")
             except zipfile.BadZipFile:
                 st.error(f"❌ NHL.Headshots.zip is not a valid ZIP archive. Please verify file integrity.")
             except Exception as e:
                 st.error(f"❌ Extraction failed: {e}")
-        else:
-            st.error(f"❌ Failed to download: Status {response.status_code}")
-    else:
-        st.write(f"✅ Headshots already extracted at: {HEADSHOTS_DIR}")
 
 # Function to retrieve headshot path based on player name
 def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
-    st.write(f"🔎 Looking for headshot for: {formatted_name}")
 
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
         try:
-            available_files = os.listdir(HEADSHOTS_DIR)
-            st.write(f"📂 Files available: {available_files[:10]} ...")
-
-            for file in available_files:
+            for file in os.listdir(HEADSHOTS_DIR):
                 if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
-                    st.write(f"✅ Found file: {file}")
                     if "_away" not in file:
                         return os.path.join(HEADSHOTS_DIR, file)
 
-            # Fallback if only '_away' file exists
-            for file in available_files:
+            for file in os.listdir(HEADSHOTS_DIR):
                 if file.lower().startswith(formatted_name + "_"):
-                    st.write(f"⚠️ Only '_away' file found: {file}")
                     return os.path.join(HEADSHOTS_DIR, file)
-        except Exception as e:
-            st.error(f"❌ Error while searching for headshot: {e}")
+        except:
+            pass
 
-    st.write("❓ Headshot not found, using placeholder.")
     return None
 
 # Function to calculate age from birthdate
