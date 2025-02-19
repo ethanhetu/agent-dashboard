@@ -11,7 +11,7 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 # Load data from GitHub repository
 @st.cache_data(ttl=0)  # Forces reload every time
 def load_data():
-    url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard-test/main/AP%20Final.xlsx"
+    url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
     response = requests.get(url_agents)
 
     if response.status_code != 200:
@@ -30,13 +30,13 @@ def load_data():
 
 # Function to retrieve headshot URL based on player name
 def get_headshot_url(player_name):
-    base_url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard-test/main/headshots/"
+    base_url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/"
     # Format player name to match file naming convention
     formatted_name = player_name.lower().replace(" ", "_")
 
     # Since files have extra text after the last underscore, we'll search for partial matches
     headshots_list = requests.get(
-        "https://api.github.com/repos/ethanhetu/agent-dashboard-test/contents/headshots"
+        "https://api.github.com/repos/ethanhetu/agent-dashboard/contents/headshots"
     ).json()
 
     for file in headshots_list:
@@ -45,7 +45,7 @@ def get_headshot_url(player_name):
             return base_url + file["name"]
 
     # Default placeholder image if no match found
-    return "https://raw.githubusercontent.com/ethanhetu/agent-dashboard-test/main/headshots/placeholder.png"
+    return "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png"
 
 def home_page():
     st.title("🏒 Welcome to the Agent Insights Dashboard")
