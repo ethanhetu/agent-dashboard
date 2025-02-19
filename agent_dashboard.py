@@ -7,7 +7,6 @@ from datetime import datetime
 import zipfile
 import os
 import base64
-import matplotlib.pyplot as plt
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
@@ -116,19 +115,12 @@ def calculate_vcp_per_year(agent_players):
             vcp_results[year] = None
     return vcp_results
 
-# Plot the VCP line graph
+# Plot the VCP line graph using st.line_chart
 def plot_vcp_line_graph(vcp_per_year):
-    years = list(vcp_per_year.keys())
-    vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
+    vcp_df = pd.DataFrame({"Year": list(vcp_per_year.keys()), "VCP": list(vcp_per_year.values())})
+    vcp_df.set_index("Year", inplace=True)
+    st.line_chart(vcp_df, height=300, use_container_width=True)
 
-    plt.figure(figsize=(8, 4))
-    plt.plot(years, vcp_values, marker='o', linestyle='-', color='orange')
-    plt.ylim(0, 200)
-    plt.ylabel("Value Capture Percentage (VCP) %")
-    plt.xlabel("Year")
-    plt.title("Year-by-Year Value Capture Percentage Trend")
-    plt.grid(True, linestyle='--', alpha=0.6)
-    st.pyplot(plt)
 
 def display_player_section(title, player_df):
     st.subheader(title)
