@@ -134,7 +134,7 @@ def agent_dashboard():
         with client_cols[idx]:
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
-                st.image(img_path, width=200, use_container_width=False)
+                st.image(img_path, width=200; image-align:center, use_container_width=False)
             else:
                 st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=200)
 
