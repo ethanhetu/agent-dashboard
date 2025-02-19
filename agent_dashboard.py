@@ -110,16 +110,24 @@ def calculate_vcp_per_year(agent_players):
         try:
             total_cost = agent_players[cost_col].sum()
             total_value = agent_players[value_col].sum()
-            vcp_results[year] = (total_cost / total_value) * 100 if total_value != 0 else None
+            vcp_results[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
         except KeyError as e:
             vcp_results[year] = None
     return vcp_results
 
-# Plot the VCP line graph using st.line_chart
+# Plot the VCP line graph using st.line_chart with custom color and improved readability
 def plot_vcp_line_graph(vcp_per_year):
     vcp_df = pd.DataFrame({"Year": list(vcp_per_year.keys()), "VCP": list(vcp_per_year.values())})
     vcp_df.set_index("Year", inplace=True)
-    st.line_chart(vcp_df, height=300, use_container_width=True)
+
+    st.line_chart(
+        vcp_df.style.set_properties(**{
+            'color': '#041E41',
+            'line-color': '#041E41'
+        }),
+        height=300,
+        use_container_width=True
+    )
 
 
 def display_player_section(title, player_df):
