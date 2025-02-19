@@ -4,9 +4,15 @@ import requests
 from io import BytesIO
 import tempfile
 from datetime import datetime
+import zipfile
+import os
+import subprocess
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
+
+# Global variable to store the headshots directory
+HEADSHOTS_DIR = None
 
 # Load data from GitHub repository
 @st.cache_data(ttl=0)  # Forces reload every time
@@ -29,26 +35,44 @@ def load_data():
     piba_data = xls.parse('PIBA')
     return agents_data, ranks_data, piba_data
 
-# Function to retrieve headshot URL based on player name
-def get_headshot_url(player_name):
-    base_url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/"
+# Function to download and extract headshots zip from Google Drive
+@st.cache_data(ttl=0)
+def extract_headshots():
+    global HEADSHOTS_DIR
+    drive_file_id = "1KgSXYIekXg6K55wAGhG4FZyU9YNW1etA"
+    gdown_url = f"https://drive.google.com/uc?id={drive_file_id}"
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        zip_path = os.path.join(tmpdir, "headshots.zip")
+
+        # Download using gdown
+        try:
+            subprocess.run(["pip", "install", "gdown"], check=True)
+            import gdown
+            gdown.download(gdown_url, zip_path, quiet=False)
+        except Exception as e:
+            st.error(f"Failed to download headshots.zip from Google Drive: {e}")
+            return
+
+        # Extract the zip file
+        extract_path = os.path.join(tmpdir, "headshots")
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_path)
+            HEADSHOTS_DIR = extract_path
+
+# Function to retrieve headshot path based on player name
+def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
-
-    # Fetch headshot file list from GitHub
-    headshots_list = requests.get(
-        "https://api.github.com/repos/ethanhetu/agent-dashboard/contents/headshots"
-    ).json()
-
-    # Filter matching files ignoring extra suffixes
-    matches = [file["name"] for file in headshots_list if file["name"].lower().startswith(formatted_name + "_")]
-
-    if matches:
-        # Prioritize the file without '_away' if duplicates exist
-        matches.sort(key=lambda x: 1 if "_away" in x else 0)
-        return base_url + matches[0]
-
-    # Default placeholder image if no match found
-    return "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png"
+    if HEADSHOTS_DIR:
+        for file in os.listdir(HEADSHOTS_DIR):
+            if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
+                if "_away" not in file:
+                    return os.path.join(HEADSHOTS_DIR, file)
+        # If only '_away' version exists
+        for file in os.listdir(HEADSHOTS_DIR):
+            if file.lower().startswith(formatted_name + "_"):
+                return os.path.join(HEADSHOTS_DIR, file)
+    return None
 
 # Function to calculate age from birthdate
 def calculate_age(birthdate):
@@ -69,6 +93,7 @@ def home_page():
 
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
+    extract_headshots()
 
     if agents_data is None or ranks_data is None or piba_data is None:
         st.stop()
@@ -116,7 +141,11 @@ def agent_dashboard():
     for _, player in top_clients.iterrows():
         player_col1, player_col2 = st.columns([1, 4])
         with player_col1:
-            st.image(get_headshot_url(player['Combined Names']), width=100)
+            img_path = get_headshot_path(player['Combined Names'])
+            if img_path:
+                st.image(img_path, width=100)
+            else:
+                st.image("https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png", width=100)
         with player_col2:
             st.markdown(f"**{player['Combined Names']}**")
             st.write(f"**Age:** {calculate_age(player['Birth Date'])}")
