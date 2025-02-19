@@ -16,7 +16,7 @@ HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
 # Load data from GitHub repository
-@st.cache_data(ttl=0)
+@st.cache_data(ttl=0)  # Forces reload every time
 def load_data():
     url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
     response = requests.get(url_agents)
@@ -132,21 +132,6 @@ def display_player_section(title, player_df):
             """
             st.markdown(box_html, unsafe_allow_html=True)
 
-def plot_yearly_vcp(agent_players):
-    years = ['2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24']
-    cost_cols = ['H', 'J', 'L', 'N', 'P', 'R']
-    value_cols = ['I', 'K', 'M', 'O', 'Q', 'S']
-
-    vcp_data = {}
-    for year, cost_col, value_col in zip(years, cost_cols, value_cols):
-        total_cost = agent_players[cost_col].sum()
-        total_value = agent_players[value_col].sum()
-        vcp = (total_cost / total_value) * 100 if total_value != 0 else 0
-        vcp_data[year] = vcp
-
-    vcp_df = pd.DataFrame(list(vcp_data.items()), columns=['Year', 'VCP']).set_index('Year')
-    st.line_chart(vcp_df, height=400, use_container_width=True)
-
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
     extract_headshots()
@@ -182,13 +167,9 @@ def agent_dashboard():
     col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
-    # Year-by-Year Trend Graph (VCP per year)
-    st.subheader("📊 Year-by-Year Value Capture Trend")
-    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
-    plot_yearly_vcp(agent_players)
-
     # Biggest Clients Section
     st.subheader("🏆 Biggest Clients")
+    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
 
