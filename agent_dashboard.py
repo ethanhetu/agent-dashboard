@@ -133,13 +133,13 @@ def plot_vcp_line_graph(vcp_per_year):
         hovertemplate='%{y:.2f}%'
     ))
 
-    # 100% reference line (light grey dotted)
+    # 100% reference line (red dotted)
     fig.add_trace(go.Scatter(
         x=years,
         y=[100] * len(years),
         mode='lines',
         name='100% Reference',
-        line=dict(color='lightgrey', width=2, dash='dot')
+        line=dict(color='red', width=2, dash='dot')
     ))
 
     fig.update_layout(
