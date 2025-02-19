@@ -92,9 +92,44 @@ def format_value_capture_percentage(value):
     color = "#006400" if value >= 1 else "#8B0000"  # Dark green if >=100%, dark red otherwise
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.2%}</span></p>"
 
-def home_page():
-    st.title("🏒 Welcome to the Agent Insights Dashboard")
-    st.write("Detailed insights on player agents, rankings, and financial statistics.")
+def display_player_section(title, player_df):
+    st.subheader(title)
+    client_cols = st.columns(len(player_df))
+    for idx, (_, player) in enumerate(player_df.iterrows()):
+        with client_cols[idx]:
+            img_path = get_headshot_path(player['Combined Names'])
+            if img_path:
+                st.markdown(
+                    f"""
+                    <div style='text-align:center;'>
+                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" 
+                             style='width:200px; display:block; margin:auto;'/>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    """
+                    <div style='text-align:center;'>
+                        <img src="https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png" 
+                             style='width:200px; display:block; margin:auto;'/>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
+            box_html = f"""
+            <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
+                <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
+                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
+                <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
+                <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
+            </div>
+            {format_value_capture_percentage(player['Value Capture %'])}
+            """
+            st.markdown(box_html, unsafe_allow_html=True)
 
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
@@ -131,46 +166,19 @@ def agent_dashboard():
     col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
 
+    # Biggest Clients Section
     st.subheader("🏆 Biggest Clients")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
+    display_player_section("Top 3 Clients by Total Cost", top_clients)
 
-    client_cols = st.columns(len(top_clients))
-    for idx, (_, player) in enumerate(top_clients.iterrows()):
-        with client_cols[idx]:
-            img_path = get_headshot_path(player['Combined Names'])
-            if img_path:
-                st.markdown(
-                    f"""
-                    <div style='text-align:center;'>
-                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" 
-                             style='width:200px; display:block; margin:auto;'/>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    """
-                    <div style='text-align:center;'>
-                        <img src="https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/headshots/placeholder.png" 
-                             style='width:200px; display:block; margin:auto;'/>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+    # Agent Wins Section
+    top_vcp_clients = agent_players.sort_values(by='Value Capture %', ascending=False).head(3)
+    display_player_section("🏅 Agent 'Wins' (Top 3 by Value Capture %)", top_vcp_clients)
 
-            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
-            box_html = f"""
-            <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
-                <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
-                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
-                <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
-                <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
-            </div>
-            {format_value_capture_percentage(player['Value Capture %'])}
-            """
-            st.markdown(box_html, unsafe_allow_html=True)
+    # Agent Losses Section
+    bottom_vcp_clients = agent_players.sort_values(by='Value Capture %', ascending=True).head(3)
+    display_player_section("❌ Agent 'Losses' (Bottom 3 by Value Capture %)", bottom_vcp_clients)
 
 def project_definitions():
     st.title("📚 Project Definitions")
