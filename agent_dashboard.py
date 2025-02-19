@@ -9,6 +9,7 @@ import os
 
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
+st.write("🚀 Running the UPDATED code with SINGLE ZIP integration.")  # Debug line to confirm code version
 
 # Global variable to store the headshots directory
 HEADSHOTS_DIR = None
