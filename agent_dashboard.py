@@ -424,21 +424,21 @@ def leaderboard_page():
         st.markdown(card_html, unsafe_allow_html=True)
     
     st.markdown("---")
-    st.subheader("Year-by-Year VCP Breakdown")
-    agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
-    for season, df in agent_vcp_by_season.items():
+       st.subheader("Year-by-Year VCP Breakdown")
+    # Sort seasons in reverse chronological order
+    for season in sorted(agent_vcp_by_season.keys(), reverse=True):
+        df = agent_vcp_by_season[season]
         st.markdown(f"### {season}")
         winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
         losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
         
-        # Headings for the two columns:
         col_head1, col_head2 = st.columns(2)
         with col_head1:
             st.markdown("#### Top 5 Agents")
         with col_head2:
             st.markdown("#### Bottom 5 Agents")
         
-        # Now, display the winners and losers side by side.
+        # Display winners and losers side by side
         for i in range(max(len(winners), len(losers))):
             cols = st.columns(2)
             with cols[0]:
@@ -447,7 +447,7 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="font-size: 16px; font-weight: bold;">{w['Agent Name']}</div>
-                        <div style="font-size: 14px;">VCP: {w['VCP']:.2f}%</div>
+                        <div style="font-size: 14px;">VCP: {w['VCP']:.0f}%</div>
                     </div>
                     """, unsafe_allow_html=True)
             with cols[1]:
@@ -456,7 +456,7 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="font-size: 16px; font-weight: bold;">{l['Agent Name']}</div>
-                        <div style="font-size: 14px;">VCP: {l['VCP']:.2f}%</div>
+                        <div style="font-size: 14px;">VCP: {l['VCP']:.0f}%</div>
                     </div>
                     """, unsafe_allow_html=True)
                     
