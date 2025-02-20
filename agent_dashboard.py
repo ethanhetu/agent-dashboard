@@ -347,7 +347,9 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Add a filter option at the top of the standings.
+    # Overall Standings heading
+    st.subheader("Overall Standings (by Dollar Index)")
+    # Now place the filter checkbox just below the heading.
     filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
     
     # Overall Standings: display a card for each agent with ranking, agent name, agency, Dollar Index, and Contracts Tracked.
@@ -356,7 +358,6 @@ def leaderboard_page():
         overall_table = overall_table[overall_table['CT'] >= 10]
     overall_table = overall_table.head(90)  # Limit to top 90 agents
     
-    st.subheader("Overall Standings (by Dollar Index)")
     for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
         agent_name = row['Agent Name']
         agency = row['Agency Name']
