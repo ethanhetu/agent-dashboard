@@ -80,15 +80,23 @@ def load_agencies_data():
 # --------------------------------------------------------------------
 def correct_player_name(name):
     """
-    Apply band-aid corrections to specific player names.
-    For example:
-      - "Zotto Del" -> "Michael Del Zotto"
-      - "Riemsdyk Van" -> "James Van Riemsdyk"
-    Add more entries as needed.
+    Band-aid corrections for specific player names.
+    The key-value pairs below map problematic names (in lowercase)
+    to the corrected display versions.
+      - "zotto del" -> "Michael Del Zotto"
+      - "riemsdyk van" -> "James Van Riemsdyk"
+      - "alexandre carrier a" -> "Alexandre Carrier"
+      - "lias andersson l" -> "Lias Andersson"
+      - "jesper boqvist j" -> "Jesper Boqvist"
+      - "sompel vande" -> "Mitch Vande Sompel"
     """
     corrections = {
-        "zotto del": "michael del zotto",
-        "riemsdyk van": "james van riemsdyk",
+        "zotto del": "Michael Del Zotto",
+        "riemsdyk van": "James Van Riemsdyk",
+        "alexandre carrier a": "Alexandre Carrier",
+        "lias andersson l": "Lias Andersson",
+        "jesper boqvist j": "Jesper Boqvist",
+        "sompel vande": "Mitch Vande Sompel",
     }
     lower_name = name.lower().strip()
     return corrections.get(lower_name, name)
@@ -96,29 +104,28 @@ def correct_player_name(name):
 def get_headshot_path(player_name):
     """
     Retrieves the headshot path for a given player name.
-    It first applies any name corrections, then attempts an exact match 
-    (using only the first and last name), and finally falls back to fuzzy matching.
+    First applies name corrections, then attempts an exact match
+    (using just the first and last name), and finally falls back to fuzzy matching.
     """
-    # Apply band-aid corrections before matching
+    # Apply band-aid corrections before matching.
     player_name = correct_player_name(player_name)
     
-    # Convert the (possibly corrected) name to lower-case and underscore format.
+    # Convert to lower-case with underscores.
     formatted_name = player_name.lower().replace(" ", "_")
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
         try:
-            # Gather all headshot PNG files (ignoring files with "_away")
+            # Gather all headshot PNG files (excluding those with "_away")
             possible_files = [
                 f for f in os.listdir(HEADSHOTS_DIR)
                 if f.lower().endswith(".png") and "_away" not in f.lower()
             ]
             
-            # 1) Exact matching: look for files that start with the formatted name.
+            # 1) Exact matching: look for files starting with the formatted name.
             for file in possible_files:
                 if file.lower().startswith(formatted_name + "_"):
                     return os.path.join(HEADSHOTS_DIR, file)
             
-            # 2) Fuzzy matching: build a dictionary mapping the "name part" (first and last names)
-            # to the full filename.
+            # 2) Fuzzy matching: map file names using only the first two parts.
             names_dict = {}
             for f in possible_files:
                 base = f.lower().replace(".png", "")
@@ -136,10 +143,10 @@ def get_headshot_path(player_name):
                 return os.path.join(HEADSHOTS_DIR, names_dict[best_match])
             
         except Exception as e:
-            # Optionally log or handle the exception as needed.
+            # Optionally log the exception if needed.
             pass
 
-    # Fallback: return None so that the placeholder image is used.
+    # Fallback: return None so the placeholder image is used.
     return None
 
 def calculate_age(birthdate):
@@ -226,6 +233,7 @@ def display_player_section(title, player_df):
     client_cols = st.columns(3)
     for idx, (_, player) in enumerate(player_df.iterrows()):
         with client_cols[idx % 3]:
+            # Use corrected name for headshot retrieval (already applied within get_headshot_path)
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
                 st.markdown(
@@ -248,7 +256,9 @@ def display_player_section(title, player_df):
                     unsafe_allow_html=True,
                 )
 
-            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
+            # Use the corrected name for display.
+            display_name = correct_player_name(player['Combined Names'])
+            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{display_name}</h4>", unsafe_allow_html=True)
             box_html = f"""
             <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
