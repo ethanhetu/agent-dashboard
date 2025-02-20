@@ -34,7 +34,7 @@ def load_data():
     agents_data = xls.parse('Agents')
     ranks_data = xls.parse('Just Agent Ranks')
     piba_data = xls.parse('PIBA')
-    piba_data.columns = piba_data.columns.str.strip()  # Remove extra spaces in column names
+    piba_data.columns = piba_data.columns.str.strip().str.replace(" ", "_")  # Normalize column names
     return agents_data, ranks_data, piba_data
 
 @st.cache_data(ttl=0)
@@ -58,80 +58,46 @@ def extract_headshots():
             except zipfile.BadZipFile:
                 st.error("❌ NHL.Headshots.zip is not a valid ZIP archive.")
 
-# Retrieve headshot path
-def get_headshot_path(player_name):
-    formatted_name = player_name.lower().replace(" ", "_")
-    if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
-        try:
-            for file in os.listdir(HEADSHOTS_DIR):
-                if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
-                    if "_away" not in file:
-                        return os.path.join(HEADSHOTS_DIR, file)
-            for file in os.listdir(HEADSHOTS_DIR):
-                if file.lower().startswith(formatted_name + "_"):
-                    return os.path.join(HEADSHOTS_DIR, file)
-        except:
-            pass
-    return None
-
-# Calculate age
-def calculate_age(birthdate):
-    try:
-        birth_date = pd.to_datetime(birthdate)
-        today = datetime.today()
-        return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
-    except:
-        return "N/A"
-
-# Color Six-Year Agent Delivery
-def format_delivery_value(value):
-    if value > 0:
-        return f"<span style='color:#006400;'>${value:,.0f}</span>"  # Dark green
-    else:
-        return f"<span style='color:#8B0000;'>${value:,.0f}</span>"  # Dark red
-
-# Color only the percentage in Value Capture Percentage
-def format_value_capture_percentage(value):
-    color = "#006400" if value >= 1 else "#8B0000"  # Dark green if >=100%, dark red otherwise
-    return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.2%}</span></p>"
-
 # Calculate VCP per year for the agent
 def calculate_vcp_per_year(agent_players):
     years = [
-        ('2018-19', 'COST 18-19', 'PC 18-19'),
-        ('2019-20', 'COST 19-20', 'PC 19-20'),
-        ('2020-21', 'COST 20-21', 'PC 20-21'),
-        ('2021-22', 'COST 21-22', 'PC 21-22'),
-        ('2022-23', 'COST 22-23', 'PC 22-23'),
-        ('2023-24', 'COST 23-24', 'PC 23-24')
+        ('2018-19', 'COST_18-19', 'PC_18-19'),
+        ('2019-20', 'COST_19-20', 'PC_19-20'),
+        ('2020-21', 'COST_20-21', 'PC_20-21'),
+        ('2021-22', 'COST_21-22', 'PC_21-22'),
+        ('2022-23', 'COST_22-23', 'PC_22-23'),
+        ('2023-24', 'COST_23-24', 'PC_23-24')
     ]
 
     vcp_results = {}
     for year, cost_col, value_col in years:
-        try:
+        if cost_col in agent_players.columns and value_col in agent_players.columns:
             total_cost = agent_players[cost_col].sum()
             total_value = agent_players[value_col].sum()
             vcp_results[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
-        except KeyError:
+        else:
             vcp_results[year] = None
     return vcp_results
 
 # Calculate average VCP per year across all players
 def calculate_average_vcp_per_year(piba_data):
     years = [
-        ('2018-19', 'COST 18-19', 'PC 18-19'),
-        ('2019-20', 'COST 19-20', 'PC 19-20'),
-        ('2020-21', 'COST 20-21', 'PC 20-21'),
-        ('2021-22', 'COST 21-22', 'PC 21-22'),
-        ('2022-23', 'COST 22-23', 'PC 22-23'),
-        ('2023-24', 'COST 23-24', 'PC 23-24')
+        ('2018-19', 'COST_18-19', 'PC_18-19'),
+        ('2019-20', 'COST_19-20', 'PC_19-20'),
+        ('2020-21', 'COST_20-21', 'PC_20-21'),
+        ('2021-22', 'COST_21-22', 'PC_21-22'),
+        ('2022-23', 'COST_22-23', 'PC_22-23'),
+        ('2023-24', 'COST_23-24', 'PC_23-24')
     ]
 
     avg_vcp = {}
     for year, cost_col, value_col in years:
-        total_cost = piba_data[cost_col].sum()
-        total_value = piba_data[value_col].sum()
-        avg_vcp[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
+        if cost_col in piba_data.columns and value_col in piba_data.columns:
+            total_cost = piba_data[cost_col].sum()
+            total_value = piba_data[value_col].sum()
+            avg_vcp[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
+        else:
+            avg_vcp[year] = None
     return avg_vcp
 
 # Plot the VCP line graph using Plotly with customizations
