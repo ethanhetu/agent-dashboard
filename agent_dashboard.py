@@ -354,21 +354,8 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Debug output of available columns in ranks_data
-    st.write("Ranks Data Columns:", ranks_data.columns.tolist())
-    
-    # Merge ranks_data with agents_data to obtain missing columns ('Won%' and 'Total Contract Value')
-    merged = pd.merge(
-        ranks_data,
-        agents_data[['Agent Name', 'Won%', 'Total Contract Value']],
-        on='Agent Name',
-        how='left'
-    )
-    
-    # Define the expected columns for overall standings
-    expected_columns = ['Agent Name', 'Dollar Index', 'CT', 'Won%', 'Total Contract Value']
-    overall_table = merged[expected_columns].sort_values(by='Dollar Index', ascending=False)
-    
+    # Overall Standings: Only display Agent Name and Dollar Index
+    overall_table = ranks_data[['Agent Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
     st.subheader("Overall Standings (by Dollar Index)")
     st.dataframe(overall_table)
     
