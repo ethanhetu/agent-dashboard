@@ -194,7 +194,7 @@ def format_value_capture_percentage(value):
 def compute_agent_vcp_by_season(piba_data):
     """
     Aggregates PIBA data to compute VCP for each agent by season.
-    Converts the season's cost and PC columns to numeric and also counts clients.
+    Converts the season's cost and PC columns to numeric and counts clients.
     Only agents with more than 2 clients in that season are kept.
     Returns a dictionary with seasons as keys and dataframes (Agent Name, VCP) as values.
     """
@@ -219,7 +219,7 @@ def compute_agent_vcp_by_season(piba_data):
         # Filter: only keep agents with more than 2 clients in that season.
         grouped = grouped[grouped['client_count'] > 2]
         grouped['VCP'] = grouped.apply(
-            lambda row: round((row['total_cost'] / row['total_pc']) * 100, 2)
+            lambda row: round((row['total_cost'] / row['total_pc']) * 100)  # Rounded to whole number
             if pd.notnull(row['total_pc']) and row['total_pc'] != 0 else None,
             axis=1
         )
@@ -237,7 +237,7 @@ def plot_vcp_line_graph(vcp_per_year):
         mode='lines+markers',
         name='Agent VCP',
         line=dict(color='#041E41', width=3),
-        hovertemplate='%{y:.2f}%',
+        hovertemplate='%{y:.0f}%',  # No decimals in hover
     ))
     fig.add_trace(go.Scatter(
         x=years,
@@ -245,7 +245,7 @@ def plot_vcp_line_graph(vcp_per_year):
         mode='lines+markers',
         name='Average VCP',
         line=dict(color='#FFB819', width=3, dash='dash'),
-        hovertemplate='Avg VCP: %{y:.2f}%',
+        hovertemplate='Avg VCP: %{y:.0f}%',
     ))
     fig.update_layout(
         title="Year-by-Year VCP Trend",
@@ -324,7 +324,7 @@ def agent_dashboard():
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
     st.subheader("📅 Year-by-Year VCP Trend")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
-    vcp_per_year = calculate_vcp_per_year(agent_players)
+    vcp_per_year = compute_agent_vcp_by_season(agent_players)
     plot_vcp_line_graph(vcp_per_year)
     st.subheader("🏆 Biggest Clients")
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
@@ -366,7 +366,7 @@ def agency_dashboard():
     col5.metric("Total Player Value Rank", f"#{int(agency_info['TPV R'])}/74")
     st.subheader("📅 Year-by-Year VCP Trend")
     agency_players = piba_data[piba_data['Agency Name'] == selected_agency]
-    vcp_per_year = calculate_vcp_per_year(agency_players)
+    vcp_per_year = compute_agent_vcp_by_season(agency_players)
     plot_vcp_line_graph(vcp_per_year)
     st.subheader("🏆 Biggest Clients")
     top_clients = agency_players.sort_values(by='Total Cost', ascending=False).head(3)
@@ -391,7 +391,7 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Overall Standings heading and filter checkbox below the heading.
+    # Overall Standings heading and filter checkbox (placed below the heading)
     st.subheader("Overall Standings (by Dollar Index)")
     filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
     
@@ -426,19 +426,20 @@ def leaderboard_page():
     st.markdown("---")
     st.subheader("Year-by-Year VCP Breakdown")
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
-    for season, df in agent_vcp_by_season.items():
+    
+    # Sort the seasons in reverse chronological order (most recent first)
+    for season in sorted(agent_vcp_by_season.keys(), reverse=True):
+        df = agent_vcp_by_season[season]
         st.markdown(f"### {season}")
         winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
         losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
         
-        # Headings for the two columns:
         col_head1, col_head2 = st.columns(2)
         with col_head1:
             st.markdown("#### Top 5 Agents")
         with col_head2:
             st.markdown("#### Bottom 5 Agents")
         
-        # Now, display the winners and losers side by side.
         for i in range(max(len(winners), len(losers))):
             cols = st.columns(2)
             with cols[0]:
@@ -447,7 +448,7 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="font-size: 16px; font-weight: bold;">{w['Agent Name']}</div>
-                        <div style="font-size: 14px;">VCP: {w['VCP']:.2f}%</div>
+                        <div style="font-size: 14px;">VCP: {w['VCP']:.0f}%</div>
                     </div>
                     """, unsafe_allow_html=True)
             with cols[1]:
@@ -456,7 +457,7 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="font-size: 16px; font-weight: bold;">{l['Agent Name']}</div>
-                        <div style="font-size: 14px;">VCP: {l['VCP']:.2f}%</div>
+                        <div style="font-size: 14px;">VCP: {l['VCP']:.0f}%</div>
                     </div>
                     """, unsafe_allow_html=True)
                     
