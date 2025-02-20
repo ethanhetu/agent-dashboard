@@ -347,7 +347,7 @@ def agency_dashboard():
     else:
         st.write("No client names available for sorting.")
 
-ddef leaderboard_page():
+def leaderboard_page():
     st.title("Agent Leaderboard")
     agents_data, ranks_data, piba_data = load_data()
     if agents_data is None or ranks_data is None or piba_data is None:
