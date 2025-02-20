@@ -436,7 +436,7 @@ def leaderboard_page():
         
         col_head1, col_head2 = st.columns(2)
         with col_head1:
-            st.markdown("#### Five Biggest 'Winners'of the Year")
+            st.markdown("#### Five Biggest 'Winners' of the Year")
         with col_head2:
             st.markdown("#### Five Biggest 'Losers' of the Year")
         
