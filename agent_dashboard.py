@@ -392,7 +392,7 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Overall Standings: include Agent Name, Agency Name, Dollar Index, and CT (Contracts)
+    # Overall Standings: display a card for each agent with ranking, agent name, agency, Dollar Index, and Contracts Tracked.
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
     overall_table = overall_table.head(90)  # Limit to top 90 agents
     st.subheader("Overall Standings (by Dollar Index)")
@@ -409,11 +409,13 @@ def leaderboard_page():
             </div>
             <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
                 {agent_name} <br/>
-                <span style="font-size: 14px; font-weight: normal;">{agency}</span><br/>
-                <span style="font-size: 14px; font-weight: normal;">Contracts: {contracts}</span>
+                <span style="font-size: 14px; font-weight: normal;">{agency}</span>
             </div>
-            <div style="flex: 0 0 120px; text-align: right; font-size: 16px;">
-                ${dollar_index:,.2f}
+            <div style="flex: 0 0 150px; text-align: right; font-size: 16px;">
+                <div style="border-left: 1px solid #ccc; padding-left: 8px;">
+                    <div style="font-weight: bold;">${dollar_index:,.2f}</div>
+                    <div style="font-size: 14px;">Contracts Tracked: {int(round(contracts))}</div>
+                </div>
             </div>
         </div>
         """
