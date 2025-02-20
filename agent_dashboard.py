@@ -78,35 +78,52 @@ def load_agencies_data():
 # --------------------------------------------------------------------
 # 2) Helper Functions
 # --------------------------------------------------------------------
+def correct_player_name(name):
+    """
+    Apply band-aid corrections to specific player names.
+    For example:
+      - "Zotto Del" -> "Michael Del Zotto"
+      - "Riemsdyk Van" -> "James Van Riemsdyk"
+    Add more entries as needed.
+    """
+    corrections = {
+        "zotto del": "michael del zotto",
+        "riemsdyk van": "james van riemsdyk",
+    }
+    lower_name = name.lower().strip()
+    return corrections.get(lower_name, name)
+
 def get_headshot_path(player_name):
     """
-    Attempts to retrieve the headshot path for a given player name.
-    First, it tries for an exact match (ignoring DOB parts), then uses fuzzy matching
-    on the first and last names if no exact match is found.
+    Retrieves the headshot path for a given player name.
+    It first applies any name corrections, then attempts an exact match 
+    (using only the first and last name), and finally falls back to fuzzy matching.
     """
-    # Convert the player's name to lower-case and replace spaces with underscores.
+    # Apply band-aid corrections before matching
+    player_name = correct_player_name(player_name)
+    
+    # Convert the (possibly corrected) name to lower-case and underscore format.
     formatted_name = player_name.lower().replace(" ", "_")
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
         try:
-            # Gather all headshot PNG files (excluding those with "_away")
+            # Gather all headshot PNG files (ignoring files with "_away")
             possible_files = [
                 f for f in os.listdir(HEADSHOTS_DIR)
                 if f.lower().endswith(".png") and "_away" not in f.lower()
             ]
             
-            # 1) Exact matching: if any file starts with the formatted name (which is "firstname_lastname")
+            # 1) Exact matching: look for files that start with the formatted name.
             for file in possible_files:
                 if file.lower().startswith(formatted_name + "_"):
                     return os.path.join(HEADSHOTS_DIR, file)
             
-            # 2) Fuzzy matching: build a dictionary mapping the "name part" of the file 
-            # (i.e., the first two components) to the full filename.
+            # 2) Fuzzy matching: build a dictionary mapping the "name part" (first and last names)
+            # to the full filename.
             names_dict = {}
             for f in possible_files:
                 base = f.lower().replace(".png", "")
                 parts = base.split("_")
                 if len(parts) >= 2:
-                    # Only consider the first two parts (firstname and lastname)
                     extracted_name = "_".join(parts[:2])
                     names_dict[extracted_name] = f
             
@@ -119,10 +136,10 @@ def get_headshot_path(player_name):
                 return os.path.join(HEADSHOTS_DIR, names_dict[best_match])
             
         except Exception as e:
-            # Optionally, you can log the exception if needed.
+            # Optionally log or handle the exception as needed.
             pass
 
-    # Fallback: return None to trigger the placeholder image
+    # Fallback: return None so that the placeholder image is used.
     return None
 
 def calculate_age(birthdate):
