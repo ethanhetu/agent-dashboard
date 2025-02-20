@@ -419,7 +419,7 @@ def agency_dashboard():
         st.write("No client names available for sorting.")
 
 def leaderboard_page():
-    # Before using agent photos, extract them from the release.
+    # Make sure to extract agent photos before using them.
     extract_agent_photos()
     
     st.title("Agent Leaderboard")
@@ -429,9 +429,8 @@ def leaderboard_page():
         st.stop()
     
     # Overall Standings: display a card for each agent with ranking, agent photo, name, agency, and Dollar Index.
-    # Merge agents_data into ranks_data to get the agency.
-    merged = pd.merge(ranks_data, agents_data[['Agent Name', 'Agency Name']], on='Agent Name', how='left')
-    overall_table = merged[['Agent Name', 'Agency Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
+    # Note: Since ranks_data already has the "Agency Name" column, we can use it directly.
+    overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
     st.subheader("Overall Standings (by Dollar Index)")
     
     for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
