@@ -386,15 +386,16 @@ def agency_dashboard():
         st.write("No client names available for sorting.")
 
 def leaderboard_page():
-    # We no longer need to extract agent photos because images are removed from the display.
     st.title("Agent Leaderboard")
     agents_data, ranks_data, piba_data = load_data()
     if agents_data is None or ranks_data is None or piba_data is None:
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Overall Standings: display a card for each agent with ranking, agent name, agency, and Dollar Index (no image).
+    # Overall Standings: display a card for each agent with ranking, agent name, agency, and Dollar Index.
+    # Use ranks_data which already includes "Agency Name".
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
+    overall_table = overall_table.head(90)  # Only show top 90 agents
     st.subheader("Overall Standings (by Dollar Index)")
     
     for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
