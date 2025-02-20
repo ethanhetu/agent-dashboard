@@ -286,14 +286,20 @@ def display_player_section(title, player_df):
                 )
             display_name = correct_player_name(player['Combined Names'])
             st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{display_name}</h4>", unsafe_allow_html=True)
+            # Calculate VCP directly as (Total Cost / Total PC) * 100
+            try:
+                vcp_value = (player['Total Cost'] / player['Total PC']) * 100
+            except Exception as e:
+                vcp_value = None
+            vcp_line = f"<p><strong>VCP:</strong> {vcp_value:.2f}%</p>" if vcp_value is not None else ""
             box_html = f"""
             <div style="border: 2px solid #ddd; padding: 10px; border-radius: 10px;">
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
                 <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
                 <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
                 <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
+                {vcp_line}
             </div>
-            {format_value_capture_percentage(player['Value Capture %'])}
             """
             st.markdown(box_html, unsafe_allow_html=True)
 
