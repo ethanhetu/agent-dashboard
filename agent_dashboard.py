@@ -7,6 +7,7 @@ from datetime import datetime
 import zipfile
 import os
 import base64
+import difflib
 import plotly.graph_objects as go
 
 # ✅ Ensure this is the first Streamlit command
@@ -78,18 +79,50 @@ def load_agencies_data():
 # 2) Helper Functions
 # --------------------------------------------------------------------
 def get_headshot_path(player_name):
+    """
+    Attempts to retrieve the headshot path for a given player name.
+    First, it tries for an exact match (ignoring DOB parts), then uses fuzzy matching
+    on the first and last names if no exact match is found.
+    """
+    # Convert the player's name to lower-case and replace spaces with underscores.
     formatted_name = player_name.lower().replace(" ", "_")
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
         try:
-            for file in os.listdir(HEADSHOTS_DIR):
-                if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
-                    if "_away" not in file:
-                        return os.path.join(HEADSHOTS_DIR, file)
-            for file in os.listdir(HEADSHOTS_DIR):
+            # Gather all headshot PNG files (excluding those with "_away")
+            possible_files = [
+                f for f in os.listdir(HEADSHOTS_DIR)
+                if f.lower().endswith(".png") and "_away" not in f.lower()
+            ]
+            
+            # 1) Exact matching: if any file starts with the formatted name (which is "firstname_lastname")
+            for file in possible_files:
                 if file.lower().startswith(formatted_name + "_"):
                     return os.path.join(HEADSHOTS_DIR, file)
-        except:
+            
+            # 2) Fuzzy matching: build a dictionary mapping the "name part" of the file 
+            # (i.e., the first two components) to the full filename.
+            names_dict = {}
+            for f in possible_files:
+                base = f.lower().replace(".png", "")
+                parts = base.split("_")
+                if len(parts) >= 2:
+                    # Only consider the first two parts (firstname and lastname)
+                    extracted_name = "_".join(parts[:2])
+                    names_dict[extracted_name] = f
+            
+            # Use fuzzy matching on these extracted names.
+            close_matches = difflib.get_close_matches(
+                formatted_name, list(names_dict.keys()), n=1, cutoff=0.75
+            )
+            if close_matches:
+                best_match = close_matches[0]
+                return os.path.join(HEADSHOTS_DIR, names_dict[best_match])
+            
+        except Exception as e:
+            # Optionally, you can log the exception if needed.
             pass
+
+    # Fallback: return None to trigger the placeholder image
     return None
 
 def calculate_age(birthdate):
@@ -302,8 +335,6 @@ def agency_dashboard():
     # --- Financial Breakdown ---
     st.subheader("📊 Financial Breakdown")
     col1, col2, col3, col4 = st.columns(4)
-    # Here we assume your Agencies sheet has these columns:
-    # 'Dollar Index', 'Won%', 'CT', 'Total Contract Value'
     col1.metric("Dollar Index", f"${agency_info['Dollar Index']:.2f}")
     col2.metric("Win %", f"{agency_info['Won%']:.3f}")
     col3.metric("Contracts Tracked", int(agency_info['CT']))
@@ -312,8 +343,6 @@ def agency_dashboard():
     # --- Agency Rankings ---
     st.subheader("📈 Agency Rankings")
     col1, col2, col3, col4, col5 = st.columns(5)
-    # We assume the Agencies sheet has columns 'Index R', 'WinR', 'CTR', 'TCV R', 'TPV R'
-    # and that you want the rank denominator to be 74 instead of 90.
     col1.metric("Dollar Index Rank", f"#{int(agency_info['Index R'])}/74")
     col2.metric("Win Percentage Rank", f"#{int(agency_info['WinR'])}/74")
     col3.metric("Contracts Tracked Rank", f"#{int(agency_info['CTR'])}/74")
@@ -322,7 +351,6 @@ def agency_dashboard():
 
     # --- Year-by-Year VCP Trend ---
     st.subheader("📅 Year-by-Year Value Capture Percentage (VCP) Trend")
-    # Filter PIBA data by Agency Name
     agency_players = piba_data[piba_data['Agency Name'] == selected_agency]
     vcp_per_year = calculate_vcp_per_year(agency_players)
     plot_vcp_line_graph(vcp_per_year)
