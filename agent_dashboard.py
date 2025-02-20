@@ -177,7 +177,8 @@ def format_value_capture_percentage(value):
             value = value * 100
     except Exception as e:
         pass
-    color = "#006400" if value >= 100 else "#8B0000"
+    # This function is used for the aggregated data elsewhere.
+    color = "#006400" if value >= 100 else "#041E41"
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.0f}%</span></p>"
 
 def compute_vcp_for_agent(agent_players):
@@ -291,17 +292,19 @@ def display_player_section(title, player_df):
                 vcp_value = (player['Total Cost'] / player['Total PC']) * 100
             except Exception as e:
                 vcp_value = None
-            vcp_line = f"<p><strong>VCP:</strong> {vcp_value:.2f}%</p>" if vcp_value is not None else ""
             box_html = f"""
             <div style="border: 2px solid #ddd; padding: 10px; border-radius: 10px;">
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
                 <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
                 <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
                 <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
-                {vcp_line}
             </div>
             """
             st.markdown(box_html, unsafe_allow_html=True)
+            if vcp_value is not None:
+                # Decide color: dark green if vcp >= 100, dark blue otherwise.
+                color = "#006400" if vcp_value >= 100 else "#041E41"
+                st.markdown(f"<p style='font-weight:bold; text-align:center;'>Percent of Value Captured: <span style='color:{color};'>{vcp_value:.0f}%</span></p>", unsafe_allow_html=True)
 
 # --------------------------------------------------------------------
 # 3) Main Dashboard Pages
