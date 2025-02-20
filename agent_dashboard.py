@@ -37,13 +37,13 @@ def load_data():
         tmp_path = tmp.name
     xls = pd.ExcelFile(tmp_path)
     agents_data = xls.parse('Agents')
-    agents_data.columns = agents_data.columns.str.strip()
-    
+    agents_data.columns = agents_data.columns.str.strip()  # Clean column names
+
     ranks_data = xls.parse('Just Agent Ranks')
-    ranks_data.columns = ranks_data.columns.str.strip()
-    
+    ranks_data.columns = ranks_data.columns.str.strip()  # Clean column names
+
     piba_data = xls.parse('PIBA')
-    piba_data.columns = piba_data.columns.str.strip()
+    piba_data.columns = piba_data.columns.str.strip()  # Clean column names
     return agents_data, ranks_data, piba_data
 
 @st.cache_data(ttl=0)
@@ -174,8 +174,11 @@ def format_value_capture_percentage(value):
     color = "#006400" if value >= 1 else "#8B0000"
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.0f}%</span></p>"
 
-def calculate_vcp_per_year(agent_players):
-    # Define the fixed list of seasons and their corresponding columns.
+def compute_vcp_for_agent(agent_players):
+    """
+    Computes VCP for a single agent (from their filtered PIBA data) for each season.
+    Returns a dictionary mapping season to VCP (or None if not available).
+    """
     seasons = [
         ('2018-19', 'COST 18-19', 'PC 18-19'),
         ('2019-20', 'COST 19-20', 'PC 19-20'),
@@ -184,29 +187,58 @@ def calculate_vcp_per_year(agent_players):
         ('2022-23', 'COST 22-23', 'PC 22-23'),
         ('2023-24', 'COST 23-24', 'PC 23-24')
     ]
-    vcp_results = {}
-    # For each season, ensure a value is computed (or None if missing)
+    results = {}
     for season, cost_col, pc_col in seasons:
         try:
-            if cost_col in agent_players.columns and pc_col in agent_players.columns:
-                total_cost = pd.to_numeric(agent_players[cost_col], errors='coerce').sum()
-                total_pc = pd.to_numeric(agent_players[pc_col], errors='coerce').sum()
-                if total_pc != 0:
-                    vcp_results[season] = round((total_cost / total_pc) * 100, 2)
-                else:
-                    vcp_results[season] = None
+            total_cost = pd.to_numeric(agent_players[cost_col], errors='coerce').sum()
+            total_pc = pd.to_numeric(agent_players[pc_col], errors='coerce').sum()
+            if total_pc != 0:
+                results[season] = round((total_cost / total_pc) * 100, 2)
             else:
-                vcp_results[season] = None
+                results[season] = None
         except Exception as e:
-            vcp_results[season] = None
-    return vcp_results
+            results[season] = None
+    return results
+
+def compute_agent_vcp_by_season(piba_data):
+    """
+    Aggregates PIBA data to compute VCP for each agent by season.
+    Converts the season's cost and PC columns to numeric and counts clients.
+    Only agents with more than 2 clients in that season are kept.
+    Returns a dictionary with seasons as keys and dataframes (Agent Name, VCP) as values.
+    """
+    seasons = [
+        ('2018-19', 'COST 18-19', 'PC 18-19'),
+        ('2019-20', 'COST 19-20', 'PC 19-20'),
+        ('2020-21', 'COST 20-21', 'PC 20-21'),
+        ('2021-22', 'COST 21-22', 'PC 21-22'),
+        ('2022-23', 'COST 22-23', 'PC 22-23'),
+        ('2023-24', 'COST 23-24', 'PC 23-24')
+    ]
+    results = {}
+    df = piba_data.copy()
+    for season, cost_col, pc_col in seasons:
+        df[cost_col] = pd.to_numeric(df[cost_col], errors='coerce')
+        df[pc_col] = pd.to_numeric(df[pc_col], errors='coerce')
+        grouped = df.groupby('Agent Name').agg(
+            total_cost=(cost_col, 'sum'),
+            total_pc=(pc_col, 'sum'),
+            client_count=('Agent Name', 'count')
+        ).reset_index()
+        # Only keep agents with more than 2 clients in that season.
+        grouped = grouped[grouped['client_count'] > 2]
+        grouped['VCP'] = grouped.apply(
+            lambda row: round((row['total_cost'] / row['total_pc']) * 100)
+            if pd.notnull(row['total_pc']) and row['total_pc'] != 0 else None,
+            axis=1
+        )
+        results[season] = grouped[['Agent Name', 'VCP']]
+    return results
 
 def plot_vcp_line_graph(vcp_per_year):
-    # Use the fixed order of seasons.
+    # Use fixed order of seasons
     seasons = ['2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24']
-    # Create list of VCP values for each season (using np.nan if missing)
     vcp_values = [vcp_per_year.get(season, np.nan) for season in seasons]
-    # Hard-coded league average values.
     avg_vcp_values = [85.56, 103.17, 115.85, 84.30, 91.87, 108.12]
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -302,8 +334,9 @@ def agent_dashboard():
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
     st.subheader("📅 Year-by-Year VCP Trend")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
-    vcp_per_year = calculate_vcp_per_year(agent_players)
-    plot_vcp_line_graph(vcp_per_year)
+    # Use the new function for the single agent
+    vcp_for_agent = compute_vcp_for_agent(agent_players)
+    plot_vcp_line_graph(vcp_for_agent)
     st.subheader("🏆 Biggest Clients")
     top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
@@ -344,8 +377,9 @@ def agency_dashboard():
     col5.metric("Total Player Value Rank", f"#{int(agency_info['TPV R'])}/74")
     st.subheader("📅 Year-by-Year VCP Trend")
     agency_players = piba_data[piba_data['Agency Name'] == selected_agency]
-    vcp_per_year = calculate_vcp_per_year(agency_players)
-    plot_vcp_line_graph(vcp_per_year)
+    # For the agency, use compute_vcp_for_agent as well.
+    vcp_for_agency = compute_vcp_for_agent(agency_players)
+    plot_vcp_line_graph(vcp_for_agency)
     st.subheader("🏆 Biggest Clients")
     top_clients = agency_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
@@ -368,15 +402,15 @@ def leaderboard_page():
     if agents_data is None or ranks_data is None or piba_data is None:
         st.error("Error loading data for leaderboard.")
         st.stop()
-    
+
     st.subheader("Overall Standings (by Dollar Index)")
     filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
-    
+
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
     if filter_option:
         overall_table = overall_table[overall_table['CT'] >= 10]
     overall_table = overall_table.head(90)
-    
+
     for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
         agent_name = row['Agent Name']
         agency = row['Agency Name']
@@ -399,23 +433,24 @@ def leaderboard_page():
         </div>
         """
         st.markdown(card_html, unsafe_allow_html=True)
-    
+
     st.markdown("---")
     st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
-    
+
+    # Reverse chronological order
     for season in sorted(agent_vcp_by_season.keys(), reverse=True):
         df = agent_vcp_by_season[season]
         st.markdown(f"### {season}")
         winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
         losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
-        
+
         col_head1, col_head2 = st.columns(2)
         with col_head1:
             st.markdown("#### Five Biggest 'Winners' of the Year")
         with col_head2:
             st.markdown("#### Five Biggest 'Losers' of the Year")
-        
+
         for i in range(max(len(winners), len(losers))):
             cols = st.columns(2)
             with cols[0]:
@@ -436,7 +471,7 @@ def leaderboard_page():
                         <div style="font-size: 14px;">VCP: {l['VCP']:.0f}%</div>
                     </div>
                     """, unsafe_allow_html=True)
-                    
+
 def project_definitions():
     st.title("📚 Project Definitions")
     st.write("Definitions for key terms and metrics used throughout the project.")
