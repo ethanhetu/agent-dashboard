@@ -424,7 +424,7 @@ def leaderboard_page():
         st.markdown(card_html, unsafe_allow_html=True)
     
     st.markdown("---")
-    st.subheader("Year-by-Year VCP Breakdown")
+    st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
     
     # Sort the seasons in reverse chronological order (most recent first)
@@ -436,9 +436,9 @@ def leaderboard_page():
         
         col_head1, col_head2 = st.columns(2)
         with col_head1:
-            st.markdown("#### Top 5 Agents")
+            st.markdown("#### Five Biggest 'Winners'of the Year")
         with col_head2:
-            st.markdown("#### Bottom 5 Agents")
+            st.markdown("#### Five Biggest 'Losers' of the Year")
         
         for i in range(max(len(winners), len(losers))):
             cols = st.columns(2)
