@@ -37,13 +37,13 @@ def load_data():
         tmp_path = tmp.name
     xls = pd.ExcelFile(tmp_path)
     agents_data = xls.parse('Agents')
-    agents_data.columns = agents_data.columns.str.strip()  # Clean column names
-
+    agents_data.columns = agents_data.columns.str.strip()
+    
     ranks_data = xls.parse('Just Agent Ranks')
-    ranks_data.columns = ranks_data.columns.str.strip()  # Clean column names
-
+    ranks_data.columns = ranks_data.columns.str.strip()
+    
     piba_data = xls.parse('PIBA')
-    piba_data.columns = piba_data.columns.str.strip()  # Clean column names
+    piba_data.columns = piba_data.columns.str.strip()
     return agents_data, ranks_data, piba_data
 
 @st.cache_data(ttl=0)
@@ -176,8 +176,8 @@ def format_value_capture_percentage(value):
 
 def compute_vcp_for_agent(agent_players):
     """
-    Computes VCP for a single agent (from their filtered PIBA data) for each season.
-    Returns a dictionary mapping season to VCP (or None if not available).
+    Computes VCP for a single agent (using their filtered PIBA data) for each season.
+    Returns a dictionary mapping each season to that agent’s VCP.
     """
     seasons = [
         ('2018-19', 'COST 18-19', 'PC 18-19'),
@@ -188,10 +188,12 @@ def compute_vcp_for_agent(agent_players):
         ('2023-24', 'COST 23-24', 'PC 23-24')
     ]
     results = {}
+    # Use a deep copy so the original data remains intact.
+    df = agent_players.copy(deep=True)
     for season, cost_col, pc_col in seasons:
         try:
-            total_cost = pd.to_numeric(agent_players[cost_col], errors='coerce').sum()
-            total_pc = pd.to_numeric(agent_players[pc_col], errors='coerce').sum()
+            total_cost = pd.to_numeric(df[cost_col], errors='coerce').sum()
+            total_pc = pd.to_numeric(df[pc_col], errors='coerce').sum()
             if total_pc != 0:
                 results[season] = round((total_cost / total_pc) * 100, 2)
             else:
@@ -203,7 +205,7 @@ def compute_vcp_for_agent(agent_players):
 def compute_agent_vcp_by_season(piba_data):
     """
     Aggregates PIBA data to compute VCP for each agent by season.
-    Converts the season's cost and PC columns to numeric and counts clients.
+    Converts cost and PC columns to numeric and counts clients.
     Only agents with more than 2 clients in that season are kept.
     Returns a dictionary with seasons as keys and dataframes (Agent Name, VCP) as values.
     """
@@ -216,7 +218,8 @@ def compute_agent_vcp_by_season(piba_data):
         ('2023-24', 'COST 23-24', 'PC 23-24')
     ]
     results = {}
-    df = piba_data.copy()
+    # Use a deep copy so that modifications do not affect the original piba_data.
+    df = piba_data.copy(deep=True)
     for season, cost_col, pc_col in seasons:
         df[cost_col] = pd.to_numeric(df[cost_col], errors='coerce')
         df[pc_col] = pd.to_numeric(df[pc_col], errors='coerce')
@@ -236,7 +239,7 @@ def compute_agent_vcp_by_season(piba_data):
     return results
 
 def plot_vcp_line_graph(vcp_per_year):
-    # Use fixed order of seasons
+    # Fixed order of seasons
     seasons = ['2018-19', '2019-20', '2020-21', '2021-22', '2022-23', '2023-24']
     vcp_values = [vcp_per_year.get(season, np.nan) for season in seasons]
     avg_vcp_values = [85.56, 103.17, 115.85, 84.30, 91.87, 108.12]
@@ -334,7 +337,6 @@ def agent_dashboard():
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
     st.subheader("📅 Year-by-Year VCP Trend")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
-    # Use the new function for the single agent
     vcp_for_agent = compute_vcp_for_agent(agent_players)
     plot_vcp_line_graph(vcp_for_agent)
     st.subheader("🏆 Biggest Clients")
@@ -377,7 +379,6 @@ def agency_dashboard():
     col5.metric("Total Player Value Rank", f"#{int(agency_info['TPV R'])}/74")
     st.subheader("📅 Year-by-Year VCP Trend")
     agency_players = piba_data[piba_data['Agency Name'] == selected_agency]
-    # For the agency, use compute_vcp_for_agent as well.
     vcp_for_agency = compute_vcp_for_agent(agency_players)
     plot_vcp_line_graph(vcp_for_agency)
     st.subheader("🏆 Biggest Clients")
@@ -438,7 +439,6 @@ def leaderboard_page():
     st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
 
-    # Reverse chronological order
     for season in sorted(agent_vcp_by_season.keys(), reverse=True):
         df = agent_vcp_by_season[season]
         st.markdown(f"### {season}")
