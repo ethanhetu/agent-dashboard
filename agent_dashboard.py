@@ -32,7 +32,12 @@ def load_data():
         tmp_path = tmp.name
     xls = pd.ExcelFile(tmp_path)
     agents_data = xls.parse('Agents')
+    # Strip column names for consistency
+    agents_data.columns = agents_data.columns.str.strip()
+    
     ranks_data = xls.parse('Just Agent Ranks')
+    ranks_data.columns = ranks_data.columns.str.strip()  # This should fix the KeyError.
+    
     piba_data = xls.parse('PIBA')
     piba_data.columns = piba_data.columns.str.strip()  # Clean column names
     return agents_data, ranks_data, piba_data
@@ -68,6 +73,7 @@ def load_agencies_data():
         tmp_path = tmp.name
     xls = pd.ExcelFile(tmp_path)
     agencies_data = xls.parse('Agencies')
+    agencies_data.columns = agencies_data.columns.str.strip()
     return agencies_data
 
 # --------------------------------------------------------------------
@@ -107,7 +113,7 @@ def get_headshot_path(player_name):
             for file in possible_files:
                 if file.lower().startswith(formatted_name + "_"):
                     return os.path.join(HEADSHOTS_DIR, file)
-            # Fuzzy matching: compare using only the first two parts of the filename.
+            # Fuzzy matching: use only the first two parts of the filename.
             names_dict = {}
             for f in possible_files:
                 base = f.lower().replace(".png", "")
@@ -144,10 +150,6 @@ def format_value_capture_percentage(value):
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.2%}</span></p>"
 
 def calculate_vcp_per_year(agent_players):
-    """
-    Calculates an agent's VCP over six seasons.
-    Expects the agent's players dataframe (filtered from PIBA).
-    """
     seasons = [
         ('2018-19', 'COST 18-19', 'PC 18-19'),
         ('2019-20', 'COST 19-20', 'PC 19-20'),
@@ -352,6 +354,7 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     st.subheader("Overall Standings (by Dollar Index)")
+    # Using the stripped column names from ranks_data:
     overall_table = ranks_data[['Agent Name', 'Dollar Index', 'CT', 'Won%', 'Total Contract Value']]
     overall_table = overall_table.sort_values(by='Dollar Index', ascending=False)
     st.dataframe(overall_table)
