@@ -353,11 +353,25 @@ def leaderboard_page():
     if agents_data is None or ranks_data is None or piba_data is None:
         st.error("Error loading data for leaderboard.")
         st.stop()
-    st.subheader("Overall Standings (by Dollar Index)")
-    # Using the stripped column names from ranks_data:
-    overall_table = ranks_data[['Agent Name', 'Dollar Index', 'CT', 'Won%', 'Total Contract Value']]
+    
+    # Debug: show the columns available in ranks_data
+    st.write("Ranks Data Columns:", ranks_data.columns.tolist())
+    
+    # Define the expected columns:
+    expected_columns = ['Agent Name', 'Dollar Index', 'CT', 'Won%', 'Total Contract Value']
+    
+    # Check for missing columns:
+    missing = [col for col in expected_columns if col not in ranks_data.columns]
+    if missing:
+        st.error(f"Missing columns in ranks_data: {missing}")
+        st.stop()
+    
+    # If all columns exist, build the overall standings table:
+    overall_table = ranks_data[expected_columns]
     overall_table = overall_table.sort_values(by='Dollar Index', ascending=False)
+    st.subheader("Overall Standings (by Dollar Index)")
     st.dataframe(overall_table)
+    
     st.markdown("---")
     st.subheader("Year-by-Year VCP Breakdown")
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
