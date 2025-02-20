@@ -171,9 +171,9 @@ def format_delivery_value(value):
         return f"<span style='color:#8B0000;'>${value:,.0f}</span>"
 
 def format_value_capture_percentage(value):
-    # If value is less than 1, assume it is a fraction and convert it to percentage.
+    # If value is less than 2, assume it's a fraction and convert it
     try:
-        if value is not None and value < 1:
+        if value is not None and value < 2:
             value = value * 100
     except Exception as e:
         pass
@@ -181,10 +181,6 @@ def format_value_capture_percentage(value):
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.0f}%</span></p>"
 
 def compute_vcp_for_agent(agent_players):
-    """
-    Computes VCP for a single agent (using their filtered PIBA data) for each season.
-    Returns a dictionary mapping each season to that agent’s VCP.
-    """
     seasons = [
         ('2018-19', 'COST 18-19', 'PC 18-19'),
         ('2019-20', 'COST 19-20', 'PC 19-20'),
@@ -208,12 +204,6 @@ def compute_vcp_for_agent(agent_players):
     return results
 
 def compute_agent_vcp_by_season(piba_data):
-    """
-    Aggregates PIBA data to compute VCP for each agent by season.
-    Converts cost and PC columns to numeric and counts clients.
-    Only agents with more than 2 clients in that season are kept.
-    Returns a dictionary with seasons as keys and dataframes (Agent Name, VCP) as values.
-    """
     seasons = [
         ('2018-19', 'COST 18-19', 'PC 18-19'),
         ('2019-20', 'COST 19-20', 'PC 19-20'),
