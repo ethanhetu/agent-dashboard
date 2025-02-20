@@ -418,62 +418,22 @@ def agency_dashboard():
     else:
         st.write("No client names available for sorting.")
 
-def leaderboard_page():
-    # Make sure to extract agent photos before using them.
-    extract_agent_photos()
-    
-    st.title("Agent Leaderboard")
-    agents_data, ranks_data, piba_data = load_data()
-    if agents_data is None or ranks_data is None or piba_data is None:
-        st.error("Error loading data for leaderboard.")
-        st.stop()
-    
-    # Overall Standings: display a card for each agent with ranking, agent photo, name, agency, and Dollar Index.
-    # Note: Since ranks_data already has the "Agency Name" column, we can use it directly.
-    overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
-    st.subheader("Overall Standings (by Dollar Index)")
-    
-    for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
-        agent_name = row['Agent Name']
-        agency = row['Agency Name']
-        dollar_index = row['Dollar Index']
-        img_path = get_agent_photo_path(agent_name)
-        if img_path:
-            image_uri = image_to_data_uri(img_path)
-        else:
-            image_uri = AGENT_PLACEHOLDER_IMAGE_URL
-        card_html = f"""
-        <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
-            <div style="flex: 0 0 40px; text-align: center; font-size: 18px; font-weight: bold;">
-                {rank}.
-            </div>
-            <div style="flex: 0 0 60px;">
-                <img src="{image_uri}" alt="{agent_name}" style="width: 60px; height: 60px; border-radius: 50%;">
-            </div>
-            <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
-                {agent_name} <br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
-            </div>
-            <div style="flex: 0 0 120px; text-align: right; font-size: 16px;">
-                ${dollar_index:,.2f}
-            </div>
-        </div>
-        """
-        st.markdown(card_html, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    st.subheader("Year-by-Year VCP Breakdown")
-    agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
-    for season, df in agent_vcp_by_season.items():
-        st.markdown(f"### {season}")
-        winners = df.sort_values(by='VCP', ascending=False).head(5)
-        losers = df.sort_values(by='VCP', ascending=True).head(5)
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("#### Top 5 Agents")
-            st.table(winners)
-        with col2:
-            st.markdown("#### Bottom 5 Agents")
-            st.table(losers)
+def get_agent_photo_path(agent_name):
+    """
+    Retrieves the agent photo from the agent photos directory.
+    Expects files to be named in the format:
+        firstname_lastname_converted.png
+    This function searches recursively within AGENT_PHOTOS_DIR.
+    """
+    formatted_name = agent_name.lower().replace(" ", "_")
+    target_prefix = formatted_name + "_converted"
+    for root, dirs, files in os.walk(AGENT_PHOTOS_DIR):
+        for file in files:
+            if file.lower().endswith((".png", ".jpg")):
+                if file.lower().startswith(target_prefix):
+                    return os.path.join(root, file)
+    # Optional fuzzy matching can be added here if desired.
+    return None
 
 def project_definitions():
     st.title("📚 Project Definitions")
