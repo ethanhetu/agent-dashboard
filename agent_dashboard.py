@@ -13,8 +13,8 @@ import plotly.graph_objects as go
 # ✅ Ensure this is the first Streamlit command
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 
-# Global variables for caching images
-HEADSHOTS_DIR = "headshots_cache"  # For player headshots
+# Global variables for images
+HEADSHOTS_DIR = "headshots_cache"  # For player/agent headshots
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
 # --------------------------------------------------------------------
@@ -32,11 +32,10 @@ def load_data():
         tmp_path = tmp.name
     xls = pd.ExcelFile(tmp_path)
     agents_data = xls.parse('Agents')
-    # Strip column names for consistency
-    agents_data.columns = agents_data.columns.str.strip()
+    agents_data.columns = agents_data.columns.str.strip()  # Ensure clean column names
     
     ranks_data = xls.parse('Just Agent Ranks')
-    ranks_data.columns = ranks_data.columns.str.strip()  # This should fix the KeyError.
+    ranks_data.columns = ranks_data.columns.str.strip()  # Clean column names
     
     piba_data = xls.parse('PIBA')
     piba_data.columns = piba_data.columns.str.strip()  # Clean column names
@@ -82,7 +81,7 @@ def load_agencies_data():
 def correct_player_name(name):
     """
     Band-aid corrections for specific player names.
-    These corrections only affect the displayed names (and headshot lookup).
+    These corrections affect both headshot lookup and display.
     """
     corrections = {
         "zotto del": "Michael Del Zotto",
@@ -97,9 +96,9 @@ def correct_player_name(name):
 
 def get_headshot_path(player_name):
     """
-    Retrieves the headshot path for a given player name.
-    First applies name corrections, then attempts an exact match 
-    (using only the first and last name), and finally falls back to fuzzy matching.
+    Retrieves the headshot path for a given player/agent name.
+    First applies name corrections, then attempts an exact match (using only first & last name),
+    and finally falls back to fuzzy matching.
     """
     player_name = correct_player_name(player_name)
     formatted_name = player_name.lower().replace(" ", "_")
@@ -130,6 +129,18 @@ def get_headshot_path(player_name):
         except Exception as e:
             pass
     return None
+
+def image_to_data_uri(image_path):
+    """
+    Converts an image file to a base64 data URI.
+    If the image can't be loaded, returns the placeholder URL.
+    """
+    try:
+        with open(image_path, "rb") as img_file:
+            b64_string = base64.b64encode(img_file.read()).decode('utf-8')
+        return f"data:image/png;base64,{b64_string}"
+    except Exception as e:
+        return PLACEHOLDER_IMAGE_URL
 
 def calculate_age(birthdate):
     try:
@@ -354,10 +365,32 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Overall Standings: Only display Agent Name and Dollar Index
+    # Overall Standings: Custom card display with headshot, agent name, and Dollar Index
     overall_table = ranks_data[['Agent Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
     st.subheader("Overall Standings (by Dollar Index)")
-    st.dataframe(overall_table)
+    
+    for _, row in overall_table.iterrows():
+        agent_name = row['Agent Name']
+        dollar_index = row['Dollar Index']
+        img_path = get_headshot_path(agent_name)
+        if img_path:
+            image_uri = image_to_data_uri(img_path)
+        else:
+            image_uri = PLACEHOLDER_IMAGE_URL
+        card_html = f"""
+        <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+            <div style="flex: 0 0 60px;">
+                <img src="{image_uri}" alt="{agent_name}" style="width: 60px; height: 60px; border-radius: 50%;">
+            </div>
+            <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
+                {agent_name}
+            </div>
+            <div style="flex: 0 0 120px; text-align: right; font-size: 16px;">
+                ${dollar_index:,.2f}
+            </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
     
     st.markdown("---")
     st.subheader("Year-by-Year VCP Breakdown")
