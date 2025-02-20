@@ -58,13 +58,68 @@ def extract_headshots():
             except zipfile.BadZipFile:
                 st.error("❌ NHL.Headshots.zip is not a valid ZIP archive.")
 
-# Plot the VCP line graph using Plotly with customizations and a yellow reference line
+# Retrieve headshot path
+def get_headshot_path(player_name):
+    formatted_name = player_name.lower().replace(" ", "_")
+    if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
+        try:
+            for file in os.listdir(HEADSHOTS_DIR):
+                if file.lower().startswith(formatted_name + "_") and file.endswith(".png"):
+                    if "_away" not in file:
+                        return os.path.join(HEADSHOTS_DIR, file)
+            for file in os.listdir(HEADSHOTS_DIR):
+                if file.lower().startswith(formatted_name + "_"):
+                    return os.path.join(HEADSHOTS_DIR, file)
+        except:
+            pass
+    return None
+
+# Calculate age
+def calculate_age(birthdate):
+    try:
+        birth_date = pd.to_datetime(birthdate)
+        today = datetime.today()
+        return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    except:
+        return "N/A"
+
+# Color Six-Year Agent Delivery
+def format_delivery_value(value):
+    if value > 0:
+        return f"<span style='color:#006400;'>${value:,.0f}</span>"  # Dark green
+    else:
+        return f"<span style='color:#8B0000;'>${value:,.0f}</span>"  # Dark red
+
+# Color only the percentage in Value Capture Percentage
+def format_value_capture_percentage(value):
+    color = "#006400" if value >= 1 else "#8B0000"  # Dark green if >=100%, dark red otherwise
+    return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.2%}</span></p>"
+
+# Calculate VCP per year for the agent
+def calculate_vcp_per_year(agent_players):
+    years = [
+        ('2018-19', 'COST 18-19', 'PC 18-19'),
+        ('2019-20', 'COST 19-20', 'PC 19-20'),
+        ('2020-21', 'COST 20-21', 'PC 20-21'),
+        ('2021-22', 'COST 21-22', 'PC 21-22'),
+        ('2022-23', 'COST 22-23', 'PC 22-23'),
+        ('2023-24', 'COST 23-24', 'PC 23-24')
+    ]
+
+    vcp_results = {}
+    for year, cost_col, value_col in years:
+        try:
+            total_cost = agent_players[cost_col].sum()
+            total_value = agent_players[value_col].sum()
+            vcp_results[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
+        except KeyError as e:
+            vcp_results[year] = None
+    return vcp_results
+
+# Plot the VCP line graph using Plotly with customizations
 def plot_vcp_line_graph(vcp_per_year):
     years = list(vcp_per_year.keys())
     vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
-
-    # Manually provided average VCP values per year
-    avg_vcp_values = [85.56, 103.17, 115.85, 84.30, 91.87, 108.12]
 
     fig = go.Figure()
 
@@ -87,16 +142,6 @@ def plot_vcp_line_graph(vcp_per_year):
         line=dict(color='red', width=2, dash='dot')
     ))
 
-    # Yellow average reference line (manual values provided by user)
-    fig.add_trace(go.Scatter(
-        x=years,
-        y=avg_vcp_values,
-        mode='lines+markers',
-        name='Average VCP (Manual)',
-        line=dict(color='#FFB819', width=3, dash='dash'),
-        hovertemplate='Avg VCP: %{y:.2f}%'
-    ))
-
     fig.update_layout(
         title="Year-by-Year Value Capture Percentage Trend",
         xaxis=dict(title='Year', tickangle=0),
@@ -106,25 +151,44 @@ def plot_vcp_line_graph(vcp_per_year):
 
     st.plotly_chart(fig, use_container_width=True)
 
-def calculate_vcp_per_year(agent_players):
-    years = [
-        ('2018-19', 'COST 18-19', 'PC 18-19'),
-        ('2019-20', 'COST 19-20', 'PC 19-20'),
-        ('2020-21', 'COST 20-21', 'PC 20-21'),
-        ('2021-22', 'COST 21-22', 'PC 21-22'),
-        ('2022-23', 'COST 22-23', 'PC 22-23'),
-        ('2023-24', 'COST 23-24', 'PC 23-24')
-    ]
+def display_player_section(title, player_df):
+    st.subheader(title)
+    client_cols = st.columns(3)
+    for idx, (_, player) in enumerate(player_df.iterrows()):
+        with client_cols[idx % 3]:
+            img_path = get_headshot_path(player['Combined Names'])
+            if img_path:
+                st.markdown(
+                    f"""
+                    <div style='text-align:center;'>
+                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" 
+                             style='width:200px; height:200px; display:block; margin:auto;'/>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f"""
+                    <div style='text-align:center;'>
+                        <img src="{PLACEHOLDER_IMAGE_URL}" 
+                             style='width:200px; height:200px; display:block; margin:auto;'/>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-    vcp_results = {}
-    for year, cost_col, value_col in years:
-        try:
-            total_cost = agent_players[cost_col].sum()
-            total_value = agent_players[value_col].sum()
-            vcp_results[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
-        except KeyError as e:
-            vcp_results[year] = None
-    return vcp_results
+            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
+            box_html = f"""
+            <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
+                <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
+                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
+                <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
+                <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
+            </div>
+            {format_value_capture_percentage(player['Value Capture %'])}
+            """
+            st.markdown(box_html, unsafe_allow_html=True)
 
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
@@ -197,7 +261,7 @@ st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Project Definitions"])
 
 if page == "Home":
-    st.title("Welcome to the Agent Insights Dashboard!")
+    home_page()
 elif page == "Agent Dashboard":
     agent_dashboard()
 elif page == "Project Definitions":
