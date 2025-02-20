@@ -18,7 +18,7 @@ HEADSHOTS_DIR = "headshots_cache"  # For player headshots
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
 # Globals for agent photos
-AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos
+AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos from release
 AGENT_PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Agent_placeholder.png"
 
 # --------------------------------------------------------------------
@@ -68,7 +68,7 @@ def extract_headshots():
 def extract_agent_photos():
     """
     Downloads and extracts agent photos from your release.
-    Assumes a release asset at:
+    Assumes your release asset is at:
     https://github.com/ethanhetu/agent-dashboard/releases/download/v1.0-agent-photos/PNGs.zip
     """
     global AGENT_PHOTOS_DIR
@@ -109,7 +109,6 @@ def load_agencies_data():
 def correct_player_name(name):
     """
     Band-aid corrections for specific player names.
-    These corrections affect both headshot lookup and display.
     """
     corrections = {
         "zotto del": "Michael Del Zotto",
@@ -124,22 +123,16 @@ def correct_player_name(name):
 
 def get_headshot_path(player_name):
     """
-    Retrieves the headshot path for a given player/agent name.
-    Uses the player headshots directory.
+    Retrieves the headshot path for a given player/agent name from HEADSHOTS_DIR.
     """
     player_name = correct_player_name(player_name)
     formatted_name = player_name.lower().replace(" ", "_")
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
         try:
-            possible_files = [
-                f for f in os.listdir(HEADSHOTS_DIR)
-                if f.lower().endswith(".png") and "_away" not in f.lower()
-            ]
-            # Exact matching:
+            possible_files = [f for f in os.listdir(HEADSHOTS_DIR) if f.lower().endswith(".png") and "_away" not in f.lower()]
             for file in possible_files:
                 if file.lower().startswith(formatted_name + "_"):
                     return os.path.join(HEADSHOTS_DIR, file)
-            # Fuzzy matching: use first two parts.
             names_dict = {}
             for f in possible_files:
                 base = f.lower().replace(".png", "")
@@ -147,9 +140,7 @@ def get_headshot_path(player_name):
                 if len(parts) >= 2:
                     extracted_name = "_".join(parts[:2])
                     names_dict[extracted_name] = f
-            close_matches = difflib.get_close_matches(
-                formatted_name, list(names_dict.keys()), n=1, cutoff=0.75
-            )
+            close_matches = difflib.get_close_matches(formatted_name, list(names_dict.keys()), n=1, cutoff=0.75)
             if close_matches:
                 best_match = close_matches[0]
                 return os.path.join(HEADSHOTS_DIR, names_dict[best_match])
@@ -159,41 +150,21 @@ def get_headshot_path(player_name):
 
 def get_agent_photo_path(agent_name):
     """
-    Retrieves the agent photo from the agent photos directory.
-    Expects files to be named in the format:
-        firstname_lastname_converted.png
+    Searches recursively within AGENT_PHOTOS_DIR for an image that matches:
+        firstname_lastname_converted (in lowercase)
     """
     formatted_name = agent_name.lower().replace(" ", "_")
     target_prefix = formatted_name + "_converted"
-    if os.path.exists(AGENT_PHOTOS_DIR):
-        try:
-            possible_files = [
-                f for f in os.listdir(AGENT_PHOTOS_DIR)
-                if f.lower().endswith((".png", ".jpg"))
-            ]
-            # Exact matching using the naming convention:
-            for file in possible_files:
+    for root, dirs, files in os.walk(AGENT_PHOTOS_DIR):
+        for file in files:
+            if file.lower().endswith((".png", ".jpg")):
                 if file.lower().startswith(target_prefix):
-                    return os.path.join(AGENT_PHOTOS_DIR, file)
-            # Optionally, fuzzy matching can be added if necessary:
-            names_dict = {}
-            for f in possible_files:
-                base = f.lower().replace(".png", "").replace(".jpg", "")
-                names_dict[base] = f
-            close_matches = difflib.get_close_matches(
-                target_prefix, list(names_dict.keys()), n=1, cutoff=0.75
-            )
-            if close_matches:
-                best_match = close_matches[0]
-                return os.path.join(AGENT_PHOTOS_DIR, names_dict[best_match])
-        except Exception as e:
-            pass
+                    return os.path.join(root, file)
     return None
 
 def image_to_data_uri(image_path):
     """
     Converts an image file to a base64 data URI.
-    If it fails, returns the appropriate placeholder URL.
     """
     try:
         with open(image_path, "rb") as img_file:
@@ -278,7 +249,7 @@ def display_player_section(title, player_df):
                 st.markdown(
                     f"""
                     <div style='text-align:center;'>
-                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" 
+                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}"
                              style='width:200px; height:200px; display:block; margin:auto;'/>
                     </div>
                     """, unsafe_allow_html=True,
@@ -287,7 +258,7 @@ def display_player_section(title, player_df):
                 st.markdown(
                     f"""
                     <div style='text-align:center;'>
-                        <img src="{PLACEHOLDER_IMAGE_URL}" 
+                        <img src="{PLACEHOLDER_IMAGE_URL}"
                              style='width:200px; height:200px; display:block; margin:auto;'/>
                     </div>
                     """, unsafe_allow_html=True,
@@ -306,10 +277,6 @@ def display_player_section(title, player_df):
             st.markdown(box_html, unsafe_allow_html=True)
 
 def compute_agent_vcp_by_season(piba_data):
-    """
-    Aggregates PIBA data to compute VCP for each agent by season.
-    Returns a dictionary with seasons as keys and dataframes (Agent Name, VCP) as values.
-    """
     seasons = [
         ('2018-19', 'COST 18-19', 'PC 18-19'),
         ('2019-20', 'COST 19-20', 'PC 19-20'),
@@ -418,22 +385,62 @@ def agency_dashboard():
     else:
         st.write("No client names available for sorting.")
 
-def get_agent_photo_path(agent_name):
-    """
-    Retrieves the agent photo from the agent photos directory.
-    Expects files to be named in the format:
-        firstname_lastname_converted.png
-    This function searches recursively within AGENT_PHOTOS_DIR.
-    """
-    formatted_name = agent_name.lower().replace(" ", "_")
-    target_prefix = formatted_name + "_converted"
-    for root, dirs, files in os.walk(AGENT_PHOTOS_DIR):
-        for file in files:
-            if file.lower().endswith((".png", ".jpg")):
-                if file.lower().startswith(target_prefix):
-                    return os.path.join(root, file)
-    # Optional fuzzy matching can be added here if desired.
-    return None
+def leaderboard_page():
+    # Ensure agent photos are extracted first.
+    extract_agent_photos()
+    
+    st.title("Agent Leaderboard")
+    agents_data, ranks_data, piba_data = load_data()
+    if agents_data is None or ranks_data is None or piba_data is None:
+        st.error("Error loading data for leaderboard.")
+        st.stop()
+    
+    # Overall Standings: display a card for each agent with ranking, agent photo, name, agency, and Dollar Index.
+    # Use ranks_data which already includes "Agency Name".
+    overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
+    st.subheader("Overall Standings (by Dollar Index)")
+    
+    for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
+        agent_name = row['Agent Name']
+        agency = row['Agency Name']
+        dollar_index = row['Dollar Index']
+        img_path = get_agent_photo_path(agent_name)
+        if img_path:
+            image_uri = image_to_data_uri(img_path)
+        else:
+            image_uri = AGENT_PLACEHOLDER_IMAGE_URL
+        card_html = f"""
+        <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+            <div style="flex: 0 0 40px; text-align: center; font-size: 18px; font-weight: bold;">
+                {rank}.
+            </div>
+            <div style="flex: 0 0 60px;">
+                <img src="{image_uri}" alt="{agent_name}" style="width: 60px; height: 60px; border-radius: 50%;">
+            </div>
+            <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
+                {agent_name} <br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
+            </div>
+            <div style="flex: 0 0 120px; text-align: right; font-size: 16px;">
+                ${dollar_index:,.2f}
+            </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.subheader("Year-by-Year VCP Breakdown")
+    agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
+    for season, df in agent_vcp_by_season.items():
+        st.markdown(f"### {season}")
+        winners = df.sort_values(by='VCP', ascending=False).head(5)
+        losers = df.sort_values(by='VCP', ascending=True).head(5)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("#### Top 5 Agents")
+            st.table(winners)
+        with col2:
+            st.markdown("#### Bottom 5 Agents")
+            st.table(losers)
 
 def project_definitions():
     st.title("📚 Project Definitions")
