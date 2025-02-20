@@ -347,28 +347,28 @@ def agency_dashboard():
     else:
         st.write("No client names available for sorting.")
 
-def leaderboard_page():
+ddef leaderboard_page():
     st.title("Agent Leaderboard")
     agents_data, ranks_data, piba_data = load_data()
     if agents_data is None or ranks_data is None or piba_data is None:
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Debug: show the columns available in ranks_data
+    # Debug output of available columns in ranks_data
     st.write("Ranks Data Columns:", ranks_data.columns.tolist())
     
-    # Define the expected columns:
+    # Merge ranks_data with agents_data to obtain missing columns ('Won%' and 'Total Contract Value')
+    merged = pd.merge(
+        ranks_data,
+        agents_data[['Agent Name', 'Won%', 'Total Contract Value']],
+        on='Agent Name',
+        how='left'
+    )
+    
+    # Define the expected columns for overall standings
     expected_columns = ['Agent Name', 'Dollar Index', 'CT', 'Won%', 'Total Contract Value']
+    overall_table = merged[expected_columns].sort_values(by='Dollar Index', ascending=False)
     
-    # Check for missing columns:
-    missing = [col for col in expected_columns if col not in ranks_data.columns]
-    if missing:
-        st.error(f"Missing columns in ranks_data: {missing}")
-        st.stop()
-    
-    # If all columns exist, build the overall standings table:
-    overall_table = ranks_data[expected_columns]
-    overall_table = overall_table.sort_values(by='Dollar Index', ascending=False)
     st.subheader("Overall Standings (by Dollar Index)")
     st.dataframe(overall_table)
     
