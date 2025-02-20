@@ -171,14 +171,12 @@ def format_delivery_value(value):
         return f"<span style='color:#8B0000;'>${value:,.0f}</span>"
 
 def format_value_capture_percentage(value):
-    # If value is less than 2, assume it's a fraction and convert it
     try:
         if value is not None and value < 2:
             value = value * 100
     except Exception as e:
         pass
-    # This function is used for the aggregated data elsewhere.
-    color = "#006400" if value >= 100 else "#041E41"
+    color = "#006400" if value >= 100 else "#8B0000"
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.0f}%</span></p>"
 
 def compute_vcp_for_agent(agent_players):
@@ -287,7 +285,7 @@ def display_player_section(title, player_df):
                 )
             display_name = correct_player_name(player['Combined Names'])
             st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{display_name}</h4>", unsafe_allow_html=True)
-            # Calculate VCP directly as (Total Cost / Total PC) * 100
+            # Calculate VCP as (Total Cost / Total PC) * 100
             try:
                 vcp_value = (player['Total Cost'] / player['Total PC']) * 100
             except Exception as e:
@@ -302,7 +300,6 @@ def display_player_section(title, player_df):
             """
             st.markdown(box_html, unsafe_allow_html=True)
             if vcp_value is not None:
-                # Use dark green if vcp is 100 or above, dark red if below 100.
                 color = "#006400" if vcp_value >= 100 else "#8B0000"
                 st.markdown(f"<p style='font-weight:bold; text-align:center;'>Percent of Value Captured: <span style='color:{color};'>{vcp_value:.0f}%</span></p>", unsafe_allow_html=True)
 
@@ -407,12 +404,11 @@ def leaderboard_page():
 
     st.subheader("Overall Standings (by Dollar Index)")
     filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
-
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
     if filter_option:
         overall_table = overall_table[overall_table['CT'] >= 10]
     overall_table = overall_table.head(90)
-
+    
     for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
         agent_name = row['Agent Name']
         agency = row['Agency Name']
@@ -438,38 +434,51 @@ def leaderboard_page():
 
     st.markdown("---")
     st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
+    # Create a mapping from agent name to agency using ranks_data
+    agency_map = dict(zip(ranks_data["Agent Name"], ranks_data["Agency Name"]))
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
-
     for season in sorted(agent_vcp_by_season.keys(), reverse=True):
         df = agent_vcp_by_season[season]
         st.markdown(f"### {season}")
         winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
         losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
-
+        
         col_head1, col_head2 = st.columns(2)
         with col_head1:
             st.markdown("#### Five Biggest 'Winners' of the Year")
         with col_head2:
             st.markdown("#### Five Biggest 'Losers' of the Year")
-
+        
         for i in range(max(len(winners), len(losers))):
             cols = st.columns(2)
             with cols[0]:
                 if i < len(winners):
                     w = winners.loc[i]
+                    agency = agency_map.get(w['Agent Name'], "")
                     st.markdown(f"""
-                    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
-                        <div style="font-size: 16px; font-weight: bold;">{w['Agent Name']}</div>
-                        <div style="font-size: 14px;">VCP: {w['VCP']:.0f}%</div>
+                    <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+                        <div style="flex: 1; font-size: 16px; font-weight: bold;">
+                            {w['Agent Name']}<br/>
+                            <span style="font-size: 14px; font-weight: normal;">{agency}</span>
+                        </div>
+                        <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
+                            <span style="font-weight: bold;">{w['VCP']:.0f}%</span>
+                        </div>
                     </div>
                     """, unsafe_allow_html=True)
             with cols[1]:
                 if i < len(losers):
                     l = losers.loc[i]
+                    agency = agency_map.get(l['Agent Name'], "")
                     st.markdown(f"""
-                    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
-                        <div style="font-size: 16px; font-weight: bold;">{l['Agent Name']}</div>
-                        <div style="font-size: 14px;">VCP: {l['VCP']:.0f}%</div>
+                    <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+                        <div style="flex: 1; font-size: 16px; font-weight: bold;">
+                            {l['Agent Name']}<br/>
+                            <span style="font-size: 14px; font-weight: normal;">{agency}</span>
+                        </div>
+                        <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
+                            <span style="font-weight: bold;">{l['VCP']:.0f}%</span>
+                        </div>
                     </div>
                     """, unsafe_allow_html=True)
 
