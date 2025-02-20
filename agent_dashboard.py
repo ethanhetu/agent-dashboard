@@ -14,8 +14,12 @@ import plotly.graph_objects as go
 st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 
 # Global variables for images
-HEADSHOTS_DIR = "headshots_cache"  # For player/agent headshots
+HEADSHOTS_DIR = "headshots_cache"  # For player headshots
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
+
+# New globals for agent photos
+AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos
+AGENT_PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Agent_placeholder.png"
 
 # --------------------------------------------------------------------
 # 1) Data-Loading & Caching Functions
@@ -32,7 +36,7 @@ def load_data():
         tmp_path = tmp.name
     xls = pd.ExcelFile(tmp_path)
     agents_data = xls.parse('Agents')
-    agents_data.columns = agents_data.columns.str.strip()  # Ensure clean column names
+    agents_data.columns = agents_data.columns.str.strip()  # Clean column names
     
     ranks_data = xls.parse('Just Agent Ranks')
     ranks_data.columns = ranks_data.columns.str.strip()  # Clean column names
@@ -97,8 +101,7 @@ def correct_player_name(name):
 def get_headshot_path(player_name):
     """
     Retrieves the headshot path for a given player/agent name.
-    First applies name corrections, then attempts an exact match (using only first & last name),
-    and finally falls back to fuzzy matching.
+    Uses the player headshots directory.
     """
     player_name = correct_player_name(player_name)
     formatted_name = player_name.lower().replace(" ", "_")
@@ -112,7 +115,7 @@ def get_headshot_path(player_name):
             for file in possible_files:
                 if file.lower().startswith(formatted_name + "_"):
                     return os.path.join(HEADSHOTS_DIR, file)
-            # Fuzzy matching: use only the first two parts of the filename.
+            # Fuzzy matching: use first two parts.
             names_dict = {}
             for f in possible_files:
                 base = f.lower().replace(".png", "")
@@ -130,10 +133,45 @@ def get_headshot_path(player_name):
             pass
     return None
 
+def get_agent_photo_path(agent_name):
+    """
+    Retrieves the agent photo from the agent photos directory.
+    Uses a separate folder and placeholder than player headshots.
+    """
+    # For agents, we may not need to apply the same fuzzy logic if your naming is consistent.
+    formatted_name = agent_name.lower().replace(" ", "_")
+    if os.path.exists(AGENT_PHOTOS_DIR):
+        try:
+            possible_files = [
+                f for f in os.listdir(AGENT_PHOTOS_DIR)
+                if f.lower().endswith(".png") or f.lower().endswith(".jpg")
+            ]
+            # Exact matching:
+            for file in possible_files:
+                if file.lower().startswith(formatted_name + "_"):
+                    return os.path.join(AGENT_PHOTOS_DIR, file)
+            # Fuzzy matching: use first two parts.
+            names_dict = {}
+            for f in possible_files:
+                base = f.lower().replace(".png", "").replace(".jpg", "")
+                parts = base.split("_")
+                if len(parts) >= 2:
+                    extracted_name = "_".join(parts[:2])
+                    names_dict[extracted_name] = f
+            close_matches = difflib.get_close_matches(
+                formatted_name, list(names_dict.keys()), n=1, cutoff=0.75
+            )
+            if close_matches:
+                best_match = close_matches[0]
+                return os.path.join(AGENT_PHOTOS_DIR, names_dict[best_match])
+        except Exception as e:
+            pass
+    return None
+
 def image_to_data_uri(image_path):
     """
     Converts an image file to a base64 data URI.
-    If the image can't be loaded, returns the placeholder URL.
+    If it fails, returns the appropriate placeholder URL.
     """
     try:
         with open(image_path, "rb") as img_file:
@@ -365,18 +403,19 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Overall Standings: Custom card display with headshot, agent name, and Dollar Index
+    # Overall Standings: display a card for each agent with agent photo, name, and Dollar Index.
     overall_table = ranks_data[['Agent Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
     st.subheader("Overall Standings (by Dollar Index)")
     
     for _, row in overall_table.iterrows():
         agent_name = row['Agent Name']
         dollar_index = row['Dollar Index']
-        img_path = get_headshot_path(agent_name)
+        # Use the agent photo function instead of the player headshot function.
+        img_path = get_agent_photo_path(agent_name)
         if img_path:
             image_uri = image_to_data_uri(img_path)
         else:
-            image_uri = PLACEHOLDER_IMAGE_URL
+            image_uri = AGENT_PLACEHOLDER_IMAGE_URL
         card_html = f"""
         <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
             <div style="flex: 0 0 60px;">
