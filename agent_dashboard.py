@@ -17,7 +17,7 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 HEADSHOTS_DIR = "headshots_cache"  # For player headshots
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
-# Globals for agent photos (not used in leaderboard anymore)
+# Globals for agent photos (unused in leaderboard now)
 AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos from release
 AGENT_PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Agent_placeholder.png"
 
@@ -194,102 +194,8 @@ def format_value_capture_percentage(value):
 def compute_agent_vcp_by_season(piba_data):
     """
     Aggregates PIBA data to compute VCP for each agent by season.
-    Converts the cost and PC columns to numeric so that summation works correctly.
-    Returns a dictionary with seasons as keys and dataframes (Agent Name, VCP) as values.
-    """
-    seasons = [
-        ('2018-19', 'COST 18-19', 'PC 18-19'),
-        ('2019-20', 'COST 19-20', 'PC 19-20'),
-        ('2020-21', 'COST 20-21', 'PC 20-21'),
-        ('2021-22', 'COST 21-22', 'PC 21-22'),
-        ('2022-23', 'COST 22-23', 'PC 22-23'),
-        ('2023-24', 'COST 23-24', 'PC 23-24')
-    ]
-    results = {}
-    # Work on a copy to avoid modifying the original
-    df = piba_data.copy()
-    for season, cost_col, pc_col in seasons:
-        df[cost_col] = pd.to_numeric(df[cost_col], errors='coerce')
-        df[pc_col] = pd.to_numeric(df[pc_col], errors='coerce')
-        grouped = df.groupby('Agent Name').agg({cost_col: 'sum', pc_col: 'sum'}).reset_index()
-        grouped['VCP'] = grouped.apply(
-            lambda row: round((row[cost_col] / row[pc_col]) * 100, 2)
-            if pd.notnull(row[pc_col]) and row[pc_col] != 0 else None,
-            axis=1
-        )
-        results[season] = grouped[['Agent Name', 'VCP']]
-    return results
-
-def plot_vcp_line_graph(vcp_per_year):
-    years = list(vcp_per_year.keys())
-    vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
-    avg_vcp_values = [85.56, 103.17, 115.85, 84.30, 91.87, 108.12]
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=years,
-        y=vcp_values,
-        mode='lines+markers',
-        name='Agent VCP',
-        line=dict(color='#041E41', width=3),
-        hovertemplate='%{y:.2f}%',
-    ))
-    fig.add_trace(go.Scatter(
-        x=years,
-        y=avg_vcp_values,
-        mode='lines+markers',
-        name='Average VCP',
-        line=dict(color='#FFB819', width=3, dash='dash'),
-        hovertemplate='Avg VCP: %{y:.2f}%',
-    ))
-    fig.update_layout(
-        title="Year-by-Year VCP Trend",
-        xaxis=dict(title='Year'),
-        yaxis=dict(title='VCP (%)', range=[0, 200]),
-        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-def display_player_section(title, player_df):
-    st.subheader(title)
-    client_cols = st.columns(3)
-    for idx, (_, player) in enumerate(player_df.iterrows()):
-        with client_cols[idx % 3]:
-            img_path = get_headshot_path(player['Combined Names'])
-            if img_path:
-                st.markdown(
-                    f"""
-                    <div style='text-align:center;'>
-                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}"
-                             style='width:200px; height:200px; display:block; margin:auto;'/>
-                    </div>
-                    """, unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    f"""
-                    <div style='text-align:center;'>
-                        <img src="{PLACEHOLDER_IMAGE_URL}"
-                             style='width:200px; height:200px; display:block; margin:auto;'/>
-                    </div>
-                    """, unsafe_allow_html=True,
-                )
-            display_name = correct_player_name(player['Combined Names'])
-            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{display_name}</h4>", unsafe_allow_html=True)
-            box_html = f"""
-            <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
-                <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
-                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
-                <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
-                <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
-            </div>
-            {format_value_capture_percentage(player['Value Capture %'])}
-            """
-            st.markdown(box_html, unsafe_allow_html=True)
-
-def compute_agent_vcp_by_season(piba_data):
-    """
-    Aggregates PIBA data to compute VCP for each agent by season.
-    Converts cost and PC columns to numeric before grouping.
+    Converts the season's cost and PC columns to numeric and also counts clients.
+    Only agents with more than 2 clients in that season are kept.
     Returns a dictionary with seasons as keys and dataframes (Agent Name, VCP) as values.
     """
     seasons = [
@@ -305,10 +211,16 @@ def compute_agent_vcp_by_season(piba_data):
     for season, cost_col, pc_col in seasons:
         df[cost_col] = pd.to_numeric(df[cost_col], errors='coerce')
         df[pc_col] = pd.to_numeric(df[pc_col], errors='coerce')
-        grouped = df.groupby('Agent Name').agg({cost_col: 'sum', pc_col: 'sum'}).reset_index()
+        grouped = df.groupby('Agent Name').agg(
+            total_cost=(cost_col, 'sum'),
+            total_pc=(pc_col, 'sum'),
+            client_count=('Agent Name', 'count')
+        ).reset_index()
+        # Filter: only keep agents with more than 2 clients in that season.
+        grouped = grouped[grouped['client_count'] > 2]
         grouped['VCP'] = grouped.apply(
-            lambda row: round((row[cost_col] / row[pc_col]) * 100, 2)
-            if pd.notnull(row[pc_col]) and row[pc_col] != 0 else None,
+            lambda row: round((row['total_cost'] / row['total_pc']) * 100, 2)
+            if pd.notnull(row['total_pc']) and row['total_pc'] != 0 else None,
             axis=1
         )
         results[season] = grouped[['Agent Name', 'VCP']]
@@ -479,7 +391,7 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Overall Standings heading and filter checkbox
+    # Overall Standings heading and filter checkbox below the heading.
     st.subheader("Overall Standings (by Dollar Index)")
     filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
     
@@ -519,14 +431,14 @@ def leaderboard_page():
         winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
         losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
         
-        # Add headings for each column
+        # Headings for the two columns:
         col_head1, col_head2 = st.columns(2)
         with col_head1:
             st.markdown("#### Top 5 Agents")
         with col_head2:
             st.markdown("#### Bottom 5 Agents")
         
-        # Now iterate over the rows and display them side-by-side as cards
+        # Now, display the winners and losers side by side.
         for i in range(max(len(winners), len(losers))):
             cols = st.columns(2)
             with cols[0]:
@@ -547,7 +459,7 @@ def leaderboard_page():
                         <div style="font-size: 14px;">VCP: {l['VCP']:.2f}%</div>
                     </div>
                     """, unsafe_allow_html=True)
-
+                    
 def project_definitions():
     st.title("📚 Project Definitions")
     st.write("Definitions for key terms and metrics used throughout the project.")
