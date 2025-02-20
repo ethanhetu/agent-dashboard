@@ -17,7 +17,7 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 HEADSHOTS_DIR = "headshots_cache"  # For player headshots
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
-# Globals for agent photos
+# Globals for agent photos (unused in leaderboard now, but kept for consistency)
 AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos from release
 AGENT_PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Agent_placeholder.png"
 
@@ -386,17 +386,14 @@ def agency_dashboard():
         st.write("No client names available for sorting.")
 
 def leaderboard_page():
-    # Ensure agent photos are extracted first.
-    extract_agent_photos()
-    
+    # We no longer need to extract agent photos because images are removed from the display.
     st.title("Agent Leaderboard")
     agents_data, ranks_data, piba_data = load_data()
     if agents_data is None or ranks_data is None or piba_data is None:
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Overall Standings: display a card for each agent with ranking, agent photo, name, agency, and Dollar Index.
-    # Use ranks_data which already includes "Agency Name".
+    # Overall Standings: display a card for each agent with ranking, agent name, agency, and Dollar Index (no image).
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
     st.subheader("Overall Standings (by Dollar Index)")
     
@@ -404,18 +401,10 @@ def leaderboard_page():
         agent_name = row['Agent Name']
         agency = row['Agency Name']
         dollar_index = row['Dollar Index']
-        img_path = get_agent_photo_path(agent_name)
-        if img_path:
-            image_uri = image_to_data_uri(img_path)
-        else:
-            image_uri = AGENT_PLACEHOLDER_IMAGE_URL
         card_html = f"""
         <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
             <div style="flex: 0 0 40px; text-align: center; font-size: 18px; font-weight: bold;">
                 {rank}.
-            </div>
-            <div style="flex: 0 0 60px;">
-                <img src="{image_uri}" alt="{agent_name}" style="width: 60px; height: 60px; border-radius: 50%;">
             </div>
             <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
                 {agent_name} <br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
