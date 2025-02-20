@@ -131,18 +131,9 @@ def plot_vcp_line_graph(vcp_per_year):
         x=years,
         y=vcp_values,
         mode='lines+markers',
-        name='VCP',
+        name='Agent Value Capture Percentage',
         line=dict(color='#041E41', width=3),
         hovertemplate='%{y:.2f}%'
-    ))
-
-    # 100% reference line (red dotted)
-    fig.add_trace(go.Scatter(
-        x=years,
-        y=[100] * len(years),
-        mode='lines',
-        name='100% Reference',
-        line=dict(color='red', width=2, dash='dot')
     ))
 
     # Yellow average reference line
@@ -150,7 +141,7 @@ def plot_vcp_line_graph(vcp_per_year):
         x=years,
         y=avg_vcp_values,
         mode='lines+markers',
-        name='Average VCP (Manual)',
+        name='Average VCP of All Agents',
         line=dict(color='#FFB819', width=3, dash='dash'),
         hovertemplate='Avg VCP: %{y:.2f}%'
     ))
