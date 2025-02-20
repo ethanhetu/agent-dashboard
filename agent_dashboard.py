@@ -340,51 +340,6 @@ def agent_dashboard():
     all_clients_sorted = agent_players.sort_values(by='Last Name')
     display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
 
-def agency_dashboard():
-    agencies_data = load_agencies_data()
-    _, _, piba_data = load_data()
-    if agencies_data is None or piba_data is None:
-        st.error("Error loading data for Agency Dashboard.")
-        st.stop()
-    st.title("Agency Overview Dashboard")
-    agency_names = agencies_data['Agency Name'].dropna().unique()
-    agency_names = sorted(agency_names)
-    selected_agency = st.selectbox("Select an Agency:", agency_names)
-    agency_info = agencies_data[agencies_data['Agency Name'] == selected_agency].iloc[0]
-    st.header(f"{selected_agency}")
-    st.subheader("📊 Financial Breakdown")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Dollar Index", f"${agency_info['Dollar Index']:.2f}")
-    col2.metric("Win %", f"{agency_info['Won%']:.3f}")
-    col3.metric("Contracts Tracked", int(agency_info['CT']))
-    col4.metric("Total Contract Value", f"${agency_info['Total Contract Value']:,.0f}")
-    st.subheader("📈 Agency Rankings")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Dollar Index Rank", f"#{int(agency_info['Index R'])}/74")
-    col2.metric("Win Percentage Rank", f"#{int(agency_info['WinR'])}/74")
-    col3.metric("Contracts Tracked Rank", f"#{int(agency_info['CTR'])}/74")
-    col4.metric("Total Contract Value Rank", f"#{int(agency_info['TCV R'])}/74")
-    col5.metric("Total Player Value Rank", f"#{int(agency_info['TPV R'])}/74")
-    st.subheader("📅 Year-by-Year VCP Trend")
-    agency_players = piba_data[piba_data['Agency Name'] == selected_agency]
-    vcp_per_year = calculate_vcp_per_year(agency_players)
-    plot_vcp_line_graph(vcp_per_year)
-    st.subheader("🏆 Biggest Clients")
-    top_clients = agency_players.sort_values(by='Total Cost', ascending=False).head(3)
-    display_player_section("Top 3 Clients by Total Cost", top_clients)
-    top_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
-    display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agency Delivery)", top_delivery_clients)
-    bottom_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
-    display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agency Delivery)", bottom_delivery_clients)
-    st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
-    st.subheader("📋 All Clients")
-    if 'Combined Names' in agency_players.columns:
-        agency_players['Last Name'] = agency_players['Combined Names'].apply(lambda x: x.split()[-1])
-        all_clients_sorted = agency_players.sort_values(by='Last Name')
-        display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
-    else:
-        st.write("No client names available for sorting.")
-
 def leaderboard_page():
     st.title("Agent Leaderboard")
     agents_data, ranks_data, piba_data = load_data()
@@ -392,11 +347,16 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     
+    # Add a filter option at the top of the standings.
+    filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
+    
     # Overall Standings: display a card for each agent with ranking, agent name, agency, Dollar Index, and Contracts Tracked.
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
+    if filter_option:
+        overall_table = overall_table[overall_table['CT'] >= 10]
     overall_table = overall_table.head(90)  # Limit to top 90 agents
-    st.subheader("Overall Standings (by Dollar Index)")
     
+    st.subheader("Overall Standings (by Dollar Index)")
     for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
         agent_name = row['Agent Name']
         agency = row['Agency Name']
