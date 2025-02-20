@@ -16,7 +16,9 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 HEADSHOTS_DIR = "headshots_cache"  # Persistent local directory
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
-# Load data from GitHub repository
+# --------------------------------------------------------------------
+# 1) Data-Loading & Caching Functions
+# --------------------------------------------------------------------
 @st.cache_data(ttl=0)  # Forces reload every time
 def load_data():
     url_agents = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
@@ -58,7 +60,23 @@ def extract_headshots():
             except zipfile.BadZipFile:
                 st.error("❌ NHL.Headshots.zip is not a valid ZIP archive.")
 
-# Retrieve headshot path
+@st.cache_data(ttl=0)
+def load_agencies_data():
+    url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
+    response = requests.get(url)
+    if response.status_code != 200:
+        st.error("Error fetching Agencies data. Please check the file URL and permissions.")
+        return None
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+        tmp.write(response.content)
+        tmp_path = tmp.name
+    xls = pd.ExcelFile(tmp_path)
+    agencies_data = xls.parse('Agencies')
+    return agencies_data
+
+# --------------------------------------------------------------------
+# 2) Helper Functions
+# --------------------------------------------------------------------
 def get_headshot_path(player_name):
     formatted_name = player_name.lower().replace(" ", "_")
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
@@ -74,7 +92,6 @@ def get_headshot_path(player_name):
             pass
     return None
 
-# Calculate age
 def calculate_age(birthdate):
     try:
         birth_date = pd.to_datetime(birthdate)
@@ -83,19 +100,16 @@ def calculate_age(birthdate):
     except:
         return "N/A"
 
-# Color Six-Year Agent Delivery
 def format_delivery_value(value):
     if value > 0:
         return f"<span style='color:#006400;'>${value:,.0f}</span>"  # Dark green
     else:
         return f"<span style='color:#8B0000;'>${value:,.0f}</span>"  # Dark red
 
-# Color only the percentage in Value Capture Percentage
 def format_value_capture_percentage(value):
     color = "#006400" if value >= 1 else "#8B0000"  # Dark green if >=100%, dark red otherwise
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.2%}</span></p>"
 
-# Calculate VCP per year for the agent
 def calculate_vcp_per_year(agent_players):
     years = [
         ('2018-19', 'COST 18-19', 'PC 18-19'),
@@ -111,12 +125,14 @@ def calculate_vcp_per_year(agent_players):
         try:
             total_cost = agent_players[cost_col].sum()
             total_value = agent_players[value_col].sum()
-            vcp_results[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
-        except KeyError as e:
+            if total_value != 0:
+                vcp_results[year] = round((total_cost / total_value) * 100, 2)
+            else:
+                vcp_results[year] = None
+        except KeyError:
             vcp_results[year] = None
     return vcp_results
 
-# Plot the VCP line graph using Plotly with customizations and a yellow reference line
 def plot_vcp_line_graph(vcp_per_year):
     years = list(vcp_per_year.keys())
     vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
@@ -133,7 +149,7 @@ def plot_vcp_line_graph(vcp_per_year):
         mode='lines+markers',
         name='Agent Value Capture Percentage',
         line=dict(color='#041E41', width=3),
-        hovertemplate='%{y:.2f}%'
+        hovertemplate='%{y:.2f}%',
     ))
 
     # Yellow average reference line
@@ -143,80 +159,17 @@ def plot_vcp_line_graph(vcp_per_year):
         mode='lines+markers',
         name='Average VCP of All Agents',
         line=dict(color='#FFB819', width=3, dash='dash'),
-        hovertemplate='Avg VCP: %{y:.2f}%'
+        hovertemplate='Avg VCP: %{y:.2f}%',
     ))
 
     fig.update_layout(
         title="Year-by-Year Value Capture Percentage Trend",
-        xaxis=dict(title='Year', tickangle=0),
+        xaxis=dict(title='Year'),
         yaxis=dict(title='VCP (%)', range=[0, 200]),
-        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
     )
 
     st.plotly_chart(fig, use_container_width=True)
-
-def agent_dashboard():
-    agents_data, ranks_data, piba_data = load_data()
-    extract_headshots()
-
-    if agents_data is None or ranks_data is None or piba_data is None:
-        st.stop()
-
-    st.title("Agent Overview Dashboard")
-
-    agent_names = ranks_data['Agent Name'].dropna().replace(['', '(blank)', 'Grand Total'], pd.NA).dropna()
-    agent_names = sorted(agent_names, key=lambda name: name.split()[-1])
-    selected_agent = st.selectbox("Select an Agent:", agent_names)
-
-    agent_info = agents_data[agents_data['Agent Name'] == selected_agent].iloc[0]
-    rank_info = ranks_data[ranks_data['Agent Name'] == selected_agent].iloc[0]
-
-    header_col1, header_col2 = st.columns([3, 1])
-    with header_col1:
-        st.header(f"{selected_agent} - {agent_info['Agency Name']}")
-
-    st.subheader("📊 Financial Breakdown")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Dollar Index", f"${rank_info['Dollar Index']:.2f}")
-    col2.metric("Win %", f"{agent_info['Won%']:.3f}")
-    col3.metric("Contracts Tracked", int(agent_info['CT']))
-    col4.metric("Total Contract Value", f"${agent_info['Total Contract Value']:,.0f}")
-
-    st.subheader("📈 Agent Rankings")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Dollar Index Rank", f"#{int(rank_info['Index R'])}/90")
-    col2.metric("Win Percentage Rank", f"#{int(rank_info['WinR'])}/90")
-    col3.metric("Contracts Tracked Rank", f"#{int(rank_info['CTR'])}/90")
-    col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
-    col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
-
-    # Year-by-Year VCP Line Graph
-    st.subheader("📅 Year-by-Year Value Capture Percentage (VCP) Trend")
-    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
-    vcp_per_year = calculate_vcp_per_year(agent_players)
-    plot_vcp_line_graph(vcp_per_year)
-
-    # Biggest Clients Section
-    st.subheader("🏆 Biggest Clients")
-    top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
-    display_player_section("Top 3 Clients by Total Cost", top_clients)
-
-    # Agent Wins Section (by highest Six-Year Agent Delivery)
-    top_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
-    display_player_section("🏅 Agent 'Wins' (Top 3 by Six-Year Agent Delivery)", top_delivery_clients)
-
-    # Agent Losses Section (by lowest Six-Year Agent Delivery)
-    bottom_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
-    display_player_section("❌ Agent 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
-
-    # Divider line
-    st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
-
-    # All Clients Section (sorted by last name)
-    st.subheader("📋 All Clients")
-    agent_players['Last Name'] = agent_players['Combined Names'].apply(lambda x: x.split()[-1])
-    all_clients_sorted = agent_players.sort_values(by='Last Name')
-    display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
 
 def display_player_section(title, player_df):
     st.subheader(title)
@@ -257,34 +210,77 @@ def display_player_section(title, player_df):
             """
             st.markdown(box_html, unsafe_allow_html=True)
 
-def project_definitions():
-    st.title("📚 Project Definitions")
-    st.write("Definitions for key terms and metrics used throughout the project.")
+# --------------------------------------------------------------------
+# 3) Main Dashboard Pages
+# --------------------------------------------------------------------
+def agent_dashboard():
+    agents_data, ranks_data, piba_data = load_data()
+    extract_headshots()
 
-# ------------------------------------------------
-# New: Load Agencies Data (from the same Excel file)
-# ------------------------------------------------
-@st.cache_data(ttl=0)
-def load_agencies_data():
-    url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
-    response = requests.get(url)
-    if response.status_code != 200:
-        st.error("Error fetching Agencies data. Please check the file URL and permissions.")
-        return None
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-        tmp.write(response.content)
-        tmp_path = tmp.name
-    xls = pd.ExcelFile(tmp_path)
-    agencies_data = xls.parse('Agencies')
-    return agencies_data
+    if agents_data is None or ranks_data is None or piba_data is None:
+        st.stop()
 
-# ------------------------------------------------
-# New: Agency Dashboard Function
-# ------------------------------------------------
+    st.title("Agent Overview Dashboard")
+
+    agent_names = ranks_data['Agent Name'].dropna().replace(['', '(blank)', 'Grand Total'], pd.NA).dropna()
+    agent_names = sorted(agent_names, key=lambda name: name.split()[-1])
+    selected_agent = st.selectbox("Select an Agent:", agent_names)
+
+    agent_info = agents_data[agents_data['Agent Name'] == selected_agent].iloc[0]
+    rank_info = ranks_data[ranks_data['Agent Name'] == selected_agent].iloc[0]
+
+    header_col1, header_col2 = st.columns([3, 1])
+    with header_col1:
+        st.header(f"{selected_agent} - {agent_info['Agency Name']}")
+
+    # --- Financial Breakdown ---
+    st.subheader("📊 Financial Breakdown")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Dollar Index", f"${rank_info['Dollar Index']:.2f}")
+    col2.metric("Win %", f"{agent_info['Won%']:.3f}")
+    col3.metric("Contracts Tracked", int(agent_info['CT']))
+    col4.metric("Total Contract Value", f"${agent_info['Total Contract Value']:,.0f}")
+
+    # --- Agent Rankings ---
+    st.subheader("📈 Agent Rankings")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    col1.metric("Dollar Index Rank", f"#{int(rank_info['Index R'])}/90")
+    col2.metric("Win Percentage Rank", f"#{int(rank_info['WinR'])}/90")
+    col3.metric("Contracts Tracked Rank", f"#{int(rank_info['CTR'])}/90")
+    col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
+    col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
+
+    # --- VCP Trend ---
+    st.subheader("📅 Year-by-Year Value Capture Percentage (VCP) Trend")
+    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
+    vcp_per_year = calculate_vcp_per_year(agent_players)
+    plot_vcp_line_graph(vcp_per_year)
+
+    # --- Biggest Clients ---
+    st.subheader("🏆 Biggest Clients")
+    top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
+    display_player_section("Top 3 Clients by Total Cost", top_clients)
+
+    # --- Agent 'Wins' ---
+    top_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
+    display_player_section("🏅 Agent 'Wins' (Top 3 by Six-Year Agent Delivery)", top_delivery_clients)
+
+    # --- Agent 'Losses' ---
+    bottom_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
+    display_player_section("❌ Agent 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
+
+    st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
+
+    # --- All Clients (alphabetical) ---
+    st.subheader("📋 All Clients")
+    agent_players['Last Name'] = agent_players['Combined Names'].apply(lambda x: x.split()[-1])
+    all_clients_sorted = agent_players.sort_values(by='Last Name')
+    display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
+
 def agency_dashboard():
-    # Load Agencies data and PIBA data (from load_data)
+    # Load agencies and PIBA data
     agencies_data = load_agencies_data()
-    _, _, piba_data = load_data()  # Reusing the cached load_data() function
+    _, _, piba_data = load_data()  # from the original load_data()
 
     if agencies_data is None or piba_data is None:
         st.error("Error loading data for Agency Dashboard.")
@@ -292,59 +288,61 @@ def agency_dashboard():
 
     st.title("Agency Overview Dashboard")
 
-    # Agency selection: get unique agency names from the Agencies sheet
+    # --- Agency Selection ---
     agency_names = agencies_data['Agency Name'].dropna().unique()
     agency_names = sorted(agency_names)
     selected_agency = st.selectbox("Select an Agency:", agency_names)
 
-    # Retrieve agency info from Agencies data (assumes one row per agency)
+    # Pull row for selected agency
     agency_info = agencies_data[agencies_data['Agency Name'] == selected_agency].iloc[0]
 
-    # Display header (for consistency, similar to Agent Dashboard)
+    # --- Page Header ---
     st.header(f"{selected_agency}")
 
-    # ---------------------------
-    # Financial Overview using columns K-P (indices 10:16)
-    # ---------------------------
-    st.subheader("📊 Financial Overview")
-    # Extract columns K–P from the Agencies row (adjust if needed based on your file)
-    financial_overview = agency_info.iloc[10:16]
-    st.dataframe(financial_overview.to_frame().T)
+    # --- Financial Breakdown ---
+    st.subheader("📊 Financial Breakdown")
+    col1, col2, col3, col4 = st.columns(4)
+    # Here we assume your Agencies sheet has these columns:
+    # 'Dollar Index', 'Won%', 'CT', 'Total Contract Value'
+    col1.metric("Dollar Index", f"${agency_info['Dollar Index']:.2f}")
+    col2.metric("Win %", f"{agency_info['Won%']:.3f}")
+    col3.metric("Contracts Tracked", int(agency_info['CT']))
+    col4.metric("Total Contract Value", f"${agency_info['Total Contract Value']:,.0f}")
 
-    # ---------------------------
-    # Year-by-Year VCP Trend (mirroring Agent Dashboard but for the agency)
-    # ---------------------------
+    # --- Agency Rankings ---
+    st.subheader("📈 Agency Rankings")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    # We assume the Agencies sheet has columns 'Index R', 'WinR', 'CTR', 'TCV R', 'TPV R'
+    # and that you want the rank denominator to be 74 instead of 90.
+    col1.metric("Dollar Index Rank", f"#{int(agency_info['Index R'])}/74")
+    col2.metric("Win Percentage Rank", f"#{int(agency_info['WinR'])}/74")
+    col3.metric("Contracts Tracked Rank", f"#{int(agency_info['CTR'])}/74")
+    col4.metric("Total Contract Value Rank", f"#{int(agency_info['TCV R'])}/74")
+    col5.metric("Total Player Value Rank", f"#{int(agency_info['TPV R'])}/74")
+
+    # --- Year-by-Year VCP Trend ---
     st.subheader("📅 Year-by-Year Value Capture Percentage (VCP) Trend")
-    # Filter PIBA data by Agency Name (assumes PIBA has an 'Agency Name' column)
+    # Filter PIBA data by Agency Name
     agency_players = piba_data[piba_data['Agency Name'] == selected_agency]
     vcp_per_year = calculate_vcp_per_year(agency_players)
     plot_vcp_line_graph(vcp_per_year)
 
-    # ---------------------------
-    # Biggest Clients Section
-    # ---------------------------
+    # --- Biggest Clients ---
     st.subheader("🏆 Biggest Clients")
     top_clients = agency_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
 
-    # ---------------------------
-    # Agency Wins Section (Top 3 by Six-Year Delivery)
-    # ---------------------------
+    # --- Agency 'Wins' ---
     top_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
     display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agency Delivery)", top_delivery_clients)
 
-    # ---------------------------
-    # Agency Losses Section (Bottom 3 by Six-Year Delivery)
-    # ---------------------------
+    # --- Agency 'Losses' ---
     bottom_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
     display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agency Delivery)", bottom_delivery_clients)
 
-    # Divider line
     st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
 
-    # ---------------------------
-    # All Clients Section (sorted alphabetically by last name)
-    # ---------------------------
+    # --- All Clients (alphabetical) ---
     st.subheader("📋 All Clients")
     if 'Combined Names' in agency_players.columns:
         agency_players['Last Name'] = agency_players['Combined Names'].apply(lambda x: x.split()[-1])
@@ -353,9 +351,13 @@ def agency_dashboard():
     else:
         st.write("No client names available for sorting.")
 
-# ------------------------------------------------
-# Updated Navigation to Include Agency Dashboard
-# ------------------------------------------------
+def project_definitions():
+    st.title("📚 Project Definitions")
+    st.write("Definitions for key terms and metrics used throughout the project.")
+
+# --------------------------------------------------------------------
+# 4) Navigation
+# --------------------------------------------------------------------
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Project Definitions"])
 
