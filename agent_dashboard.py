@@ -424,7 +424,7 @@ def leaderboard_page():
         st.markdown(card_html, unsafe_allow_html=True)
     
     st.markdown("---")
-       st.subheader("Year-by-Year VCP Breakdown")
+    st.subheader("Year-by-Year VCP Breakdown")
     # Sort seasons in reverse chronological order
     for season in sorted(agent_vcp_by_season.keys(), reverse=True):
         df = agent_vcp_by_season[season]
