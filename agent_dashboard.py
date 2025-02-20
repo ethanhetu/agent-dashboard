@@ -516,15 +516,37 @@ def leaderboard_page():
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
     for season, df in agent_vcp_by_season.items():
         st.markdown(f"### {season}")
-        winners = df.sort_values(by='VCP', ascending=False).head(5)
-        losers = df.sort_values(by='VCP', ascending=True).head(5)
-        col1, col2 = st.columns(2)
-        with col1:
+        winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
+        losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
+        
+        # Add headings for each column
+        col_head1, col_head2 = st.columns(2)
+        with col_head1:
             st.markdown("#### Top 5 Agents")
-            st.table(winners)
-        with col2:
+        with col_head2:
             st.markdown("#### Bottom 5 Agents")
-            st.table(losers)
+        
+        # Now iterate over the rows and display them side-by-side as cards
+        for i in range(max(len(winners), len(losers))):
+            cols = st.columns(2)
+            with cols[0]:
+                if i < len(winners):
+                    w = winners.loc[i]
+                    st.markdown(f"""
+                    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+                        <div style="font-size: 16px; font-weight: bold;">{w['Agent Name']}</div>
+                        <div style="font-size: 14px;">VCP: {w['VCP']:.2f}%</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            with cols[1]:
+                if i < len(losers):
+                    l = losers.loc[i]
+                    st.markdown(f"""
+                    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+                        <div style="font-size: 16px; font-weight: bold;">{l['Agent Name']}</div>
+                        <div style="font-size: 14px;">VCP: {l['VCP']:.2f}%</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 def project_definitions():
     st.title("📚 Project Definitions")
