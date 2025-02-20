@@ -261,12 +261,109 @@ def project_definitions():
     st.title("📚 Project Definitions")
     st.write("Definitions for key terms and metrics used throughout the project.")
 
+# ------------------------------------------------
+# New: Load Agencies Data (from the same Excel file)
+# ------------------------------------------------
+@st.cache_data(ttl=0)
+def load_agencies_data():
+    url = "https://raw.githubusercontent.com/ethanhetu/agent-dashboard/main/AP%20Final.xlsx"
+    response = requests.get(url)
+    if response.status_code != 200:
+        st.error("Error fetching Agencies data. Please check the file URL and permissions.")
+        return None
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+        tmp.write(response.content)
+        tmp_path = tmp.name
+    xls = pd.ExcelFile(tmp_path)
+    agencies_data = xls.parse('Agencies')
+    return agencies_data
+
+# ------------------------------------------------
+# New: Agency Dashboard Function
+# ------------------------------------------------
+def agency_dashboard():
+    # Load Agencies data and PIBA data (from load_data)
+    agencies_data = load_agencies_data()
+    _, _, piba_data = load_data()  # Reusing the cached load_data() function
+
+    if agencies_data is None or piba_data is None:
+        st.error("Error loading data for Agency Dashboard.")
+        st.stop()
+
+    st.title("Agency Overview Dashboard")
+
+    # Agency selection: get unique agency names from the Agencies sheet
+    agency_names = agencies_data['Agency Name'].dropna().unique()
+    agency_names = sorted(agency_names)
+    selected_agency = st.selectbox("Select an Agency:", agency_names)
+
+    # Retrieve agency info from Agencies data (assumes one row per agency)
+    agency_info = agencies_data[agencies_data['Agency Name'] == selected_agency].iloc[0]
+
+    # Display header (for consistency, similar to Agent Dashboard)
+    st.header(f"{selected_agency}")
+
+    # ---------------------------
+    # Financial Overview using columns K-P (indices 10:16)
+    # ---------------------------
+    st.subheader("📊 Financial Overview")
+    # Extract columns K–P from the Agencies row (adjust if needed based on your file)
+    financial_overview = agency_info.iloc[10:16]
+    st.dataframe(financial_overview.to_frame().T)
+
+    # ---------------------------
+    # Year-by-Year VCP Trend (mirroring Agent Dashboard but for the agency)
+    # ---------------------------
+    st.subheader("📅 Year-by-Year Value Capture Percentage (VCP) Trend")
+    # Filter PIBA data by Agency Name (assumes PIBA has an 'Agency Name' column)
+    agency_players = piba_data[piba_data['Agency Name'] == selected_agency]
+    vcp_per_year = calculate_vcp_per_year(agency_players)
+    plot_vcp_line_graph(vcp_per_year)
+
+    # ---------------------------
+    # Biggest Clients Section
+    # ---------------------------
+    st.subheader("🏆 Biggest Clients")
+    top_clients = agency_players.sort_values(by='Total Cost', ascending=False).head(3)
+    display_player_section("Top 3 Clients by Total Cost", top_clients)
+
+    # ---------------------------
+    # Agency Wins Section (Top 3 by Six-Year Delivery)
+    # ---------------------------
+    top_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
+    display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agency Delivery)", top_delivery_clients)
+
+    # ---------------------------
+    # Agency Losses Section (Bottom 3 by Six-Year Delivery)
+    # ---------------------------
+    bottom_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
+    display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agency Delivery)", bottom_delivery_clients)
+
+    # Divider line
+    st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
+
+    # ---------------------------
+    # All Clients Section (sorted alphabetically by last name)
+    # ---------------------------
+    st.subheader("📋 All Clients")
+    if 'Combined Names' in agency_players.columns:
+        agency_players['Last Name'] = agency_players['Combined Names'].apply(lambda x: x.split()[-1])
+        all_clients_sorted = agency_players.sort_values(by='Last Name')
+        display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
+    else:
+        st.write("No client names available for sorting.")
+
+# ------------------------------------------------
+# Updated Navigation to Include Agency Dashboard
+# ------------------------------------------------
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Project Definitions"])
+page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Project Definitions"])
 
 if page == "Home":
     st.title("Welcome to the Agent Insights Dashboard!")
 elif page == "Agent Dashboard":
     agent_dashboard()
+elif page == "Agency Dashboard":
+    agency_dashboard()
 elif page == "Project Definitions":
     project_definitions()
