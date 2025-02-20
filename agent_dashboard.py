@@ -302,8 +302,8 @@ def display_player_section(title, player_df):
             """
             st.markdown(box_html, unsafe_allow_html=True)
             if vcp_value is not None:
-                # Decide color: dark green if vcp >= 100, dark blue otherwise.
-                color = "#006400" if vcp_value >= 100 else "#041E41"
+                # Use dark green if vcp is 100 or above, dark red if below 100.
+                color = "#006400" if vcp_value >= 100 else "#8B0000"
                 st.markdown(f"<p style='font-weight:bold; text-align:center;'>Percent of Value Captured: <span style='color:{color};'>{vcp_value:.0f}%</span></p>", unsafe_allow_html=True)
 
 # --------------------------------------------------------------------
