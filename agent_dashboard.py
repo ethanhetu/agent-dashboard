@@ -112,14 +112,33 @@ def calculate_vcp_per_year(agent_players):
             total_cost = agent_players[cost_col].sum()
             total_value = agent_players[value_col].sum()
             vcp_results[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
-        except KeyError as e:
+        except KeyError:
             vcp_results[year] = None
     return vcp_results
 
+# Calculate average VCP per year across all players
+def calculate_average_vcp_per_year(piba_data):
+    years = [
+        ('2018-19', 'COST 18-19', 'PC 18-19'),
+        ('2019-20', 'COST 19-20', 'PC 19-20'),
+        ('2020-21', 'COST 20-21', 'PC 20-21'),
+        ('2021-22', 'COST 21-22', 'PC 21-22'),
+        ('2022-23', 'COST 22-23', 'PC 22-23'),
+        ('2023-24', 'COST 23-24', 'PC 23-24')
+    ]
+
+    avg_vcp = {}
+    for year, cost_col, value_col in years:
+        total_cost = piba_data[cost_col].sum()
+        total_value = piba_data[value_col].sum()
+        avg_vcp[year] = round((total_cost / total_value) * 100, 2) if total_value != 0 else None
+    return avg_vcp
+
 # Plot the VCP line graph using Plotly with customizations
-def plot_vcp_line_graph(vcp_per_year):
+def plot_vcp_line_graph(vcp_per_year, avg_vcp_per_year):
     years = list(vcp_per_year.keys())
     vcp_values = [v if v is not None else None for v in vcp_per_year.values()]
+    avg_vcp_values = [v if v is not None else None for v in avg_vcp_per_year.values()]
 
     fig = go.Figure()
 
@@ -128,7 +147,7 @@ def plot_vcp_line_graph(vcp_per_year):
         x=years,
         y=vcp_values,
         mode='lines+markers',
-        name='VCP',
+        name='Agent VCP',
         line=dict(color='#041E41', width=3),
         hovertemplate='%{y:.2f}%'
     ))
@@ -142,6 +161,16 @@ def plot_vcp_line_graph(vcp_per_year):
         line=dict(color='red', width=2, dash='dot')
     ))
 
+    # Average VCP reference line (yellow)
+    fig.add_trace(go.Scatter(
+        x=years,
+        y=avg_vcp_values,
+        mode='lines+markers',
+        name='Average VCP (All Players)',
+        line=dict(color='#FFB819', width=3, dash='dash'),
+        hovertemplate='Avg VCP: %{y:.2f}%'
+    ))
+
     fig.update_layout(
         title="Year-by-Year Value Capture Percentage Trend",
         xaxis=dict(title='Year', tickangle=0),
@@ -150,45 +179,6 @@ def plot_vcp_line_graph(vcp_per_year):
     )
 
     st.plotly_chart(fig, use_container_width=True)
-
-def display_player_section(title, player_df):
-    st.subheader(title)
-    client_cols = st.columns(3)
-    for idx, (_, player) in enumerate(player_df.iterrows()):
-        with client_cols[idx % 3]:
-            img_path = get_headshot_path(player['Combined Names'])
-            if img_path:
-                st.markdown(
-                    f"""
-                    <div style='text-align:center;'>
-                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" 
-                             style='width:200px; height:200px; display:block; margin:auto;'/>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    f"""
-                    <div style='text-align:center;'>
-                        <img src="{PLACEHOLDER_IMAGE_URL}" 
-                             style='width:200px; height:200px; display:block; margin:auto;'/>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-            st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{player['Combined Names']}</h4>", unsafe_allow_html=True)
-            box_html = f"""
-            <div style='border: 2px solid #ddd; padding: 10px; border-radius: 10px;'>
-                <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
-                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
-                <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
-                <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
-            </div>
-            {format_value_capture_percentage(player['Value Capture %'])}
-            """
-            st.markdown(box_html, unsafe_allow_html=True)
 
 def agent_dashboard():
     agents_data, ranks_data, piba_data = load_data()
@@ -206,52 +196,13 @@ def agent_dashboard():
     agent_info = agents_data[agents_data['Agent Name'] == selected_agent].iloc[0]
     rank_info = ranks_data[ranks_data['Agent Name'] == selected_agent].iloc[0]
 
-    header_col1, header_col2 = st.columns([3, 1])
-    with header_col1:
-        st.header(f"{selected_agent} - {agent_info['Agency Name']}")
+    st.header(f"{selected_agent} - {agent_info['Agency Name']}")
 
-    st.subheader("📊 Financial Breakdown")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Dollar Index", f"${rank_info['Dollar Index']:.2f}")
-    col2.metric("Win %", f"{agent_info['Won%']:.3f}")
-    col3.metric("Contracts Tracked", int(agent_info['CT']))
-    col4.metric("Total Contract Value", f"${agent_info['Total Contract Value']:,.0f}")
-
-    st.subheader("📈 Agent Rankings")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Dollar Index Rank", f"#{int(rank_info['Index R'])}/90")
-    col2.metric("Win Percentage Rank", f"#{int(rank_info['WinR'])}/90")
-    col3.metric("Contracts Tracked Rank", f"#{int(rank_info['CTR'])}/90")
-    col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
-    col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
-
-    # Year-by-Year VCP Line Graph
     st.subheader("📅 Year-by-Year Value Capture Percentage (VCP) Trend")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     vcp_per_year = calculate_vcp_per_year(agent_players)
-    plot_vcp_line_graph(vcp_per_year)
-
-    # Biggest Clients Section
-    st.subheader("🏆 Biggest Clients")
-    top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
-    display_player_section("Top 3 Clients by Total Cost", top_clients)
-
-    # Agent Wins Section (by highest Six-Year Agent Delivery)
-    top_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
-    display_player_section("🏅 Agent 'Wins' (Top 3 by Six-Year Agent Delivery)", top_delivery_clients)
-
-    # Agent Losses Section (by lowest Six-Year Agent Delivery)
-    bottom_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
-    display_player_section("❌ Agent 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
-
-    # Divider line
-    st.markdown("""<hr style='border: 2px solid #ccc; margin: 40px 0;'>""", unsafe_allow_html=True)
-
-    # All Clients Section (sorted by last name)
-    st.subheader("📋 All Clients")
-    agent_players['Last Name'] = agent_players['Combined Names'].apply(lambda x: x.split()[-1])
-    all_clients_sorted = agent_players.sort_values(by='Last Name')
-    display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
+    avg_vcp_per_year = calculate_average_vcp_per_year(piba_data)
+    plot_vcp_line_graph(vcp_per_year, avg_vcp_per_year)
 
 def project_definitions():
     st.title("📚 Project Definitions")
@@ -261,7 +212,7 @@ st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Project Definitions"])
 
 if page == "Home":
-    home_page()
+    st.title("Welcome to the Agent Insights Dashboard!")
 elif page == "Agent Dashboard":
     agent_dashboard()
 elif page == "Project Definitions":
