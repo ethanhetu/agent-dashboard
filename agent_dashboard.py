@@ -324,4 +324,173 @@ def agent_dashboard():
     header_col1, header_col2 = st.columns([3, 1])
     with header_col1:
         st.header(f"{selected_agent} - {agent_info['Agency Name']}")
-    st.subheader("
+    st.subheader("📊 Financial Breakdown")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Dollar Index", f"${rank_info['Dollar Index']:.2f}")
+    col2.metric("Win %", f"{agent_info['Won%']:.3f}")
+    col3.metric("Contracts Tracked", int(agent_info['CT']))
+    col4.metric("Total Contract Value", f"${agent_info['Total Contract Value']:,.0f}")
+    st.subheader("📈 Agent Rankings")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    col1.metric("Dollar Index Rank", f"#{int(rank_info['Index R'])}/90")
+    col2.metric("Win Percentage Rank", f"#{int(rank_info['WinR'])}/90")
+    col3.metric("Contracts Tracked Rank", f"#{int(rank_info['CTR'])}/90")
+    col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
+    col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
+    st.subheader("📅 Year-by-Year VCP Trend")
+    agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
+    vcp_for_agent = compute_vcp_for_agent(agent_players)
+    plot_vcp_line_graph(vcp_for_agent)
+    st.subheader("🏆 Biggest Clients")
+    top_clients = agent_players.sort_values(by='Total Cost', ascending=False).head(3)
+    display_player_section("Top 3 Clients by Total Cost", top_clients)
+    top_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
+    display_player_section("🏅 Agent 'Wins' (Top 3 by Six-Year Agent Delivery)", top_delivery_clients)
+    bottom_delivery_clients = agent_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
+    display_player_section("❌ Agent 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
+    st.markdown("""<hr style="border: 2px solid #ccc; margin: 40px 0;">""", unsafe_allow_html=True)
+    st.subheader("📋 All Clients")
+    agent_players['Last Name'] = agent_players['Combined Names'].apply(lambda x: x.split()[-1])
+    all_clients_sorted = agent_players.sort_values(by='Last Name')
+    display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
+
+def agency_dashboard():
+    agencies_data = load_agencies_data()
+    _, _, piba_data = load_data()
+    if agencies_data is None or piba_data is None:
+        st.error("Error loading data for Agency Dashboard.")
+        st.stop()
+    st.title("Agency Overview Dashboard")
+    agency_names = agencies_data['Agency Name'].dropna().unique()
+    agency_names = sorted(agency_names)
+    selected_agency = st.selectbox("Select an Agency:", agency_names)
+    agency_info = agencies_data[agencies_data['Agency Name'] == selected_agency].iloc[0]
+    st.header(f"{selected_agency}")
+    st.subheader("📊 Financial Breakdown")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Dollar Index", f"${agency_info['Dollar Index']:.2f}")
+    col2.metric("Win %", f"{agency_info['Won%']:.3f}")
+    col3.metric("Contracts Tracked", int(agency_info['CT']))
+    col4.metric("Total Contract Value", f"${agency_info['Total Contract Value']:,.0f}")
+    st.subheader("📈 Agency Rankings")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    col1.metric("Dollar Index Rank", f"#{int(agency_info['Index R'])}/74")
+    col2.metric("Win Percentage Rank", f"#{int(agency_info['WinR'])}/74")
+    col3.metric("Contracts Tracked Rank", f"#{int(agency_info['CTR'])}/74")
+    col4.metric("Total Contract Value Rank", f"#{int(agency_info['TCV R'])}/74")
+    col5.metric("Total Player Value Rank", f"#{int(agency_info['TPV R'])}/74")
+    st.subheader("📅 Year-by-Year VCP Trend")
+    agency_players = piba_data[piba_data['Agency Name'] == selected_agency]
+    vcp_for_agency = compute_vcp_for_agent(agency_players)
+    plot_vcp_line_graph(vcp_for_agency)
+    st.subheader("🏆 Biggest Clients")
+    top_clients = agency_players.sort_values(by='Total Cost', ascending=False).head(3)
+    display_player_section("Top 3 Clients by Total Cost", top_clients)
+    top_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
+    display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agency Delivery)", top_delivery_clients)
+    bottom_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
+    display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agency Delivery)", bottom_delivery_clients)
+    st.markdown("""<hr style="border: 2px solid #ccc; margin: 40px 0;">""", unsafe_allow_html=True)
+    st.subheader("📋 All Clients")
+    if 'Combined Names' in agency_players.columns:
+        agency_players['Last Name'] = agency_players['Combined Names'].apply(lambda x: x.split()[-1])
+        all_clients_sorted = agency_players.sort_values(by='Last Name')
+        display_player_section("All Clients (Alphabetical by Last Name)", all_clients_sorted)
+    else:
+        st.write("No client names available for sorting.")
+
+def leaderboard_page():
+    st.title("Agent Leaderboard")
+    agents_data, ranks_data, piba_data = load_data()
+    if agents_data is None or ranks_data is None or piba_data is None:
+        st.error("Error loading data for leaderboard.")
+        st.stop()
+
+    st.subheader("Overall Standings (by Dollar Index)")
+    filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
+
+    overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
+    if filter_option:
+        overall_table = overall_table[overall_table['CT'] >= 10]
+    overall_table = overall_table.head(90)
+
+    for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
+        agent_name = row['Agent Name']
+        agency = row['Agency Name']
+        dollar_index = row['Dollar Index']
+        contracts = row['CT']
+        card_html = f"""
+        <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+            <div style="flex: 0 0 40px; text-align: center; font-size: 18px; font-weight: bold;">
+                {rank}.
+            </div>
+            <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
+                {agent_name} <br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
+            </div>
+            <div style="flex: 0 0 150px; text-align: right; font-size: 16px;">
+                <div style="border-left: 1px solid #ccc; padding-left: 8px;">
+                    <div style="font-weight: bold;">${dollar_index:,.2f}</div>
+                    <div style="font-size: 14px;">Contracts Tracked: {int(round(contracts))}</div>
+                </div>
+            </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
+    agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
+
+    for season in sorted(agent_vcp_by_season.keys(), reverse=True):
+        df = agent_vcp_by_season[season]
+        st.markdown(f"### {season}")
+        winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
+        losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
+
+        col_head1, col_head2 = st.columns(2)
+        with col_head1:
+            st.markdown("#### Five Biggest 'Winners' of the Year")
+        with col_head2:
+            st.markdown("#### Five Biggest 'Losers' of the Year")
+
+        for i in range(max(len(winners), len(losers))):
+            cols = st.columns(2)
+            with cols[0]:
+                if i < len(winners):
+                    w = winners.loc[i]
+                    st.markdown(f"""
+                    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+                        <div style="font-size: 16px; font-weight: bold;">{w['Agent Name']}</div>
+                        <div style="font-size: 14px;">VCP: {w['VCP']:.0f}%</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            with cols[1]:
+                if i < len(losers):
+                    l = losers.loc[i]
+                    st.markdown(f"""
+                    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+                        <div style="font-size: 16px; font-weight: bold;">{l['Agent Name']}</div>
+                        <div style="font-size: 14px;">VCP: {l['VCP']:.0f}%</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+def project_definitions():
+    st.title("📚 Project Definitions")
+    st.write("Definitions for key terms and metrics used throughout the project.")
+
+# --------------------------------------------------------------------
+# 4) Navigation
+# --------------------------------------------------------------------
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Leaderboard", "Project Definitions"])
+
+if page == "Home":
+    st.title("Welcome to the Agent Insights Dashboard!")
+elif page == "Agent Dashboard":
+    agent_dashboard()
+elif page == "Agency Dashboard":
+    agency_dashboard()
+elif page == "Leaderboard":
+    leaderboard_page()
+elif page == "Project Definitions":
+    project_definitions()
