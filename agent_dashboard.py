@@ -402,13 +402,19 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
 
+    # Filter out agents who don't have an agent page.
+    valid_agents = set(agents_data['Agent Name'].dropna())
+    ranks_data = ranks_data[ranks_data['Agent Name'].isin(valid_agents)]
+    piba_data = piba_data[piba_data['Agent Name'].isin(valid_agents)]
+
     st.subheader("Overall Standings (by Dollar Index)")
     filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
+
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
     if filter_option:
         overall_table = overall_table[overall_table['CT'] >= 10]
     overall_table = overall_table.head(90)
-    
+
     for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
         agent_name = row['Agent Name']
         agency = row['Agency Name']
@@ -434,21 +440,22 @@ def leaderboard_page():
 
     st.markdown("---")
     st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
-    # Create a mapping from agent name to agency using ranks_data
+    # Create a mapping from agent name to agency using ranks_data.
     agency_map = dict(zip(ranks_data["Agent Name"], ranks_data["Agency Name"]))
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
+
     for season in sorted(agent_vcp_by_season.keys(), reverse=True):
         df = agent_vcp_by_season[season]
         st.markdown(f"### {season}")
         winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
         losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
-        
+
         col_head1, col_head2 = st.columns(2)
         with col_head1:
             st.markdown("#### Five Biggest 'Winners' of the Year")
         with col_head2:
             st.markdown("#### Five Biggest 'Losers' of the Year")
-        
+
         for i in range(max(len(winners), len(losers))):
             cols = st.columns(2)
             with cols[0]:
@@ -458,8 +465,7 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="flex: 1; font-size: 16px; font-weight: bold;">
-                            {w['Agent Name']}<br/>
-                            <span style="font-size: 14px; font-weight: normal;">{agency}</span>
+                            {w['Agent Name']}<br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
                         </div>
                         <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
                             <span style="font-weight: bold;">{w['VCP']:.0f}%</span>
@@ -473,8 +479,7 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="flex: 1; font-size: 16px; font-weight: bold;">
-                            {l['Agent Name']}<br/>
-                            <span style="font-size: 14px; font-weight: normal;">{agency}</span>
+                            {l['Agent Name']}<br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
                         </div>
                         <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
                             <span style="font-weight: bold;">{l['VCP']:.0f}%</span>
