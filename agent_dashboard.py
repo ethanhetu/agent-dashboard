@@ -17,7 +17,7 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 HEADSHOTS_DIR = "headshots_cache"  # For player headshots
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
-# New globals for agent photos
+# Globals for agent photos
 AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos
 AGENT_PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Agent_placeholder.png"
 
@@ -63,6 +63,30 @@ def extract_headshots():
                     zip_ref.extractall(HEADSHOTS_DIR)
             except zipfile.BadZipFile:
                 st.error("❌ NHL.Headshots.zip is not a valid ZIP archive.")
+
+@st.cache_data(ttl=0)
+def extract_agent_photos():
+    """
+    Downloads and extracts agent photos from your release.
+    Assumes a release asset at:
+    https://github.com/ethanhetu/agent-dashboard/releases/download/v1.0-agent-photos/PNGs.zip
+    """
+    global AGENT_PHOTOS_DIR
+    zip_url = "https://github.com/ethanhetu/agent-dashboard/releases/download/v1.0-agent-photos/PNGs.zip"
+    if not os.path.exists(AGENT_PHOTOS_DIR):
+        os.makedirs(AGENT_PHOTOS_DIR, exist_ok=True)
+        zip_path = os.path.join(AGENT_PHOTOS_DIR, "PNGs.zip")
+        response = requests.get(zip_url, stream=True)
+        if response.status_code == 200:
+            with open(zip_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+            try:
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(AGENT_PHOTOS_DIR)
+            except zipfile.BadZipFile:
+                st.error("❌ PNGs.zip is not a valid ZIP archive.")
 
 @st.cache_data(ttl=0)
 def load_agencies_data():
@@ -136,30 +160,28 @@ def get_headshot_path(player_name):
 def get_agent_photo_path(agent_name):
     """
     Retrieves the agent photo from the agent photos directory.
-    Uses a separate folder and placeholder than player headshots.
+    Expects files to be named in the format:
+        firstname_lastname_converted.png
     """
-    # For agents, we may not need to apply the same fuzzy logic if your naming is consistent.
     formatted_name = agent_name.lower().replace(" ", "_")
+    target_prefix = formatted_name + "_converted"
     if os.path.exists(AGENT_PHOTOS_DIR):
         try:
             possible_files = [
                 f for f in os.listdir(AGENT_PHOTOS_DIR)
-                if f.lower().endswith(".png") or f.lower().endswith(".jpg")
+                if f.lower().endswith((".png", ".jpg"))
             ]
-            # Exact matching:
+            # Exact matching using the naming convention:
             for file in possible_files:
-                if file.lower().startswith(formatted_name + "_"):
+                if file.lower().startswith(target_prefix):
                     return os.path.join(AGENT_PHOTOS_DIR, file)
-            # Fuzzy matching: use first two parts.
+            # Optionally, fuzzy matching can be added if necessary:
             names_dict = {}
             for f in possible_files:
                 base = f.lower().replace(".png", "").replace(".jpg", "")
-                parts = base.split("_")
-                if len(parts) >= 2:
-                    extracted_name = "_".join(parts[:2])
-                    names_dict[extracted_name] = f
+                names_dict[base] = f
             close_matches = difflib.get_close_matches(
-                formatted_name, list(names_dict.keys()), n=1, cutoff=0.75
+                target_prefix, list(names_dict.keys()), n=1, cutoff=0.75
             )
             if close_matches:
                 best_match = close_matches[0]
@@ -397,21 +419,25 @@ def agency_dashboard():
         st.write("No client names available for sorting.")
 
 def leaderboard_page():
+    # Before using agent photos, extract them from the release.
+    extract_agent_photos()
+    
     st.title("Agent Leaderboard")
     agents_data, ranks_data, piba_data = load_data()
     if agents_data is None or ranks_data is None or piba_data is None:
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Overall Standings: display a card for each agent with ranking, photo, agent name, agency, and Dollar Index.
-    overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
+    # Overall Standings: display a card for each agent with ranking, agent photo, name, agency, and Dollar Index.
+    # Merge agents_data into ranks_data to get the agency.
+    merged = pd.merge(ranks_data, agents_data[['Agent Name', 'Agency Name']], on='Agent Name', how='left')
+    overall_table = merged[['Agent Name', 'Agency Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
     st.subheader("Overall Standings (by Dollar Index)")
     
     for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
         agent_name = row['Agent Name']
         agency = row['Agency Name']
         dollar_index = row['Dollar Index']
-        # Use the agent photos infrastructure
         img_path = get_agent_photo_path(agent_name)
         if img_path:
             image_uri = image_to_data_uri(img_path)
@@ -449,7 +475,7 @@ def leaderboard_page():
         with col2:
             st.markdown("#### Bottom 5 Agents")
             st.table(losers)
-            
+
 def project_definitions():
     st.title("📚 Project Definitions")
     st.write("Definitions for key terms and metrics used throughout the project.")
