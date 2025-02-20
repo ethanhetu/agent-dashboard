@@ -403,14 +403,15 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
     
-    # Overall Standings: display a card for each agent with agent photo, name, and Dollar Index.
-    overall_table = ranks_data[['Agent Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
+    # Overall Standings: display a card for each agent with ranking, photo, agent name, agency, and Dollar Index.
+    overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index']].sort_values(by='Dollar Index', ascending=False)
     st.subheader("Overall Standings (by Dollar Index)")
     
-    for _, row in overall_table.iterrows():
+    for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
         agent_name = row['Agent Name']
+        agency = row['Agency Name']
         dollar_index = row['Dollar Index']
-        # Use the agent photo function instead of the player headshot function.
+        # Use the agent photos infrastructure
         img_path = get_agent_photo_path(agent_name)
         if img_path:
             image_uri = image_to_data_uri(img_path)
@@ -418,11 +419,14 @@ def leaderboard_page():
             image_uri = AGENT_PLACEHOLDER_IMAGE_URL
         card_html = f"""
         <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+            <div style="flex: 0 0 40px; text-align: center; font-size: 18px; font-weight: bold;">
+                {rank}.
+            </div>
             <div style="flex: 0 0 60px;">
                 <img src="{image_uri}" alt="{agent_name}" style="width: 60px; height: 60px; border-radius: 50%;">
             </div>
             <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
-                {agent_name}
+                {agent_name} <br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
             </div>
             <div style="flex: 0 0 120px; text-align: right; font-size: 16px;">
                 ${dollar_index:,.2f}
@@ -445,7 +449,7 @@ def leaderboard_page():
         with col2:
             st.markdown("#### Bottom 5 Agents")
             st.table(losers)
-
+            
 def project_definitions():
     st.title("📚 Project Definitions")
     st.write("Definitions for key terms and metrics used throughout the project.")
