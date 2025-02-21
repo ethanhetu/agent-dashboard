@@ -503,6 +503,26 @@ def overall_visualizations():
     and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
     tend to have a higher Dollar Index.
     """)
+    
+    # New Section: Agent Tendency Classifications
+    st.markdown("""
+    **Agent Tendency Classifications**
+    
+    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-around;">
+        <div style="flex: 1; text-align: center;">
+          <h3 style="color: #8B0000; font-weight: bold;">Player-Friendly</h3>
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <h3 style="color: black; font-weight: bold;">Market-Attuned</h3>
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <h3 style="color: #006400; font-weight: bold;">Team-Friendly</h3>
+        </div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     # Use ranks_data for the scatter plot.
     _, ranks_data, _ = load_data()
     fig = go.Figure(data=go.Scatter(
