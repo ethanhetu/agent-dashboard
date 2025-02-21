@@ -503,7 +503,7 @@ def overall_visualizations():
 
     # ----- Agent Tendency Classifications (STATIC) -----
     # Replaces any auto-sorting with your direct lists:
-    st.markdown(html_content, unsafe_allow_html=True)
+    html_content = """
     <div style='border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px;'>
       <div style='text-align: center; margin-bottom: 16px;'>
          <strong>Agent Tendency Classifications</strong>
