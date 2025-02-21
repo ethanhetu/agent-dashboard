@@ -395,134 +395,12 @@ def agency_dashboard():
         st.write("No client names available for sorting.")
 
 def overall_visualizations():
-    st.title("Overall Visualizations and Takeaways")
-    st.write("""
-    The scatter plot below shows each agent as a dot. The X axis represents Contracts Tracked (CT), 
-    and the Y axis represents the Dollar Index. This helps visualize whether agents with a larger portfolio 
-    tend to have a higher Dollar Index.
-    """)
-    # We'll use ranks_data for this visualization.
-    _, ranks_data, _ = load_data()
-    fig = go.Figure(data=go.Scatter(
-        x=ranks_data['CT'],
-        y=ranks_data['Dollar Index'],
-        mode='markers',
-        marker=dict(size=10, color='blue', opacity=0.7),
-        text=ranks_data['Agent Name']
-    ))
-    fig.update_layout(
-        title="Contracts Tracked vs Dollar Index",
-        xaxis_title="Contracts Tracked (CT)",
-        yaxis_title="Dollar Index",
-        template="plotly_white"
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-def leaderboard_page():
-    st.title("Agent Leaderboard")
-    agents_data, ranks_data, piba_data = load_data()
-    if agents_data is None or ranks_data is None or piba_data is None:
-        st.error("Error loading data for leaderboard.")
-        st.stop()
-
-    # Define manual exclusion list.
-    excluded_agents = {"Patrik Aronsson", "Chris McAlpine", "David Kaye", "Thomas Lynn", "Patrick Sullivan"}
-
-    # Build valid agent list from the Agents tab and exclude manually.
-    valid_agents = set(agents_data['Agent Name'].dropna().str.strip())
-    valid_agents = valid_agents - excluded_agents
-    # Filter out agents not in valid_agents from both ranks_data and piba_data.
-    ranks_data = ranks_data[ranks_data['Agent Name'].str.strip().isin(valid_agents)]
-    piba_data = piba_data[piba_data['Agent Name'].str.strip().isin(valid_agents)]
-    
-    st.subheader("Overall Standings (by Dollar Index)")
-    filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
-
-    overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
-    if filter_option:
-        overall_table = overall_table[overall_table['CT'] >= 10]
-    overall_table = overall_table.head(90)
-
-    for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
-        agent_name = row['Agent Name']
-        agency = row['Agency Name']
-        dollar_index = row['Dollar Index']
-        contracts = row['CT']
-        card_html = f"""
-        <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
-            <div style="flex: 0 0 40px; text-align: center; font-size: 18px; font-weight: bold;">
-                {rank}.
-            </div>
-            <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
-                {agent_name} <br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
-            </div>
-            <div style="flex: 0 0 150px; text-align: right; font-size: 16px;">
-                <div style="border-left: 1px solid #ccc; padding-left: 8px;">
-                    <div style="font-weight: bold;">${dollar_index:,.2f}</div>
-                    <div style="font-size: 14px;">Contracts Tracked: {int(round(contracts))}</div>
-                </div>
-            </div>
-        </div>
-        """
-        st.markdown(card_html, unsafe_allow_html=True)
-
-    st.markdown("---")
-    st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
-    # Create mapping from agent name to agency using filtered ranks_data.
-    agency_map = dict(zip(ranks_data["Agent Name"].str.strip(), ranks_data["Agency Name"].str.strip()))
-    agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
-
-    for season in sorted(agent_vcp_by_season.keys(), reverse=True):
-        df = agent_vcp_by_season[season]
-        st.markdown(f"### {season}")
-        winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
-        losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
-
-        col_head1, col_head2 = st.columns(2)
-        with col_head1:
-            st.markdown("#### Five Biggest 'Winners' of the Year")
-        with col_head2:
-            st.markdown("#### Five Biggest 'Losers' of the Year")
-
-        for i in range(max(len(winners), len(losers))):
-            cols = st.columns(2)
-            with cols[0]:
-                if i < len(winners):
-                    w = winners.loc[i]
-                    agency = agency_map.get(w['Agent Name'].strip(), "")
-                    st.markdown(f"""
-                    <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
-                        <div style="flex: 1; font-size: 16px; font-weight: bold;">
-                            {w['Agent Name']}<br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
-                        </div>
-                        <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
-                            <span style="font-weight: bold;">{w['VCP']:.0f}%</span>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-            with cols[1]:
-                if i < len(losers):
-                    l = losers.loc[i]
-                    agency = agency_map.get(l['Agent Name'].strip(), "")
-                    st.markdown(f"""
-                    <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
-                        <div style="flex: 1; font-size: 16px; font-weight: bold;">
-                            {l['Agent Name']}<br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
-                        </div>
-                        <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
-                            <span style="font-weight: bold;">{l['VCP']:.0f}%</span>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-def overall_visualizations():
-    st.title("Overall Visualizations and Takeaways")
+    st.title("Visualizations and Takeaways")
     st.write("""
     The scatter plot below shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
-    and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
-    tend to have a higher Dollar Index.
+    and the Y axis represents the Dollar Index. The y-axis has been limited to a range that focuses on the agents 
+    whose Dollar Index values fall mostly between 0.7 and 1.3. Outliers may not be visible without zooming.
     """)
-    # Use ranks_data for the scatter plot.
     _, ranks_data, _ = load_data()
     fig = go.Figure(data=go.Scatter(
         x=ranks_data['CT'],
@@ -535,6 +413,7 @@ def overall_visualizations():
         title="Contracts Tracked vs Dollar Index",
         xaxis_title="Contracts Tracked (CT)",
         yaxis_title="Dollar Index",
+        yaxis=dict(range=[0.7, 1.3]),
         template="plotly_white"
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -563,7 +442,7 @@ def project_definitions():
 # 4) Navigation
 # --------------------------------------------------------------------
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Leaderboard", "Overall Visualizations and Takeaways", "Project Definitions"])
+page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Leaderboard", "Visualizations and Takeaways", "Project Definitions"])
 
 if page == "Home":
     st.title("Welcome to the Agent Insights Dashboard!")
@@ -573,7 +452,7 @@ elif page == "Agency Dashboard":
     agency_dashboard()
 elif page == "Leaderboard":
     leaderboard_page()
-elif page == "Overall Visualizations and Takeaways":
+elif page == "Visualizations and Takeaways":
     overall_visualizations()
 elif page == "Project Definitions":
     project_definitions()
