@@ -504,27 +504,59 @@ def overall_visualizations():
     tend to have a higher Dollar Index.
     """)
     
-    # New Section: Agent Tendency Classifications
-    st.markdown("""
-    **Agent Tendency Classifications**
+    # ----- Agent Tendency Classifications Section -----
+    _, ranks_data, _ = load_data()
+    # Sort agents based on Dollar Index:
+    # Team-Friendly: Dollar Index <= 92.5
+    # Market-Attuned: Dollar Index between 92.51 and 107.5
+    # Player-Friendly: Dollar Index > 107.5
+    team_friendly = ranks_data[ranks_data['Dollar Index'] <= 92.5]
+    market_attuned = ranks_data[(ranks_data['Dollar Index'] > 92.5) & (ranks_data['Dollar Index'] <= 107.5)]
+    player_friendly = ranks_data[ranks_data['Dollar Index'] > 107.5]
     
+    def build_agent_cards(df):
+        cards = ""
+        for _, row in df.iterrows():
+            agent_name = row['Agent Name']
+            agency = row['Agency Name']
+            cards += f"""
+            <div style="text-align: left; margin-bottom: 8px;">
+               <div style="font-size: 16px; font-weight: bold;">{agent_name}</div>
+               <div style="font-size: 14px; font-weight: normal;">{agency}</div>
+            </div>
+            """
+        return cards
+    
+    player_cards = build_agent_cards(player_friendly)
+    market_cards = build_agent_cards(market_attuned)
+    team_cards = build_agent_cards(team_friendly)
+    
+    html_content = f"""
     <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-      <div style="display: flex; justify-content: space-around;">
-        <div style="flex: 1; text-align: center;">
-          <h3 style="color: #8B0000; font-weight: bold;">Player-Friendly</h3>
+      <div style="text-align: center; margin-bottom: 16px;">
+         <strong>Agent Tendency Classifications</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <div style="flex: 1; padding: 8px; border-right: 1px solid #ccc;">
+          <h3 style="color: #8B0000; font-weight: bold; text-align: center;">Player-Friendly</h3>
+          {player_cards}
         </div>
-        <div style="flex: 1; text-align: center;">
-          <h3 style="color: black; font-weight: bold;">Market-Attuned</h3>
+        <div style="flex: 1; padding: 8px; border-right: 1px solid #ccc;">
+          <h3 style="color: black; font-weight: bold; text-align: center;">Market-Attuned</h3>
+          {market_cards}
         </div>
-        <div style="flex: 1; text-align: center;">
-          <h3 style="color: #006400; font-weight: bold;">Team-Friendly</h3>
+        <div style="flex: 1; padding: 8px;">
+          <h3 style="color: #006400; font-weight: bold; text-align: center;">Team-Friendly</h3>
+          {team_cards}
         </div>
       </div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    
+    st.markdown(html_content, unsafe_allow_html=True)
+    # ----- End Agent Tendency Classifications Section -----
     
     # Use ranks_data for the scatter plot.
-    _, ranks_data, _ = load_data()
     fig = go.Figure(data=go.Scatter(
         x=ranks_data['CT'],
         y=ranks_data['Dollar Index'],
