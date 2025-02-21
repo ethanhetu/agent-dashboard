@@ -394,66 +394,6 @@ def agency_dashboard():
     else:
         st.write("No client names available for sorting.")
 
-def overall_visualizations():
-    st.title("Visualizations and Takeaways")
-    st.write("""
-    The scatter plot below shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
-    and the Y axis represents the Dollar Index. The y-axis is limited to a range of 0.5 to 1.5 to better
-    highlight the differences among most agents.
-    """)
-    # Load data for the plot.
-    _, ranks_data, _ = load_data()
-    
-    # Create scatter plot.
-    fig = go.Figure(data=go.Scatter(
-        x=ranks_data['CT'],
-        y=ranks_data['Dollar Index'],
-        mode='markers',
-        marker=dict(size=10, color='blue', opacity=0.7),
-        text=ranks_data['Agent Name']
-    ))
-    fig.update_layout(
-        title="Contracts Tracked vs Dollar Index",
-        xaxis_title="Contracts Tracked (CT)",
-        yaxis_title="Dollar Index",
-        yaxis=dict(range=[0.5, 1.5]),
-        template="plotly_white"
-    )
-    
-    # ---- Add Trend Line ----
-    # Sort agents by CT in ascending order.
-    df_sorted = ranks_data.sort_values(by='CT').reset_index(drop=True)
-    # Compute cumulative average using numpy.
-    cum_avg = np.cumsum(df_sorted['Dollar Index']) / np.arange(1, len(df_sorted) + 1)
-    # Add the trend line.
-    fig.add_trace(go.Scatter(
-        x=df_sorted['CT'],
-        y=cum_avg,
-        mode='lines',
-        name='Cumulative Average Dollar Index',
-        line=dict(color='red', dash='dash')
-    ))
-    # --------------------------
-    
-    st.plotly_chart(fig, use_container_width=True)
-
-    # ---- Add Trend Line ----
-    # Sort agents by Contracts Tracked (CT) in ascending order
-    df_sorted = ranks_data.sort_values(by='CT').reset_index(drop=True)
-    # Compute the cumulative average of Dollar Index
-    df_sorted['cum_avg'] = df_sorted['Dollar Index'].expanding().mean()
-    # Add a trend line (as a dashed red line) to the scatter plot
-    fig.add_trace(go.Scatter(
-        x=df_sorted['CT'],
-        y=df_sorted['cum_avg'],
-        mode='lines',
-        name='Cumulative Average Dollar Index',
-        line=dict(color='red', dash='dash')
-    ))
-    # --------------------------
-    
-    st.plotly_chart(fig, use_container_width=True)
-
 def leaderboard_page():
     st.title("Agent Leaderboard")
     agents_data, ranks_data, piba_data = load_data()
@@ -551,6 +491,11 @@ def leaderboard_page():
                     </div>
                     """, unsafe_allow_html=True)
 
+# --------------------------------------------------------------------
+# 4) Visualizations and Project Definitions
+# --------------------------------------------------------------------
+# Note: There are two definitions of overall_visualizations.
+# The second definition (below) is the one used by your sidebar.
 def overall_visualizations():
     st.title("Visualizations and Takeaways")
     st.write("""
@@ -574,6 +519,23 @@ def overall_visualizations():
         yaxis=dict(range=[0.5, 1.5]),
         template="plotly_white"
     )
+    
+    # ----- New Yellow Trend Line (Linear Regression) -----
+    x = ranks_data['CT']
+    y = ranks_data['Dollar Index']
+    slope, intercept = np.polyfit(x, y, 1)
+    x_line = np.linspace(x.min(), x.max(), 100)
+    y_line = slope * x_line + intercept
+
+    fig.add_trace(go.Scatter(
+        x=x_line,
+        y=y_line,
+        mode='lines',
+        name='Average Dollar Index Trend',
+        line=dict(color='yellow', width=3)
+    ))
+    # ------------------------------------------------------
+    
     st.plotly_chart(fig, use_container_width=True)
 
 def project_definitions():
@@ -597,7 +559,7 @@ def project_definitions():
         st.markdown("---")
 
 # --------------------------------------------------------------------
-# 4) Navigation
+# 5) Navigation
 # --------------------------------------------------------------------
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Leaderboard", "Visualizations and Takeaways", "Project Definitions"])
