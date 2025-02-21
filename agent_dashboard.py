@@ -521,19 +521,26 @@ def overall_visualizations():
     )
     
     # ----- New Yellow Trend Line (Linear Regression) -----
-    x = ranks_data['CT']
-    y = ranks_data['Dollar Index']
-    slope, intercept = np.polyfit(x, y, 1)
-    x_line = np.linspace(x.min(), x.max(), 100)
-    y_line = slope * x_line + intercept
+    x = ranks_data['CT'].astype(float)
+    y = ranks_data['Dollar Index'].astype(float)
+    mask = np.isfinite(x) & np.isfinite(y)
+    if mask.sum() > 1:
+        try:
+            slope, intercept = np.polyfit(x[mask], y[mask], 1)
+            x_line = np.linspace(x.min(), x.max(), 100)
+            y_line = slope * x_line + intercept
 
-    fig.add_trace(go.Scatter(
-        x=x_line,
-        y=y_line,
-        mode='lines',
-        name='Average Dollar Index Trend',
-        line=dict(color='yellow', width=3)
-    ))
+            fig.add_trace(go.Scatter(
+                x=x_line,
+                y=y_line,
+                mode='lines',
+                name='Average Dollar Index Trend',
+                line=dict(color='yellow', width=3)
+            ))
+        except np.linalg.LinAlgError as e:
+            st.write("Trend line could not be computed due to a numerical error.")
+    else:
+        st.write("Not enough data to compute a trend line.")
     # ------------------------------------------------------
     
     st.plotly_chart(fig, use_container_width=True)
