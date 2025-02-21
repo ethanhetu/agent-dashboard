@@ -498,12 +498,12 @@ def project_definitions():
     st.title("📚 Project Definitions")
 
     definitions = [
-        ("Dollar Index", "A composite metric that ranks agents based on various financial criteria, serving as an overall indicator of performance."),
-        ("Win %", "The percentage of deals or contracts won by an agent, indicating their success rate."),
-        ("Contracts Tracked", "The total number of contracts that an agent is actively monitoring and managing."),
-        ("VCP", "Value Capture Percentage – calculated as the ratio of player cost to player value, expressed as a percentage."),
-        ("Six-Year Agent Delivery", "A performance metric that aggregates an agent’s success over six years, reflecting the overall delivery and impact of their client portfolio."),
-        ("Player Contributions", "The on-ice contributions of players, often measured through statistical data such as cost and performance metrics (e.g., PC).")
+        ("Dollar Index", "This is the key metric for evaluating agent performance. It answers a key question: for every dollar of on-ice value a client provides to a team, how many dollars does the agent manage to capture from the team?"),
+        ("Win %", "Win % is measured by contract years. It is the percentage of contract years that are considered a 'win' for the agent. A contract year is considered a 'win' for an agent when the dollars he or she is able to capture for their client exceeds the dollars of on-ice value provided by that client."),
+        ("Contracts Tracked", "This is simply the number of contracts an agent has negotiated that qualify for the purposes of this project. Entry-level contracts are excluded, but two-way contracts are included."),
+        ("VCP", "Value Capture Percentage – the percentage of a player's on-ice value that an agent was able to capture as paid compensation to said player. It is similar to Dollar Index, but communicated as a percentage rather than a financial expression."),
+        ("Six-Year Agent Delivery", "Our project looks at agent performance over a six-year sample size, from 2018-19 through 2023-24. Six Year Agent Delivery is the total number of dollars, relative to on-ice contribution, that an agent has managed to deliver to his or her client."),
+        ("Player Contributions", "Player Contributions, or 'PC' is the metric that places a financial value on a player's on-ice performance. The data, which comes courtesy of BenchRates, utilizes all available NHL and AHL player performance metrics.")
     ]
     
     # Create a box for each term/definition pair using two columns.
