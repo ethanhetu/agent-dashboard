@@ -498,7 +498,7 @@ def project_definitions():
     st.title("📚 Project Definitions")
 
     definitions = [
-        ("Dollar Index", "This is the key metric for evaluating agent performance. It answers a key question: for every dollar of on-ice value a client provides to a team, how many dollars does the agent manage to capture from the team?"),
+        ("Dollar Index", "This is the key metric for evaluating agent performance. It answers a key question: for every dollar of on-ice value a client provides to a team, how many dollars has the agent managed to capture from the team?"),
         ("Win %", "Win % is measured by contract years. It is the percentage of contract years that are considered a 'win' for the agent. A contract year is considered a 'win' for an agent when the dollars he or she is able to capture for their client exceeds the dollars of on-ice value provided by that client."),
         ("Contracts Tracked", "This is simply the number of contracts an agent has negotiated that qualify for the purposes of this project. Entry-level contracts are excluded, but two-way contracts are included."),
         ("VCP", "Value Capture Percentage – the percentage of a player's on-ice value that an agent was able to capture as paid compensation to said player. It is similar to Dollar Index, but communicated as a percentage rather than a financial expression."),
