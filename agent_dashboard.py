@@ -395,7 +395,7 @@ def agency_dashboard():
         st.write("No client names available for sorting.")
 
 def overall_visualizations():
-    st.title("Overall Visualizations and Takeaways")
+    st.title("Visualizations and Takeaways")
     st.write("""
     The scatter plot below shows each agent as a dot. The X axis represents Contracts Tracked (CT), 
     and the Y axis represents the Dollar Index. This helps visualize whether agents with a larger portfolio 
