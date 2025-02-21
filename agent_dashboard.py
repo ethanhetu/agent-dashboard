@@ -433,22 +433,6 @@ def overall_visualizations():
         name='Cumulative Average Dollar Index',
         line=dict(color='red', dash='dash')
     ))
-
-# Compute a linear regression trend line
-x = ranks_data['CT']
-y = ranks_data['Dollar Index']
-slope, intercept = np.polyfit(x, y, 1)
-x_line = np.linspace(x.min(), x.max(), 100)
-y_line = slope * x_line + intercept
-
-# Add the yellow trend line to the scatter plot
-fig.add_trace(go.Scatter(
-    x=x_line,
-    y=y_line,
-    mode='lines',
-    name='Average Dollar Index Trend',
-    line=dict(color='yellow', width=3)
-))
     # --------------------------
     
     st.plotly_chart(fig, use_container_width=True)
