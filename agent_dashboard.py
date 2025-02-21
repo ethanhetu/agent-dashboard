@@ -402,11 +402,12 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
 
-    # Filter out agents who don't have an agent page.
-    valid_agents = set(agents_data['Agent Name'].dropna())
-    ranks_data = ranks_data[ranks_data['Agent Name'].isin(valid_agents)]
-    piba_data = piba_data[piba_data['Agent Name'].isin(valid_agents)]
-
+    # Build valid agent list from the Agents tab.
+    valid_agents = set(agents_data['Agent Name'].dropna().str.strip())
+    # Filter out any agents not present in the Agents tab.
+    ranks_data = ranks_data[ranks_data['Agent Name'].str.strip().isin(valid_agents)]
+    piba_data = piba_data[piba_data['Agent Name'].str.strip().isin(valid_agents)]
+    
     st.subheader("Overall Standings (by Dollar Index)")
     filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
 
@@ -441,7 +442,7 @@ def leaderboard_page():
     st.markdown("---")
     st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
     # Create a mapping from agent name to agency using ranks_data.
-    agency_map = dict(zip(ranks_data["Agent Name"], ranks_data["Agency Name"]))
+    agency_map = dict(zip(ranks_data["Agent Name"].str.strip(), ranks_data["Agency Name"].str.strip()))
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
 
     for season in sorted(agent_vcp_by_season.keys(), reverse=True):
@@ -461,7 +462,7 @@ def leaderboard_page():
             with cols[0]:
                 if i < len(winners):
                     w = winners.loc[i]
-                    agency = agency_map.get(w['Agent Name'], "")
+                    agency = agency_map.get(w['Agent Name'].strip(), "")
                     st.markdown(f"""
                     <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="flex: 1; font-size: 16px; font-weight: bold;">
@@ -475,7 +476,7 @@ def leaderboard_page():
             with cols[1]:
                 if i < len(losers):
                     l = losers.loc[i]
-                    agency = agency_map.get(l['Agent Name'], "")
+                    agency = agency_map.get(l['Agent Name'].strip(), "")
                     st.markdown(f"""
                     <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="flex: 1; font-size: 16px; font-weight: bold;">
