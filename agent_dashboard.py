@@ -397,11 +397,11 @@ def agency_dashboard():
 def overall_visualizations():
     st.title("Visualizations and Takeaways")
     st.write("""
-    The scatter plot below shows each agent as a dot. The X axis represents Contracts Tracked (CT), 
-    and the Y axis represents the Dollar Index. This helps visualize whether agents with a larger portfolio 
-    tend to have a higher Dollar Index.
+    The scatter plot below shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
+    and the Y axis represents the Dollar Index. The y-axis is limited to a range of 0.5 to 1.5 to better
+    highlight the differences among most agents.
     """)
-    # We'll use ranks_data for this visualization.
+    # We'll use ranks_data for the scatter plot.
     _, ranks_data, _ = load_data()
     fig = go.Figure(data=go.Scatter(
         x=ranks_data['CT'],
@@ -414,8 +414,25 @@ def overall_visualizations():
         title="Contracts Tracked vs Dollar Index",
         xaxis_title="Contracts Tracked (CT)",
         yaxis_title="Dollar Index",
+        yaxis=dict(range=[0.5, 1.5]),
         template="plotly_white"
     )
+
+    # ---- Add Trend Line ----
+    # Sort agents by Contracts Tracked (CT) in ascending order
+    df_sorted = ranks_data.sort_values(by='CT').reset_index(drop=True)
+    # Compute the cumulative average of Dollar Index
+    df_sorted['cum_avg'] = df_sorted['Dollar Index'].expanding().mean()
+    # Add a trend line (as a dashed red line) to the scatter plot
+    fig.add_trace(go.Scatter(
+        x=df_sorted['CT'],
+        y=df_sorted['cum_avg'],
+        mode='lines',
+        name='Cumulative Average Dollar Index',
+        line=dict(color='red', dash='dash')
+    ))
+    # --------------------------
+    
     st.plotly_chart(fig, use_container_width=True)
 
 def leaderboard_page():
