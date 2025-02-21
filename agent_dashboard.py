@@ -382,9 +382,9 @@ def agency_dashboard():
     top_clients = agency_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
     top_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
-    display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agency Delivery)", top_delivery_clients)
+    display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agent Delivery)", top_delivery_clients)
     bottom_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
-    display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agency Delivery)", bottom_delivery_clients)
+    display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
     st.markdown("""<hr style="border: 2px solid #ccc; margin: 40px 0;">""", unsafe_allow_html=True)
     st.subheader("📋 All Clients")
     if 'Combined Names' in agency_players.columns:
@@ -503,9 +503,10 @@ def overall_visualizations():
     and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
     tend to have a higher Dollar Index.
     """)
-    
+
     # ----- Agent Tendency Classifications Section -----
     _, ranks_data, _ = load_data()
+
     # Sort agents based on Dollar Index thresholds:
     # Team-Friendly: Dollar Index ≤ 92.5
     # Market-Attuned: Dollar Index between 92.51 and 107.5
@@ -519,6 +520,7 @@ def overall_visualizations():
         for _, row in df.iterrows():
             agent_name = row['Agent Name']
             agency = row['Agency Name']
+            # Build HTML snippet for each agent
             cards += f"""
             <div style="text-align: left; margin-bottom: 8px;">
                <div style="font-size: 16px; font-weight: bold;">{agent_name}</div>
@@ -531,6 +533,7 @@ def overall_visualizations():
     market_cards = build_agent_cards(market_attuned)
     team_cards = build_agent_cards(team_friendly)
     
+    # Final HTML block with 3 columns
     html_content = f"""
     <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
       <div style="text-align: center; margin-bottom: 16px;">
@@ -552,11 +555,11 @@ def overall_visualizations():
       </div>
     </div>
     """
-    
+
+    # Render the classification HTML
     st.markdown(html_content, unsafe_allow_html=True)
-    # ----- End Agent Tendency Classifications Section -----
-    
-    # Use ranks_data for the scatter plot.
+
+    # ----- Scatter Plot with Yellow Trend Line -----
     fig = go.Figure(data=go.Scatter(
         x=ranks_data['CT'],
         y=ranks_data['Dollar Index'],
@@ -571,8 +574,8 @@ def overall_visualizations():
         yaxis=dict(range=[0.5, 1.5]),
         template="plotly_white"
     )
-    
-    # ----- New Yellow Trend Line (Linear Regression) -----
+
+    # Fit a linear regression line if possible
     x = ranks_data['CT'].astype(float)
     y = ranks_data['Dollar Index'].astype(float)
     mask = np.isfinite(x) & np.isfinite(y)
@@ -593,8 +596,7 @@ def overall_visualizations():
             st.write("Trend line could not be computed due to a numerical error.")
     else:
         st.write("Not enough data to compute a trend line.")
-    # ------------------------------------------------------
-    
+
     st.plotly_chart(fig, use_container_width=True)
 
 def project_definitions():
