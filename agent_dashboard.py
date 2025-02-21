@@ -18,7 +18,7 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 HEADSHOTS_DIR = "headshots_cache"  # For player headshots
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
-# Globals for agent photos (unused in  now)
+# Globals for agent photos (unused in leaderboard now)
 AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos from release
 AGENT_PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Agent_placeholder.png"
 
@@ -285,7 +285,6 @@ def display_player_section(title, player_df):
                 )
             display_name = correct_player_name(player['Combined Names'])
             st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{display_name}</h4>", unsafe_allow_html=True)
-            # Calculate VCP as (Total Cost / Total PC) * 100
             try:
                 vcp_value = (player['Total Cost'] / player['Total PC']) * 100
             except Exception as e:
@@ -395,6 +394,30 @@ def agency_dashboard():
     else:
         st.write("No client names available for sorting.")
 
+def overall_visualizations():
+    st.title("Overall Visualizations and Takeaways")
+    st.write("""
+    The scatter plot below shows each agent as a dot. The X axis represents Contracts Tracked (CT), 
+    and the Y axis represents the Dollar Index. This helps visualize whether agents with a larger portfolio 
+    tend to have a higher Dollar Index.
+    """)
+    # We'll use ranks_data for this visualization.
+    _, ranks_data, _ = load_data()
+    fig = go.Figure(data=go.Scatter(
+        x=ranks_data['CT'],
+        y=ranks_data['Dollar Index'],
+        mode='markers',
+        marker=dict(size=10, color='blue', opacity=0.7),
+        text=ranks_data['Agent Name']
+    ))
+    fig.update_layout(
+        title="Contracts Tracked vs Dollar Index",
+        xaxis_title="Contracts Tracked (CT)",
+        yaxis_title="Dollar Index",
+        template="plotly_white"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
 def leaderboard_page():
     st.title("Agent Leaderboard")
     agents_data, ranks_data, piba_data = load_data()
@@ -470,8 +493,7 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="flex: 1; font-size: 16px; font-weight: bold;">
-                            {w['Agent Name']}<br/>
-                            <span style="font-size: 14px; font-weight: normal;">{agency}</span>
+                            {w['Agent Name']}<br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
                         </div>
                         <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
                             <span style="font-weight: bold;">{w['VCP']:.0f}%</span>
@@ -485,8 +507,7 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="flex: 1; font-size: 16px; font-weight: bold;">
-                            {l['Agent Name']}<br/>
-                            <span style="font-size: 14px; font-weight: normal;">{agency}</span>
+                            {l['Agent Name']}<br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
                         </div>
                         <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
                             <span style="font-weight: bold;">{l['VCP']:.0f}%</span>
@@ -494,33 +515,55 @@ def leaderboard_page():
                     </div>
                     """, unsafe_allow_html=True)
 
+def overall_visualizations():
+    st.title("Overall Visualizations and Takeaways")
+    st.write("""
+    The scatter plot below shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
+    and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
+    tend to have a higher Dollar Index.
+    """)
+    # Use ranks_data for the scatter plot.
+    _, ranks_data, _ = load_data()
+    fig = go.Figure(data=go.Scatter(
+        x=ranks_data['CT'],
+        y=ranks_data['Dollar Index'],
+        mode='markers',
+        marker=dict(size=10, color='blue', opacity=0.7),
+        text=ranks_data['Agent Name']
+    ))
+    fig.update_layout(
+        title="Contracts Tracked vs Dollar Index",
+        xaxis_title="Contracts Tracked (CT)",
+        yaxis_title="Dollar Index",
+        template="plotly_white"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
 def project_definitions():
     st.title("📚 Project Definitions")
 
     definitions = [
-        ("Dollar Index", "This is the key metric for evaluating agent performance. It answers a key question: for every dollar of on-ice value a client provides to a team, how many dollars has the agent managed to capture from the team?"),
-        ("Win %", "Win % is measured by contract years. It is the percentage of contract years that are considered a 'win' for the agent. A contract year is considered a 'win' for an agent when the dollars he or she is able to capture for their client exceeds the dollars of on-ice value provided by that client."),
-        ("Contracts Tracked", "This is simply the number of contracts an agent has negotiated that qualify for the purposes of this project. Entry-level contracts are excluded, but two-way contracts are included."),
-        ("VCP", "Value Capture Percentage – the percentage of a player's on-ice value that an agent was able to capture as paid compensation to said player. It is similar to Dollar Index, but communicated as a percentage rather than a financial expression."),
-        ("Six-Year Agent Delivery", "Our project looks at agent performance over a six-year sample size, from 2018-19 through 2023-24. Six Year Agent Delivery is the total number of dollars, relative to on-ice contribution, that an agent has managed to deliver to his or her client."),
-        ("Player Contributions", "Player Contributions, or 'PC' is the metric that places a financial value on a player's on-ice performance. The data, which comes courtesy of BenchRates, utilizes all available NHL and AHL player performance metrics.")
+        ("Dollar Index", "This metric evaluates agent performance. It answers: For every dollar of on-ice value a client provides, how many dollars does the agent capture?"),
+        ("Win %", "The percentage of contract years considered a 'win' for the agent. A win occurs when the dollars captured exceed the player's on-ice value."),
+        ("Contracts Tracked", "The number of negotiated contracts that qualify for this project (excluding entry-level contracts but including two-way contracts)."),
+        ("VCP", "Value Capture Percentage – the percentage of a player's on-ice value that the agent is able to capture as compensation."),
+        ("Six-Year Agent Delivery", "An aggregate measure over six seasons (2018-19 through 2023-24) of the dollars delivered by an agent relative to on-ice contribution."),
+        ("Player Contributions", "Also known as 'PC', this metric assigns a financial value to a player's on-ice performance using comprehensive NHL and AHL data.")
     ]
     
-    # Create a box for each term/definition pair using two columns.
     for term, definition in definitions:
         col1, col2 = st.columns([1, 3])
         with col1:
             st.markdown(f"**{term}**")
         with col2:
             st.markdown(definition)
-        st.markdown("---")  # Divider between definitions
-
+        st.markdown("---")
 
 # --------------------------------------------------------------------
 # 4) Navigation
 # --------------------------------------------------------------------
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Leaderboard", "Project Definitions"])
+page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Leaderboard", "Overall Visualizations and Takeaways", "Project Definitions"])
 
 if page == "Home":
     st.title("Welcome to the Agent Insights Dashboard!")
@@ -530,5 +573,7 @@ elif page == "Agency Dashboard":
     agency_dashboard()
 elif page == "Leaderboard":
     leaderboard_page()
+elif page == "Overall Visualizations and Takeaways":
+    overall_visualizations()
 elif page == "Project Definitions":
     project_definitions()
