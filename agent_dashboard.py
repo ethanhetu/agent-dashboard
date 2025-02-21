@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-from io import BytesIO
 import tempfile
 from datetime import datetime
 import zipfile
@@ -382,9 +381,9 @@ def agency_dashboard():
     top_clients = agency_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
     top_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
-    display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agent Delivery)", top_delivery_clients)
+    display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agency Delivery)", top_delivery_clients)
     bottom_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
-    display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
+    display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agency Delivery)", bottom_delivery_clients)
     st.markdown("""<hr style="border: 2px solid #ccc; margin: 40px 0;">""", unsafe_allow_html=True)
     st.subheader("📋 All Clients")
     if 'Combined Names' in agency_players.columns:
@@ -494,8 +493,6 @@ def leaderboard_page():
 # --------------------------------------------------------------------
 # 4) Visualizations and Project Definitions
 # --------------------------------------------------------------------
-# Note: There are two definitions of overall_visualizations.
-# The second definition (below) is the one used by your sidebar.
 def overall_visualizations():
     st.title("Visualizations and Takeaways")
     st.write("""
@@ -520,7 +517,6 @@ def overall_visualizations():
         for _, row in df.iterrows():
             agent_name = row['Agent Name']
             agency = row['Agency Name']
-            # Build HTML snippet for each agent
             cards += f"""
             <div style="text-align: left; margin-bottom: 8px;">
                <div style="font-size: 16px; font-weight: bold;">{agent_name}</div>
@@ -533,32 +529,28 @@ def overall_visualizations():
     market_cards = build_agent_cards(market_attuned)
     team_cards = build_agent_cards(team_friendly)
     
-    # Final HTML block with 3 columns
-    html_content = f"""
-    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-      <div style="text-align: center; margin-bottom: 16px;">
-         <strong>Agent Tendency Classifications</strong>
-      </div>
-      <div style="display: flex; justify-content: space-between;">
-        <div style="flex: 1; padding: 8px; border-right: 1px solid #ccc;">
-          <h3 style="color: #8B0000; font-weight: bold; text-align: center;">Player-Friendly</h3>
-          {player_cards}
-        </div>
-        <div style="flex: 1; padding: 8px; border-right: 1px solid #ccc;">
-          <h3 style="color: black; font-weight: bold; text-align: center;">Market-Attuned</h3>
-          {market_cards}
-        </div>
-        <div style="flex: 1; padding: 8px;">
-          <h3 style="color: #006400; font-weight: bold; text-align: center;">Team-Friendly</h3>
-          {team_cards}
-        </div>
-      </div>
-    </div>
-    """
+    html_content = (
+        "<div style='border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px;'>"
+        "<div style='text-align: center; margin-bottom: 16px;'><strong>Agent Tendency Classifications</strong></div>"
+        "<div style='display: flex; justify-content: space-between;'>"
+        "<div style='flex: 1; padding: 8px; border-right: 1px solid #ccc;'>"
+        "<h3 style='color: #8B0000; font-weight: bold; text-align: center;'>Player-Friendly</h3>"
+        + player_cards +
+        "</div>"
+        "<div style='flex: 1; padding: 8px; border-right: 1px solid #ccc;'>"
+        "<h3 style='color: black; font-weight: bold; text-align: center;'>Market-Attuned</h3>"
+        + market_cards +
+        "</div>"
+        "<div style='flex: 1; padding: 8px;'>"
+        "<h3 style='color: #006400; font-weight: bold; text-align: center;'>Team-Friendly</h3>"
+        + team_cards +
+        "</div>"
+        "</div></div>"
+    )
 
-    # Render the classification HTML
     st.markdown(html_content, unsafe_allow_html=True)
-
+    # ----- End Agent Tendency Classifications Section -----
+    
     # ----- Scatter Plot with Yellow Trend Line -----
     fig = go.Figure(data=go.Scatter(
         x=ranks_data['CT'],
@@ -575,7 +567,6 @@ def overall_visualizations():
         template="plotly_white"
     )
 
-    # Fit a linear regression line if possible
     x = ranks_data['CT'].astype(float)
     y = ranks_data['Dollar Index'].astype(float)
     mask = np.isfinite(x) & np.isfinite(y)
@@ -598,10 +589,10 @@ def overall_visualizations():
         st.write("Not enough data to compute a trend line.")
 
     st.plotly_chart(fig, use_container_width=True)
+    # ----- End Scatter Plot Section -----
 
 def project_definitions():
     st.title("📚 Project Definitions")
-
     definitions = [
         ("Dollar Index", "This metric evaluates agent performance. It answers: For every dollar of on-ice value a client provides, how many dollars does the agent capture?"),
         ("Win %", "The percentage of contract years considered a 'win' for the agent. A win occurs when the dollars captured exceed the player's on-ice value."),
@@ -610,7 +601,6 @@ def project_definitions():
         ("Six-Year Agent Delivery", "An aggregate measure over six seasons (2018-19 through 2023-24) of the dollars delivered by an agent relative to on-ice contribution."),
         ("Player Contributions", "Also known as 'PC', this metric assigns a financial value to a player's on-ice performance using comprehensive NHL and AHL data.")
     ]
-    
     for term, definition in definitions:
         col1, col2 = st.columns([1, 3])
         with col1:
