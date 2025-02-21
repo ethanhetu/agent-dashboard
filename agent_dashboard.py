@@ -18,7 +18,7 @@ st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
 HEADSHOTS_DIR = "headshots_cache"  # For player headshots
 PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg"
 
-# Globals for agent photos (unused in leaderboard now)
+# Globals for agent photos (unused in  now)
 AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos from release
 AGENT_PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Agent_placeholder.png"
 
@@ -402,9 +402,13 @@ def leaderboard_page():
         st.error("Error loading data for leaderboard.")
         st.stop()
 
-    # Build valid agent list from the Agents tab.
+    # Define manual exclusion list.
+    excluded_agents = {"Patrik Aronsson", "Chris McAlpine", "David Kaye", "Thomas Lynn"}
+
+    # Build valid agent list from the Agents tab and exclude manually.
     valid_agents = set(agents_data['Agent Name'].dropna().str.strip())
-    # Filter out any agents not present in the Agents tab.
+    valid_agents = valid_agents - excluded_agents
+    # Filter out agents not in valid_agents from both ranks_data and piba_data.
     ranks_data = ranks_data[ranks_data['Agent Name'].str.strip().isin(valid_agents)]
     piba_data = piba_data[piba_data['Agent Name'].str.strip().isin(valid_agents)]
     
@@ -441,7 +445,7 @@ def leaderboard_page():
 
     st.markdown("---")
     st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
-    # Create a mapping from agent name to agency using ranks_data.
+    # Create mapping from agent name to agency using filtered ranks_data.
     agency_map = dict(zip(ranks_data["Agent Name"].str.strip(), ranks_data["Agency Name"].str.strip()))
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
 
@@ -466,7 +470,8 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="flex: 1; font-size: 16px; font-weight: bold;">
-                            {w['Agent Name']}<br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
+                            {w['Agent Name']}<br/>
+                            <span style="font-size: 14px; font-weight: normal;">{agency}</span>
                         </div>
                         <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
                             <span style="font-weight: bold;">{w['VCP']:.0f}%</span>
@@ -480,7 +485,8 @@ def leaderboard_page():
                     st.markdown(f"""
                     <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
                         <div style="flex: 1; font-size: 16px; font-weight: bold;">
-                            {l['Agent Name']}<br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
+                            {l['Agent Name']}<br/>
+                            <span style="font-size: 14px; font-weight: normal;">{agency}</span>
                         </div>
                         <div style="flex: 0 0 80px; text-align: right; font-size: 16px; border-left: 1px solid #ccc; padding-left: 8px;">
                             <span style="font-weight: bold;">{l['VCP']:.0f}%</span>
