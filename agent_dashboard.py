@@ -403,7 +403,7 @@ def leaderboard_page():
         st.stop()
 
     # Define manual exclusion list.
-    excluded_agents = {"Patrik Aronsson", "Chris McAlpine", "David Kaye", "Thomas Lynn, Patrick Sullivan"}
+    excluded_agents = {"Patrik Aronsson", "Chris McAlpine", "David Kaye", "Thomas Lynn", "Patrick Sullivan"}
 
     # Build valid agent list from the Agents tab and exclude manually.
     valid_agents = set(agents_data['Agent Name'].dropna().str.strip())
