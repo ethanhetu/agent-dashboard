@@ -516,7 +516,7 @@ def leaderboard_page():
                     """, unsafe_allow_html=True)
 
 def overall_visualizations():
-    st.title("Overall Visualizations and Takeaways")
+    st.title("Visualizations and Takeaways")
     st.write("""
     The scatter plot below shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
     and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
@@ -564,7 +564,7 @@ def project_definitions():
 # 4) Navigation
 # --------------------------------------------------------------------
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Leaderboard", "Overall Visualizations and Takeaways", "Project Definitions"])
+page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Leaderboard", "Visualizations and Takeaways", "Project Definitions"])
 
 if page == "Home":
     st.title("Welcome to the Agent Insights Dashboard!")
@@ -574,7 +574,7 @@ elif page == "Agency Dashboard":
     agency_dashboard()
 elif page == "Leaderboard":
     leaderboard_page()
-elif page == "Overall Visualizations and Takeaways":
+elif page == "Visualizations and Takeaways":
     overall_visualizations()
 elif page == "Project Definitions":
     project_definitions()
