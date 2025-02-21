@@ -133,7 +133,7 @@ def get_headshot_path(player_name):
             if close_matches:
                 best_match = close_matches[0]
                 return os.path.join(HEADSHOTS_DIR, names_dict[best_match])
-        except Exception as e:
+        except Exception:
             pass
     return None
 
@@ -152,7 +152,7 @@ def image_to_data_uri(image_path):
         with open(image_path, "rb") as img_file:
             b64_string = base64.b64encode(img_file.read()).decode('utf-8')
         return f"data:image/png;base64,{b64_string}"
-    except Exception as e:
+    except Exception:
         return PLACEHOLDER_IMAGE_URL
 
 def calculate_age(birthdate):
@@ -173,7 +173,7 @@ def format_value_capture_percentage(value):
     try:
         if value is not None and value < 2:
             value = value * 100
-    except Exception as e:
+    except Exception:
         pass
     color = "#006400" if value >= 100 else "#8B0000"
     return f"<p style='font-weight:bold; text-align:center;'>Value Capture Percentage: <span style='color:{color};'>{value:.0f}%</span></p>"
@@ -197,7 +197,7 @@ def compute_vcp_for_agent(agent_players):
                 results[season] = round((total_cost / total_pc) * 100, 2)
             else:
                 results[season] = None
-        except Exception as e:
+        except Exception:
             results[season] = None
     return results
 
@@ -286,7 +286,7 @@ def display_player_section(title, player_df):
             st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{display_name}</h4>", unsafe_allow_html=True)
             try:
                 vcp_value = (player['Total Cost'] / player['Total PC']) * 100
-            except Exception as e:
+            except Exception:
                 vcp_value = None
             box_html = f"""
             <div style="border: 2px solid #ddd; padding: 10px; border-radius: 10px;">
@@ -381,9 +381,9 @@ def agency_dashboard():
     top_clients = agency_players.sort_values(by='Total Cost', ascending=False).head(3)
     display_player_section("Top 3 Clients by Total Cost", top_clients)
     top_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=False).head(3)
-    display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agency Delivery)", top_delivery_clients)
+    display_player_section("🏅 Agency 'Wins' (Top 3 by Six-Year Agent Delivery)", top_delivery_clients)
     bottom_delivery_clients = agency_players.sort_values(by='Dollars Captured Above/ Below Value', ascending=True).head(3)
-    display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agency Delivery)", bottom_delivery_clients)
+    display_player_section("❌ Agency 'Losses' (Bottom 3 by Six-Year Agent Delivery)", bottom_delivery_clients)
     st.markdown("""<hr style="border: 2px solid #ccc; margin: 40px 0;">""", unsafe_allow_html=True)
     st.subheader("📋 All Clients")
     if 'Combined Names' in agency_players.columns:
@@ -501,57 +501,135 @@ def overall_visualizations():
     tend to have a higher Dollar Index.
     """)
 
-    # ----- Agent Tendency Classifications Section -----
-    _, ranks_data, _ = load_data()
+    # ----- Agent Tendency Classifications (STATIC) -----
+    # Replaces any auto-sorting with your direct lists:
+    html_content = """
+    <div style='border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px;'>
+      <div style='text-align: center; margin-bottom: 16px;'>
+         <strong>Agent Tendency Classifications</strong>
+      </div>
+      <div style='display: flex; justify-content: space-between;'>
 
-    # Sort agents based on Dollar Index thresholds:
-    # Team-Friendly: Dollar Index ≤ 92.5
-    # Market-Attuned: Dollar Index between 92.51 and 107.5
-    # Player-Friendly: Dollar Index > 107.5
-    team_friendly = ranks_data[ranks_data['Dollar Index'] <= 92.5]
-    market_attuned = ranks_data[(ranks_data['Dollar Index'] > 92.5) & (ranks_data['Dollar Index'] <= 107.5)]
-    player_friendly = ranks_data[ranks_data['Dollar Index'] > 107.5]
-    
-    def build_agent_cards(df):
-        cards = ""
-        for _, row in df.iterrows():
-            agent_name = row['Agent Name']
-            agency = row['Agency Name']
-            cards += f"""
-            <div style="text-align: left; margin-bottom: 8px;">
-               <div style="font-size: 16px; font-weight: bold;">{agent_name}</div>
-               <div style="font-size: 14px; font-weight: normal;">{agency}</div>
-            </div>
-            """
-        return cards
-    
-    player_cards = build_agent_cards(player_friendly)
-    market_cards = build_agent_cards(market_attuned)
-    team_cards = build_agent_cards(team_friendly)
-    
-    html_content = (
-        "<div style='border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px;'>"
-        "<div style='text-align: center; margin-bottom: 16px;'><strong>Agent Tendency Classifications</strong></div>"
-        "<div style='display: flex; justify-content: space-between;'>"
-        "<div style='flex: 1; padding: 8px; border-right: 1px solid #ccc;'>"
-        "<h3 style='color: #8B0000; font-weight: bold; text-align: center;'>Player-Friendly</h3>"
-        + player_cards +
-        "</div>"
-        "<div style='flex: 1; padding: 8px; border-right: 1px solid #ccc;'>"
-        "<h3 style='color: black; font-weight: bold; text-align: center;'>Market-Attuned</h3>"
-        + market_cards +
-        "</div>"
-        "<div style='flex: 1; padding: 8px;'>"
-        "<h3 style='color: #006400; font-weight: bold; text-align: center;'>Team-Friendly</h3>"
-        + team_cards +
-        "</div>"
-        "</div></div>"
-    )
+        <!-- TEAM FRIENDLY (dark green) -->
+        <div style='flex: 1; padding: 8px; border-right: 1px solid #ccc;'>
+          <h3 style='color: #006400; font-weight: bold; text-align: center;'>Team Friendly</h3>
+          <div style='text-align: left; margin-bottom: 8px; font-size: 16px;'>
+            <strong>Peter Fish</strong><br/><br/>
+            <strong>Daniel Milstein</strong><br/><br/>
+            <strong>Murray Koontz</strong><br/><br/>
+            <strong>Georges Mueller</strong><br/><br/>
+            <strong>Shawn Hunwick</strong><br/><br/>
+            <strong>Jerry Buckley</strong><br/><br/>
+            <strong>David Gagner</strong><br/><br/>
+            <strong>Mika Rautakallio</strong><br/><br/>
+            <strong>Lewis Gross</strong><br/><br/>
+            <strong>Paul Corbeil</strong><br/><br/>
+            <strong>Stephen F. Reich</strong><br/><br/>
+            <strong>Rick Valette</strong><br/><br/>
+            <strong>Todd Reynolds</strong><br/><br/>
+            <strong>Jason Davidson</strong><br/><br/>
+            <strong>Dave Cowan</strong><br/><br/>
+            <strong>Markus Lehto</strong><br/><br/>
+            <strong>Matt Keator</strong><br/><br/>
+            <strong>Ray (Raynold) Petkau</strong><br/><br/>
+            <strong>Richard Evans</strong><br/><br/>
+            <strong>Matthew Federico</strong><br/><br/>
+            <strong>Brian MacDonald</strong><br/><br/>
+            <strong>Dean Grillo</strong><br/><br/>
+            <strong>Serge Payer</strong><br/><br/>
+            <strong>Daniel Plante</strong><br/><br/>
+            <strong>Michael Deutsch</strong><br/><br/>
+            <strong>Eric Quinlan &amp; Nicholas Martino</strong><br/><br/>
+            <strong>Monir Kalgoum</strong><br/><br/>
+            <strong>Matthew Ebbs</strong><br/><br/>
+            <strong>Joakim Persson</strong><br/><br/>
+            <strong>Maxim Moliver</strong><br/><br/>
+          </div>
+        </div>
+
+        <!-- MARKET-ORIENTED (black) -->
+        <div style='flex: 1; padding: 8px; border-right: 1px solid #ccc;'>
+          <h3 style='color: black; font-weight: bold; text-align: center;'>Market-Oriented</h3>
+          <div style='text-align: left; margin-bottom: 8px; font-size: 16px;'>
+            <strong>Darren Ferris</strong><br/><br/>
+            <strong>Paul Theofanous</strong><br/><br/>
+            <strong>Paul Capizzano</strong><br/><br/>
+            <strong>Jeff Helperl</strong><br/><br/>
+            <strong>Kurt Overhardt</strong><br/><br/>
+            <strong>Pat Brisson</strong><br/><br/>
+            <strong>Wade Arnott</strong><br/><br/>
+            <strong>Ross Gurney</strong><br/><br/>
+            <strong>Mark Gandler</strong><br/><br/>
+            <strong>Don Meehan</strong><br/><br/>
+            <strong>Claude Lemieux</strong><br/><br/>
+            <strong>Craig Oster</strong><br/><br/>
+            <strong>Philippe Lecavalier</strong><br/><br/>
+            <strong>Andre Rufener</strong><br/><br/>
+            <strong>Jordan Neumann &amp; George Bazos</strong><br/><br/>
+            <strong>Kevin Magnuson</strong><br/><br/>
+            <strong>Robert Norton</strong><br/><br/>
+            <strong>Brian &amp; Scott Bartlett</strong><br/><br/>
+            <strong>Michael Curran</strong><br/><br/>
+            <strong>Andrew Scott</strong><br/><br/>
+            <strong>Joseph Resnick</strong><br/><br/>
+            <strong>Judd Moldaver</strong><br/><br/>
+            <strong>Allan Walsh</strong><br/><br/>
+            <strong>Todd Diamond</strong><br/><br/>
+            <strong>Allain Roy</strong><br/><br/>
+            <strong>Peter Wallen</strong><br/><br/>
+            <strong>Ritchie Winter</strong><br/><br/>
+            <strong>Peter MacTavish</strong><br/><br/>
+            <strong>Ben Hankinson</strong><br/><br/>
+            <strong>Pete Rutili</strong><br/><br/>
+          </div>
+        </div>
+
+        <!-- PLAYER-FRIENDLY (dark red) -->
+        <div style='flex: 1; padding: 8px;'>
+          <h3 style='color: #8B0000; font-weight: bold; text-align: center;'>Player-Friendly</h3>
+          <div style='text-align: left; margin-bottom: 8px; font-size: 16px;'>
+            <strong>Robert Sauve</strong><br/><br/>
+            <strong>Robert Murray</strong><br/><br/>
+            <strong>Mark Stowe</strong><br/><br/>
+            <strong>John Thornton</strong><br/><br/>
+            <strong>Matthew Oates</strong><br/><br/>
+            <strong>Stephen Bartlett</strong><br/><br/>
+            <strong>Ryan Barnes</strong><br/><br/>
+            <strong>Stephen Screnci</strong><br/><br/>
+            <strong>Justin Duberman</strong><br/><br/>
+            <strong>Richard Curran</strong><br/><br/>
+            <strong>Erik Lupien</strong><br/><br/>
+            <strong>Cameron Stewart</strong><br/><br/>
+            <strong>Marc Levine</strong><br/><br/>
+            <strong>Eustace King</strong><br/><br/>
+            <strong>Jarrett Bousquet</strong><br/><br/>
+            <strong>Thane Campbell</strong><br/><br/>
+            <strong>Andrew Maloney</strong><br/><br/>
+            <strong>Jay Grossman</strong><br/><br/>
+            <strong>Gerry Johannson</strong><br/><br/>
+            <strong>Neil Sheehy</strong><br/><br/>
+            <strong>Kevin Epp</strong><br/><br/>
+            <strong>Jiri Hamal</strong><br/><br/>
+            <strong>Robert Hooper</strong><br/><br/>
+            <strong>Scott Bartlett</strong><br/><br/>
+            <strong>Patrick Morris</strong><br/><br/>
+            <strong>Ian Pulver</strong><br/><br/>
+            <strong>Bayne Pettinger</strong><br/><br/>
+            <strong>Olivier Fortier</strong><br/><br/>
+            <strong>Ron Salcer</strong><br/><br/>
+            <strong>J.P. Barry</strong><br/><br/>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
 
     st.markdown(html_content, unsafe_allow_html=True)
     # ----- End Agent Tendency Classifications Section -----
-    
-    # ----- Scatter Plot with Yellow Trend Line -----
+
+    # ----- SCATTER PLOT with Yellow Trend Line -----
+    # We'll still load ranks_data for the scatter plot
+    _, ranks_data, _ = load_data()
     fig = go.Figure(data=go.Scatter(
         x=ranks_data['CT'],
         y=ranks_data['Dollar Index'],
@@ -575,7 +653,6 @@ def overall_visualizations():
             slope, intercept = np.polyfit(x[mask], y[mask], 1)
             x_line = np.linspace(x.min(), x.max(), 100)
             y_line = slope * x_line + intercept
-
             fig.add_trace(go.Scatter(
                 x=x_line,
                 y=y_line,
@@ -583,7 +660,7 @@ def overall_visualizations():
                 name='Average Dollar Index Trend',
                 line=dict(color='yellow', width=3)
             ))
-        except np.linalg.LinAlgError as e:
+        except np.linalg.LinAlgError:
             st.write("Trend line could not be computed due to a numerical error.")
     else:
         st.write("Not enough data to compute a trend line.")
@@ -613,7 +690,14 @@ def project_definitions():
 # 5) Navigation
 # --------------------------------------------------------------------
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Agent Dashboard", "Agency Dashboard", "Leaderboard", "Visualizations and Takeaways", "Project Definitions"])
+page = st.sidebar.radio("Go to", [
+    "Home",
+    "Agent Dashboard",
+    "Agency Dashboard",
+    "Leaderboard",
+    "Visualizations and Takeaways",
+    "Project Definitions"
+])
 
 if page == "Home":
     st.title("Welcome to the Agent Insights Dashboard!")
