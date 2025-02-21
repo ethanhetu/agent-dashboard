@@ -535,6 +535,7 @@ def overall_visualizations():
         title="Contracts Tracked vs Dollar Index",
         xaxis_title="Contracts Tracked (CT)",
         yaxis_title="Dollar Index",
+        yaxis=dict(range=[0.5, 1.5]),
         template="plotly_white"
     )
     st.plotly_chart(fig, use_container_width=True)
