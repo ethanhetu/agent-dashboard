@@ -496,7 +496,26 @@ def leaderboard_page():
 
 def project_definitions():
     st.title("📚 Project Definitions")
-    st.write("Definitions for key terms and metrics used throughout the project.")
+    st.write("Below are key terms and their definitions used in this project. You can update the definitions as needed.")
+
+    definitions = [
+        ("Dollar Index", "A composite metric that ranks agents based on various financial criteria, serving as an overall indicator of performance."),
+        ("Win %", "The percentage of deals or contracts won by an agent, indicating their success rate."),
+        ("Contracts Tracked", "The total number of contracts that an agent is actively monitoring and managing."),
+        ("VCP", "Value Capture Percentage – calculated as the ratio of player cost to player value, expressed as a percentage."),
+        ("Six-Year Agent Delivery", "A performance metric that aggregates an agent’s success over six years, reflecting the overall delivery and impact of their client portfolio."),
+        ("Player Contributions", "The on-ice contributions of players, often measured through statistical data such as cost and performance metrics (e.g., PC).")
+    ]
+    
+    # Create a box for each term/definition pair using two columns.
+    for term, definition in definitions:
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            st.markdown(f"**{term}**")
+        with col2:
+            st.markdown(definition)
+        st.markdown("---")  # Divider between definitions
+
 
 # --------------------------------------------------------------------
 # 4) Navigation
