@@ -401,8 +401,10 @@ def overall_visualizations():
     and the Y axis represents the Dollar Index. The y-axis is limited to a range of 0.5 to 1.5 to better
     highlight the differences among most agents.
     """)
-    # We'll use ranks_data for the scatter plot.
+    # Load data for the plot.
     _, ranks_data, _ = load_data()
+    
+    # Create scatter plot.
     fig = go.Figure(data=go.Scatter(
         x=ranks_data['CT'],
         y=ranks_data['Dollar Index'],
@@ -417,6 +419,23 @@ def overall_visualizations():
         yaxis=dict(range=[0.5, 1.5]),
         template="plotly_white"
     )
+    
+    # ---- Add Trend Line ----
+    # Sort agents by CT in ascending order.
+    df_sorted = ranks_data.sort_values(by='CT').reset_index(drop=True)
+    # Compute cumulative average using numpy.
+    cum_avg = np.cumsum(df_sorted['Dollar Index']) / np.arange(1, len(df_sorted) + 1)
+    # Add the trend line.
+    fig.add_trace(go.Scatter(
+        x=df_sorted['CT'],
+        y=cum_avg,
+        mode='lines',
+        name='Cumulative Average Dollar Index',
+        line=dict(color='red', dash='dash')
+    ))
+    # --------------------------
+    
+    st.plotly_chart(fig, use_container_width=True)
 
     # ---- Add Trend Line ----
     # Sort agents by Contracts Tracked (CT) in ascending order
