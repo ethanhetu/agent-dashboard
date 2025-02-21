@@ -496,7 +496,6 @@ def leaderboard_page():
 
 def project_definitions():
     st.title("📚 Project Definitions")
-    st.write("Below are key terms and their definitions used in this project. You can update the definitions as needed.")
 
     definitions = [
         ("Dollar Index", "A composite metric that ranks agents based on various financial criteria, serving as an overall indicator of performance."),
