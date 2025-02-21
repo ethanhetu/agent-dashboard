@@ -433,7 +433,7 @@ def overall_visualizations():
         name='Cumulative Average Dollar Index',
         line=dict(color='red', dash='dash')
     ))
-    
+
 # Compute a linear regression trend line
 x = ranks_data['CT']
 y = ranks_data['Dollar Index']
