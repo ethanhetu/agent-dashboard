@@ -506,8 +506,8 @@ def overall_visualizations():
     
     # ----- Agent Tendency Classifications Section -----
     _, ranks_data, _ = load_data()
-    # Sort agents based on Dollar Index:
-    # Team-Friendly: Dollar Index <= 92.5
+    # Sort agents based on Dollar Index thresholds:
+    # Team-Friendly: Dollar Index ≤ 92.5
     # Market-Attuned: Dollar Index between 92.51 and 107.5
     # Player-Friendly: Dollar Index > 107.5
     team_friendly = ranks_data[ranks_data['Dollar Index'] <= 92.5]
