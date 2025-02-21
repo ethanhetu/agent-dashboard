@@ -700,7 +700,7 @@ page = st.sidebar.radio("Go to", [
 ])
 
 if page == "Home":
-    st.title("Welcome to the Agent Insights Dashboard!")
+    st.title("Landing Page - Agent Analysis Project")
 elif page == "Agent Dashboard":
     agent_dashboard()
 elif page == "Agency Dashboard":
