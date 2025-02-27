@@ -494,10 +494,6 @@ def leaderboard_page():
 # 4) NEW: Second Contracts Leaderboard Page
 # --------------------------------------------------------------------
 def second_contracts_leaderboard_page():
-    """
-    Displays a page similar to the 'leaderboard' page, but for second contracts only.
-    We automatically map agent names to their agencies from ranks_data.
-    """
     st.title("Second Contracts Leaderboard")
     st.subheader("Overall Standings - Second Contracts (by Dollar Index)")
 
@@ -535,10 +531,13 @@ def second_contracts_leaderboard_page():
         {"Agent Name": "Jordan Neumann & George Bazos",  "Dollar Index": 1.60, "Total Contract Value": 80000000},
     ]
 
-    # 4) Build a styled card for each row
-    for rank, row in enumerate(second_contracts_data, start=1):
+    # 4) Sort the data in descending order by Dollar Index (highest first)
+    second_contracts_data_sorted = sorted(second_contracts_data, key=lambda x: x["Dollar Index"], reverse=True)
+
+    # 5) Build a styled card for each row
+    for rank, row in enumerate(second_contracts_data_sorted, start=1):
         agent_name = row['Agent Name']
-        # auto-lookup agency name
+        # Auto-lookup agency name using the agency_map
         agency = agency_map.get(agent_name.strip(), "N/A")
         dollar_index = row['Dollar Index']
         total_val = row['Total Contract Value']
