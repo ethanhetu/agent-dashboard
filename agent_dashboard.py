@@ -759,7 +759,7 @@ page = st.sidebar.radio("Go to", [
     "Agent Dashboard",
     "Agency Dashboard",
     "Leaderboard",
-    "Second Contracts Leaderboard",  # <--- Our new page
+    "Second Contracts Leaderboard",
     "Visualizations and Takeaways",
     "Project Definitions"
 ])
