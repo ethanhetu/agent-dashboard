@@ -540,10 +540,10 @@ def overall_visualizations():
     ]
     
     market_oriented = [
+        "Craig Oster",
         "Darren Ferris",
-        "Paul Theofanous",
         "Paul Capizzano",
-        "Jeff Helperl",
+        "Paul Theofanous",
         "Kurt Overhardt",
         "Pat Brisson",
         "Wade Arnott",
@@ -551,7 +551,7 @@ def overall_visualizations():
         "Mark Gandler",
         "Don Meehan",
         "Claude Lemieux",
-        "Craig Oster",
+        "Jeff Helperl",
         "Philippe Lecavalier",
         "Andre Rufener",
         "Jordan Neumann & George Bazos",
@@ -569,7 +569,7 @@ def overall_visualizations():
         "Ritchie Winter",
         "Peter MacTavish",
         "Ben Hankinson",
-        "Pete Rutili"
+        "J.P. Barry"
     ]
     
     player_friendly = [
@@ -602,7 +602,7 @@ def overall_visualizations():
         "Bayne Pettinger",
         "Olivier Fortier",
         "Ron Salcer",
-        "J.P. Barry"
+        "Pete Rutili"
     ]
     
     with col1:
