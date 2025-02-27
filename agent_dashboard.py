@@ -507,8 +507,8 @@ def overall_visualizations():
     col1, col2, col3 = st.columns(3)
     
     team_friendly = [
+        "Joakim Persson",
         "Peter Fish",
-        "Daniel Milstein",
         "Murray Koontz",
         "Georges Mueller",
         "Shawn Hunwick",
@@ -535,7 +535,7 @@ def overall_visualizations():
         "Eric Quinlan & Nicholas Martino",
         "Monir Kalgoum",
         "Matthew Ebbs",
-        "Joakim Persson",
+        "Daniel Milstein",
         "Maxim Moliver"
     ]
     
@@ -561,7 +561,7 @@ def overall_visualizations():
         "Michael Curran",
         "Andrew Scott",
         "Joseph Resnick",
-        "Judd Moldaver",
+        "J.P. Barry",
         "Allan Walsh",
         "Todd Diamond",
         "Allain Roy",
@@ -569,11 +569,11 @@ def overall_visualizations():
         "Ritchie Winter",
         "Peter MacTavish",
         "Ben Hankinson",
-        "J.P. Barry"
+        "Judd Moldaver"
     ]
     
     player_friendly = [
-        "Robert Sauve",
+        "Ian Pulver",
         "Robert Murray",
         "Mark Stowe",
         "John Thornton",
@@ -598,7 +598,7 @@ def overall_visualizations():
         "Robert Hooper",
         "Scott Bartlett",
         "Patrick Morris",
-        "Ian Pulver",
+        "Robert Sauve",
         "Bayne Pettinger",
         "Olivier Fortier",
         "Ron Salcer",
