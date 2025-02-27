@@ -491,7 +491,78 @@ def leaderboard_page():
                     """, unsafe_allow_html=True)
 
 # --------------------------------------------------------------------
-# 4) Visualizations and Project Definitions
+# 4) NEW: Second Contracts Leaderboard Page
+# --------------------------------------------------------------------
+def second_contracts_leaderboard_page():
+    """
+    Displays a page similar to the 'leaderboard' page, but for second contracts only.
+    We automatically map agent names to their agencies from ranks_data.
+    """
+    st.title("Second Contracts Leaderboard")
+    st.subheader("Overall Standings - Second Contracts (by Dollar Index)")
+
+    # 1) Load main data so we can build the agency_map
+    agents_data, ranks_data, piba_data = load_data()
+
+    # 2) Create a map from agent name -> agency name
+    agency_map = dict(zip(ranks_data["Agent Name"].str.strip(), ranks_data["Agency Name"].str.strip()))
+
+    # 3) Manually defined data from your attached image (without Agency Name).
+    #    We'll look up the Agency Name using the map above.
+    second_contracts_data = [
+        {"Agent Name": "Peter Wallen",                   "Dollar Index": 0.68, "Total Contract Value": 35600000},
+        {"Agent Name": "Mika Rautakallio",               "Dollar Index": 0.72, "Total Contract Value": 42270000},
+        {"Agent Name": "Brian & Scott Bartlett",         "Dollar Index": 0.81, "Total Contract Value": 86500000},
+        {"Agent Name": "Jordan Neumann & George Bazos",  "Dollar Index": 0.82, "Total Contract Value": 82500000},
+        {"Agent Name": "Judd Moldaver",                  "Dollar Index": 0.83, "Total Contract Value": 133170000},
+        {"Agent Name": "Pat Brisson",                    "Dollar Index": 0.87, "Total Contract Value": 116885714},
+        {"Agent Name": "Richard Evans",                  "Dollar Index": 0.95, "Total Contract Value": 85000000},
+        {"Agent Name": "Paul Capizzano",                 "Dollar Index": 0.97, "Total Contract Value": 17825000},
+        {"Agent Name": "Kurt Overhardt",                 "Dollar Index": 1.00, "Total Contract Value": 97650000},
+        {"Agent Name": "Claude Lemieux",                 "Dollar Index": 1.02, "Total Contract Value": 48000000},
+        {"Agent Name": "Andre Rufener",                  "Dollar Index": 1.06, "Total Contract Value": 36000000},
+        {"Agent Name": "Craig Oster",                    "Dollar Index": 1.06, "Total Contract Value": 72500000},
+        {"Agent Name": "Darren Ferris",                  "Dollar Index": 1.10, "Total Contract Value": 54465000},
+        {"Agent Name": "Patrick Morris",                 "Dollar Index": 1.13, "Total Contract Value": 29000000},
+        {"Agent Name": "Allan Roy",                      "Dollar Index": 1.18, "Total Contract Value": 30000000},
+        {"Agent Name": "David Gagner",                   "Dollar Index": 1.20, "Total Contract Value": 15750000},
+        {"Agent Name": "Philippe Lecavalier",            "Dollar Index": 1.20, "Total Contract Value": 29250000},
+        {"Agent Name": "Don Meehan",                     "Dollar Index": 1.29, "Total Contract Value": 22750000},
+        {"Agent Name": "Markus Lehto",                   "Dollar Index": 1.39, "Total Contract Value": 27350000},
+        {"Agent Name": "Kevin Magnuson",                 "Dollar Index": 1.42, "Total Contract Value": 61666668},
+        {"Agent Name": "Robert Norton",                  "Dollar Index": 1.49, "Total Contract Value": 40800000},
+        {"Agent Name": "Matt Keator",                    "Dollar Index": 1.51, "Total Contract Value": 35600000},
+        {"Agent Name": "Jordan Neumann & George Bazos",  "Dollar Index": 1.60, "Total Contract Value": 80000000},
+    ]
+
+    # 4) Build a styled card for each row
+    for rank, row in enumerate(second_contracts_data, start=1):
+        agent_name = row['Agent Name']
+        # auto-lookup agency name
+        agency = agency_map.get(agent_name.strip(), "N/A")
+        dollar_index = row['Dollar Index']
+        total_val = row['Total Contract Value']
+        
+        card_html = f"""
+        <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+            <div style="flex: 0 0 40px; text-align: center; font-size: 18px; font-weight: bold;">
+                {rank}.
+            </div>
+            <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
+                {agent_name} <br/><span style="font-size: 14px; font-weight: normal;">{agency}</span>
+            </div>
+            <div style="flex: 0 0 170px; text-align: right; font-size: 16px;">
+                <div style="border-left: 1px solid #ccc; padding-left: 8px;">
+                    <div style="font-weight: bold;">${dollar_index:,.2f}</div>
+                    <div style="font-size: 14px;">Total Value: ${total_val:,.0f}</div>
+                </div>
+            </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
+
+# --------------------------------------------------------------------
+# 5) Visualizations and Project Definitions
 # --------------------------------------------------------------------
 def overall_visualizations():
     st.title("Visualizations and Takeaways")
@@ -507,8 +578,8 @@ def overall_visualizations():
     col1, col2, col3 = st.columns(3)
     
     team_friendly = [
-        "Joakim Persson",
         "Peter Fish",
+        "Daniel Milstein",
         "Murray Koontz",
         "Georges Mueller",
         "Shawn Hunwick",
@@ -535,15 +606,15 @@ def overall_visualizations():
         "Eric Quinlan & Nicholas Martino",
         "Monir Kalgoum",
         "Matthew Ebbs",
-        "Daniel Milstein",
+        "Joakim Persson",
         "Maxim Moliver"
     ]
     
     market_oriented = [
-        "Craig Oster",
         "Darren Ferris",
-        "Paul Capizzano",
         "Paul Theofanous",
+        "Paul Capizzano",
+        "Jeff Helperl",
         "Kurt Overhardt",
         "Pat Brisson",
         "Wade Arnott",
@@ -551,7 +622,7 @@ def overall_visualizations():
         "Mark Gandler",
         "Don Meehan",
         "Claude Lemieux",
-        "Jeff Helperl",
+        "Craig Oster",
         "Philippe Lecavalier",
         "Andre Rufener",
         "Jordan Neumann & George Bazos",
@@ -561,7 +632,7 @@ def overall_visualizations():
         "Michael Curran",
         "Andrew Scott",
         "Joseph Resnick",
-        "J.P. Barry",
+        "Judd Moldaver",
         "Allan Walsh",
         "Todd Diamond",
         "Allain Roy",
@@ -569,11 +640,11 @@ def overall_visualizations():
         "Ritchie Winter",
         "Peter MacTavish",
         "Ben Hankinson",
-        "Judd Moldaver"
+        "Pete Rutili"
     ]
     
     player_friendly = [
-        "Ian Pulver",
+        "Robert Sauve",
         "Robert Murray",
         "Mark Stowe",
         "John Thornton",
@@ -598,11 +669,11 @@ def overall_visualizations():
         "Robert Hooper",
         "Scott Bartlett",
         "Patrick Morris",
-        "Robert Sauve",
+        "Ian Pulver",
         "Bayne Pettinger",
         "Olivier Fortier",
         "Ron Salcer",
-        "Pete Rutili"
+        "J.P. Barry"
     ]
     
     with col1:
@@ -688,6 +759,7 @@ page = st.sidebar.radio("Go to", [
     "Agent Dashboard",
     "Agency Dashboard",
     "Leaderboard",
+    "Second Contracts Leaderboard",  # <--- Our new page
     "Visualizations and Takeaways",
     "Project Definitions"
 ])
@@ -700,6 +772,8 @@ elif page == "Agency Dashboard":
     agency_dashboard()
 elif page == "Leaderboard":
     leaderboard_page()
+elif page == "Second Contracts Leaderboard":
+    second_contracts_leaderboard_page()
 elif page == "Visualizations and Takeaways":
     overall_visualizations()
 elif page == "Project Definitions":
