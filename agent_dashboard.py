@@ -500,135 +500,128 @@ def overall_visualizations():
     and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
     tend to have a higher Dollar Index.
     """)
-
+    
     # ----- Agent Tendency Classifications (STATIC) -----
-    # Replaces any auto-sorting with your direct lists:
-    html_content = """
-    <div style='border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 20px;'>
-      <div style='text-align: center; margin-bottom: 16px;'>
-         <strong>Agent Tendency Classifications</strong>
-      </div>
-      <div style='display: flex; justify-content: space-between;'>
-
-        <!-- TEAM FRIENDLY (dark green) -->
-        <div style='flex: 1; padding: 8px; border-right: 1px solid #ccc;'>
-          <h3 style='color: #006400; font-weight: bold; text-align: center;'>Team Friendly</h3>
-          <div style='text-align: left; margin-bottom: 8px; font-size: 16px;'>
-            <strong>Peter Fish</strong><br/><br/>
-            <strong>Daniel Milstein</strong><br/><br/>
-            <strong>Murray Koontz</strong><br/><br/>
-            <strong>Georges Mueller</strong><br/><br/>
-            <strong>Shawn Hunwick</strong><br/><br/>
-            <strong>Jerry Buckley</strong><br/><br/>
-            <strong>David Gagner</strong><br/><br/>
-            <strong>Mika Rautakallio</strong><br/><br/>
-            <strong>Lewis Gross</strong><br/><br/>
-            <strong>Paul Corbeil</strong><br/><br/>
-            <strong>Stephen F. Reich</strong><br/><br/>
-            <strong>Rick Valette</strong><br/><br/>
-            <strong>Todd Reynolds</strong><br/><br/>
-            <strong>Jason Davidson</strong><br/><br/>
-            <strong>Dave Cowan</strong><br/><br/>
-            <strong>Markus Lehto</strong><br/><br/>
-            <strong>Matt Keator</strong><br/><br/>
-            <strong>Ray (Raynold) Petkau</strong><br/><br/>
-            <strong>Richard Evans</strong><br/><br/>
-            <strong>Matthew Federico</strong><br/><br/>
-            <strong>Brian MacDonald</strong><br/><br/>
-            <strong>Dean Grillo</strong><br/><br/>
-            <strong>Serge Payer</strong><br/><br/>
-            <strong>Daniel Plante</strong><br/><br/>
-            <strong>Michael Deutsch</strong><br/><br/>
-            <strong>Eric Quinlan &amp; Nicholas Martino</strong><br/><br/>
-            <strong>Monir Kalgoum</strong><br/><br/>
-            <strong>Matthew Ebbs</strong><br/><br/>
-            <strong>Joakim Persson</strong><br/><br/>
-            <strong>Maxim Moliver</strong><br/><br/>
-          </div>
-        </div>
-
-        <!-- MARKET-ORIENTED (black) -->
-        <div style='flex: 1; padding: 8px; border-right: 1px solid #ccc;'>
-          <h3 style='color: black; font-weight: bold; text-align: center;'>Market-Oriented</h3>
-          <div style='text-align: left; margin-bottom: 8px; font-size: 16px;'>
-            <strong>Darren Ferris</strong><br/><br/>
-            <strong>Paul Theofanous</strong><br/><br/>
-            <strong>Paul Capizzano</strong><br/><br/>
-            <strong>Jeff Helperl</strong><br/><br/>
-            <strong>Kurt Overhardt</strong><br/><br/>
-            <strong>Pat Brisson</strong><br/><br/>
-            <strong>Wade Arnott</strong><br/><br/>
-            <strong>Ross Gurney</strong><br/><br/>
-            <strong>Mark Gandler</strong><br/><br/>
-            <strong>Don Meehan</strong><br/><br/>
-            <strong>Claude Lemieux</strong><br/><br/>
-            <strong>Craig Oster</strong><br/><br/>
-            <strong>Philippe Lecavalier</strong><br/><br/>
-            <strong>Andre Rufener</strong><br/><br/>
-            <strong>Jordan Neumann &amp; George Bazos</strong><br/><br/>
-            <strong>Kevin Magnuson</strong><br/><br/>
-            <strong>Robert Norton</strong><br/><br/>
-            <strong>Brian &amp; Scott Bartlett</strong><br/><br/>
-            <strong>Michael Curran</strong><br/><br/>
-            <strong>Andrew Scott</strong><br/><br/>
-            <strong>Joseph Resnick</strong><br/><br/>
-            <strong>Judd Moldaver</strong><br/><br/>
-            <strong>Allan Walsh</strong><br/><br/>
-            <strong>Todd Diamond</strong><br/><br/>
-            <strong>Allain Roy</strong><br/><br/>
-            <strong>Peter Wallen</strong><br/><br/>
-            <strong>Ritchie Winter</strong><br/><br/>
-            <strong>Peter MacTavish</strong><br/><br/>
-            <strong>Ben Hankinson</strong><br/><br/>
-            <strong>Pete Rutili</strong><br/><br/>
-          </div>
-        </div>
-
-        <!-- PLAYER-FRIENDLY (dark red) -->
-        <div style='flex: 1; padding: 8px;'>
-          <h3 style='color: #8B0000; font-weight: bold; text-align: center;'>Player-Friendly</h3>
-          <div style='text-align: left; margin-bottom: 8px; font-size: 16px;'>
-            <strong>Robert Sauve</strong><br/><br/>
-            <strong>Robert Murray</strong><br/><br/>
-            <strong>Mark Stowe</strong><br/><br/>
-            <strong>John Thornton</strong><br/><br/>
-            <strong>Matthew Oates</strong><br/><br/>
-            <strong>Stephen Bartlett</strong><br/><br/>
-            <strong>Ryan Barnes</strong><br/><br/>
-            <strong>Stephen Screnci</strong><br/><br/>
-            <strong>Justin Duberman</strong><br/><br/>
-            <strong>Richard Curran</strong><br/><br/>
-            <strong>Erik Lupien</strong><br/><br/>
-            <strong>Cameron Stewart</strong><br/><br/>
-            <strong>Marc Levine</strong><br/><br/>
-            <strong>Eustace King</strong><br/><br/>
-            <strong>Jarrett Bousquet</strong><br/><br/>
-            <strong>Thane Campbell</strong><br/><br/>
-            <strong>Andrew Maloney</strong><br/><br/>
-            <strong>Jay Grossman</strong><br/><br/>
-            <strong>Gerry Johannson</strong><br/><br/>
-            <strong>Neil Sheehy</strong><br/><br/>
-            <strong>Kevin Epp</strong><br/><br/>
-            <strong>Jiri Hamal</strong><br/><br/>
-            <strong>Robert Hooper</strong><br/><br/>
-            <strong>Scott Bartlett</strong><br/><br/>
-            <strong>Patrick Morris</strong><br/><br/>
-            <strong>Ian Pulver</strong><br/><br/>
-            <strong>Bayne Pettinger</strong><br/><br/>
-            <strong>Olivier Fortier</strong><br/><br/>
-            <strong>Ron Salcer</strong><br/><br/>
-            <strong>J.P. Barry</strong><br/><br/>
-          </div>
-        </div>
-      </div>
-    </div>
-    """
-
-    st.markdown(html_content, unsafe_allow_html=True)
+    st.subheader("Agent Tendency Classifications")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    team_friendly = [
+        "Peter Fish",
+        "Daniel Milstein",
+        "Murray Koontz",
+        "Georges Mueller",
+        "Shawn Hunwick",
+        "Jerry Buckley",
+        "David Gagner",
+        "Mika Rautakallio",
+        "Lewis Gross",
+        "Paul Corbeil",
+        "Stephen F. Reich",
+        "Rick Valette",
+        "Todd Reynolds",
+        "Jason Davidson",
+        "Dave Cowan",
+        "Markus Lehto",
+        "Matt Keator",
+        "Ray (Raynold) Petkau",
+        "Richard Evans",
+        "Matthew Federico",
+        "Brian MacDonald",
+        "Dean Grillo",
+        "Serge Payer",
+        "Daniel Plante",
+        "Michael Deutsch",
+        "Eric Quinlan & Nicholas Martino",
+        "Monir Kalgoum",
+        "Matthew Ebbs",
+        "Joakim Persson",
+        "Maxim Moliver"
+    ]
+    
+    market_oriented = [
+        "Darren Ferris",
+        "Paul Theofanous",
+        "Paul Capizzano",
+        "Jeff Helperl",
+        "Kurt Overhardt",
+        "Pat Brisson",
+        "Wade Arnott",
+        "Ross Gurney",
+        "Mark Gandler",
+        "Don Meehan",
+        "Claude Lemieux",
+        "Craig Oster",
+        "Philippe Lecavalier",
+        "Andre Rufener",
+        "Jordan Neumann & George Bazos",
+        "Kevin Magnuson",
+        "Robert Norton",
+        "Brian & Scott Bartlett",
+        "Michael Curran",
+        "Andrew Scott",
+        "Joseph Resnick",
+        "Judd Moldaver",
+        "Allan Walsh",
+        "Todd Diamond",
+        "Allain Roy",
+        "Peter Wallen",
+        "Ritchie Winter",
+        "Peter MacTavish",
+        "Ben Hankinson",
+        "Pete Rutili"
+    ]
+    
+    player_friendly = [
+        "Robert Sauve",
+        "Robert Murray",
+        "Mark Stowe",
+        "John Thornton",
+        "Matthew Oates",
+        "Stephen Bartlett",
+        "Ryan Barnes",
+        "Stephen Screnci",
+        "Justin Duberman",
+        "Richard Curran",
+        "Erik Lupien",
+        "Cameron Stewart",
+        "Marc Levine",
+        "Eustace King",
+        "Jarrett Bousquet",
+        "Thane Campbell",
+        "Andrew Maloney",
+        "Jay Grossman",
+        "Gerry Johannson",
+        "Neil Sheehy",
+        "Kevin Epp",
+        "Jiri Hamal",
+        "Robert Hooper",
+        "Scott Bartlett",
+        "Patrick Morris",
+        "Ian Pulver",
+        "Bayne Pettinger",
+        "Olivier Fortier",
+        "Ron Salcer",
+        "J.P. Barry"
+    ]
+    
+    with col1:
+        st.markdown("<h3 style='color:#006400; text-align:center;'>Team Friendly</h3>", unsafe_allow_html=True)
+        for name in team_friendly:
+            st.write(name)
+    
+    with col2:
+        st.markdown("<h3 style='color:black; text-align:center;'>Market-Oriented</h3>", unsafe_allow_html=True)
+        for name in market_oriented:
+            st.write(name)
+    
+    with col3:
+        st.markdown("<h3 style='color:#8B0000; text-align:center;'>Player-Friendly</h3>", unsafe_allow_html=True)
+        for name in player_friendly:
+            st.write(name)
     # ----- End Agent Tendency Classifications Section -----
-
+    
     # ----- SCATTER PLOT with Yellow Trend Line -----
-    # We'll still load ranks_data for the scatter plot
     _, ranks_data, _ = load_data()
     fig = go.Figure(data=go.Scatter(
         x=ranks_data['CT'],
@@ -644,7 +637,7 @@ def overall_visualizations():
         yaxis=dict(range=[0.5, 1.5]),
         template="plotly_white"
     )
-
+    
     x = ranks_data['CT'].astype(float)
     y = ranks_data['Dollar Index'].astype(float)
     mask = np.isfinite(x) & np.isfinite(y)
@@ -664,10 +657,10 @@ def overall_visualizations():
             st.write("Trend line could not be computed due to a numerical error.")
     else:
         st.write("Not enough data to compute a trend line.")
-
+    
     st.plotly_chart(fig, use_container_width=True)
     # ----- End Scatter Plot Section -----
-
+    
 def project_definitions():
     st.title("📚 Project Definitions")
     definitions = [
