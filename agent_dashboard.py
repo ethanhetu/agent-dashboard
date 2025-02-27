@@ -22,24 +22,6 @@ AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos from release
 AGENT_PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Agent_placeholder.png"
 
 # --------------------------------------------------------------------
-# Global list for second contract players (all in lower-case for case-insensitive matching)
-SECOND_CONTRACT_PLAYERS = {
-    "joshua norris", "mattias samuelsson", "miles wood", "dylan cozens",
-    "thomas chabot", "kirby dach", "tim stutzle", "markus nutivaara",
-    "william nylander", "jack eichel", "mario ferraro", "brady tkachuk",
-    "christian dvorak", "timo meier", "ivan provorov", "andrei svechnikov",
-    "joel farabee", "clayton keller", "mike matheson", "nick schmaltz",
-    "nick suzuki", "dylan larkin", "travis konecny", "cole caufield",
-    "samuel girard", "jakob chychrun", "mitchell marner", "nikolaj ehlers",
-    "nico hischier", "matt boldy", "alex newhook", "noah hanifin",
-    "drake batherson", "miro heiskanen", "auston matthews", "jack hughes",
-    "kyle connor", "brett pesce", "sebastian aho", "mikko rantanen",
-    "connor mcdavid", "quinn hughes", "alex tuch", "rasmus andersson",
-    "jaccob slavin", "shea theodore", "elias lindholm", "cale makar",
-    "jason robertson"
-}
-
-# --------------------------------------------------------------------
 # 1) Data-Loading & Caching Functions
 # --------------------------------------------------------------------
 @st.cache_data(ttl=0)
@@ -302,10 +284,6 @@ def display_player_section(title, player_df):
                 )
             display_name = correct_player_name(player['Combined Names'])
             st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{display_name}</h4>", unsafe_allow_html=True)
-            # Check if the player is in the second contract list (case-insensitive)
-            second_contract_note = ""
-            if display_name.strip().lower() in SECOND_CONTRACT_PLAYERS:
-                second_contract_note = "<p style='color: red; font-style: italic; text-align:center;'>Second Contract Player</p>"
             try:
                 vcp_value = (player['Total Cost'] / player['Total PC']) * 100
             except Exception:
@@ -313,7 +291,6 @@ def display_player_section(title, player_df):
             box_html = f"""
             <div style="border: 2px solid #ddd; padding: 10px; border-radius: 10px;">
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
-                {second_contract_note}
                 <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
                 <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
                 <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
@@ -543,7 +520,7 @@ def second_contracts_leaderboard_page():
         {"Agent Name": "Craig Oster",                    "Dollar Index": 1.06, "Total Contract Value": 72500000},
         {"Agent Name": "Darren Ferris",                  "Dollar Index": 1.10, "Total Contract Value": 54465000},
         {"Agent Name": "Patrick Morris",                 "Dollar Index": 1.13, "Total Contract Value": 29000000},
-        {"Agent Name": "Allan Roy",                      "Dollar Index": 1.18, "Total Contract Value": 30000000},
+        {"Agent Name": "Allain Roy",                      "Dollar Index": 1.18, "Total Contract Value": 30000000},
         {"Agent Name": "David Gagner",                   "Dollar Index": 1.20, "Total Contract Value": 15750000},
         {"Agent Name": "Philippe Lecavalier",            "Dollar Index": 1.20, "Total Contract Value": 29250000},
         {"Agent Name": "Don Meehan",                     "Dollar Index": 1.29, "Total Contract Value": 22750000},
