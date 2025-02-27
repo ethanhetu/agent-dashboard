@@ -520,7 +520,7 @@ def second_contracts_leaderboard_page():
         {"Agent Name": "Craig Oster",                    "Dollar Index": 1.06, "Total Contract Value": 72500000},
         {"Agent Name": "Darren Ferris",                  "Dollar Index": 1.10, "Total Contract Value": 54465000},
         {"Agent Name": "Patrick Morris",                 "Dollar Index": 1.13, "Total Contract Value": 29000000},
-        {"Agent Name": "Allan Roy",                      "Dollar Index": 1.18, "Total Contract Value": 30000000},
+        {"Agent Name": "Allain Roy",                      "Dollar Index": 1.18, "Total Contract Value": 30000000},
         {"Agent Name": "David Gagner",                   "Dollar Index": 1.20, "Total Contract Value": 15750000},
         {"Agent Name": "Philippe Lecavalier",            "Dollar Index": 1.20, "Total Contract Value": 29250000},
         {"Agent Name": "Don Meehan",                     "Dollar Index": 1.29, "Total Contract Value": 22750000},
