@@ -608,17 +608,17 @@ def overall_visualizations():
     with col1:
         st.markdown("<h3 style='color:#006400; text-align:center;'>Team Friendly</h3>", unsafe_allow_html=True)
         for name in team_friendly:
-            st.write(name)
+            st.markdown(f"<div style='border: 1px solid #006400; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
     
     with col2:
         st.markdown("<h3 style='color:black; text-align:center;'>Market-Oriented</h3>", unsafe_allow_html=True)
         for name in market_oriented:
-            st.write(name)
+            st.markdown(f"<div style='border: 1px solid black; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
     
     with col3:
         st.markdown("<h3 style='color:#8B0000; text-align:center;'>Player-Friendly</h3>", unsafe_allow_html=True)
         for name in player_friendly:
-            st.write(name)
+            st.markdown(f"<div style='border: 1px solid #8B0000; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
     # ----- End Agent Tendency Classifications Section -----
     
     # ----- SCATTER PLOT with Yellow Trend Line -----
