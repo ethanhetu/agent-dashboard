@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 # ✅ Ensure this is the first Streamlit command
-st.set_page_config(page_title="Agent Insights Dashboard", layout="wide")
+st.set_page_config(page_title="Agent Insights Dashboard", page_icon="https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Nashville_Predators_Logo_%282011%29.svg/1200px-Nashville_Predators_Logo_%282011%29.svg.png", layout="wide")
 
 # Global variables for images
 HEADSHOTS_DIR = "headshots_cache"  # For player headshots
