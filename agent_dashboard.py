@@ -34,7 +34,7 @@ manual_photo_overrides = {
     "cole bardreau": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3942676.png&w=350&h=254",
     "andrew oglevie": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4392269.png&w=350&h=254",
     "mikkel boedker": "https://a.espncdn.com/i/headshots/nhl/players/full/3976.png",
-    "strauss mann": "https://www.hockeydb.com/ihdb/photos/strauss-mann-2021-7075.jpg",
+    "strauss mann": "https://lscluster.hockeytech.com/download.php?client_code=ahl&file_path=media/ce280ff2dbcf376687996c79d462797d.png",
     "ian mccoshen": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3041989.png",
     "marc michaelis": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4319942.png",
     "keith yandle": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3330.png",
