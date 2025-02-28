@@ -22,6 +22,88 @@ AGENT_PHOTOS_DIR = "agent_photos"  # Folder for agent photos from release
 AGENT_PLACEHOLDER_IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Agent_placeholder.png"
 
 # --------------------------------------------------------------------
+# Manual photo overrides (lower-case keys)
+# --------------------------------------------------------------------
+manual_photo_overrides = {
+    "ryan macinnis": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3115000.png",
+    "sam miletic": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4272149.png",
+    "olli maatta": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/2976850.png",
+    "griffin mendel": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4319915.png",
+    "gustav rydahl": "https://www.hockeydb.com/ihdb/photos/gustav-rydahl-2023-48.jpg",
+    "lucas wallmark": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3151037.png",
+    "cole bardreau": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3942676.png&w=350&h=254",
+    "andrew oglevie": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4392269.png&w=350&h=254",
+    "mikkel boedker": "https://a.espncdn.com/i/headshots/nhl/players/full/3976.png",
+    "strauss mann": "https://www.hockeydb.com/ihdb/photos/strauss-mann-2021-7075.jpg",
+    "ian mccoshen": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3041989.png",
+    "marc michaelis": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4319942.png",
+    "keith yandle": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3330.png",
+    "bryan little": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3508.png",
+    "michael dal colle": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3114733.png&w=350&h=254",
+    "phil di giuseppe": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3069834.png&w=350&h=254",
+    "philippe desrosiers": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042047.png&w=350&h=254",
+    "jeremy bracco": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4392564.png",
+    "sami niku": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3942047.png",
+    "joel kellman": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4421961.png",
+    "german rubtsov": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4024976.png&w=350&h=254",
+    "otto somppi": "https://www.hockeydb.com/ihdb/photos/otto-somppi-2022-55.jpg",
+    "ty ronning": "https://www.hockeydb.com/ihdb/photos/ty-ronning-2022-48.jpg",
+    "matt tennyson": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3020635.png",
+    "chris bigras": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3041990.png&w=350&h=254",
+    "tyler persons": "https://www.hockeydb.com/ihdb/photos/tyler-parsons-2020-43.jpg",
+    "chase pearson": "https://b.fssta.com/uploads/application/nhl/headshots/6279.vresize.350.350.medium.81.png",
+    "taylor fedun": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/2304599.png",
+    "jonathan dahlen": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4122196.png",
+    "colton point": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4272104.png&w=350&h=254",
+    "christopher gibson": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/2563040.png",
+    "andreas borgman": "https://a.espncdn.com/i/headshots/nhl/players/full/4220708.png",
+    "shane gersich": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3151090.png",
+    "joel l'esperance": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3648041.png",
+    "landon bow": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4272107.png&w=350&h=254",
+    "brett connolly": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/5479.png",
+    "brennan menell": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4271611.png",
+    "blake speers": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3942745.png",
+    "julius honka": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3114754.png&w=350&h=254",
+    "teemu kivihalme": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042206.png",
+    "petteri lindbohm": "https://a.espncdn.com/i/headshots/nhl/players/full/3069344.png",
+    "joachim blichfeld": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4063456.png",
+    "christian djoos": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3069440.png",
+    "mikhail grigorenko": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/2976841.png",
+    "maxim mamin": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4271946.png",
+    "alexander volkov": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4233883.png",
+    "michael mcniven": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3942205.png",
+    "bobby ryan": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3264.png",
+    "pontus aberg": "https://a.espncdn.com/i/headshots/nhl/players/full/3069396.png",
+    "filip chlapik": "https://a.espncdn.com/i/headshots/nhl/players/full/3904182.png",
+    "jayden halbgewachs": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4588292.png",
+    "tanner kaspick": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4062250.png",
+    "maxim letunov": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3115020.png",
+    "stelio mattheos": "https://www.hockeydb.com/ihdb/photos/stelio-mattheos-2023-979.jpg",
+    "ben thomas": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3151191.png",
+    "lukas vejdemo": "https://www.hockeydb.com/ihdb/photos/lukas-vejdemo-2022-45.jpg",
+    "anton lindholm": "https://a.espncdn.com/i/headshots/nhl/players/full/3942563.png",
+    "dominic turgeon": "https://a.espncdn.com/i/headshots/nhl/players/full/3151315.png",
+    "kyle turris": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3892.png",
+    "remi elie": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042006.png",
+    "cole kehler": "https://www.hockeydb.com/ihdb/photos/cole-kehler-2020-40.jpg",
+    "xavier ouellet": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/2563079.png",
+    "frederik gauthier": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042039.png&w=350&h=254",
+    "tyrell goulbourne": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042078.png",
+    "brendan guhle": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3904184.png",
+    "juho lammikko": "https://a.espncdn.com/i/headshots/nhl/players/full/3150520.png",
+    "tyler lewington": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042264.png",
+    "cedric paquette": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3067906.png",
+    "kole sherwood": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3942294.png",
+    "josh teves": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4319865.png",
+    "dmytro timashov": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3938809.png",
+    "zachary leslie": "https://www.hockeydb.com/ihdb/photos/zac-leslie-2019-7776.jpg",
+    "ilya kovalchuk": "https://a.espncdn.com/i/headshots/nhl/players/full/1175.png",
+    "josh currie": "https://a.espncdn.com/i/headshots/nhl/players/full/4063257.png",
+    "marko dano": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042058.png",
+    "adam huska": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4588215.png&w=350&h=254"
+}
+
+# --------------------------------------------------------------------
 # 1) Data-Loading & Caching Functions
 # --------------------------------------------------------------------
 @st.cache_data(ttl=0)
@@ -116,6 +198,12 @@ def correct_player_name(name):
     return corrections.get(lower_name, name)
 
 def get_headshot_path(player_name):
+    # Check if we have a manual override first
+    name_lower = player_name.lower().strip()
+    if name_lower in manual_photo_overrides:
+        return manual_photo_overrides[name_lower]
+    
+    # Otherwise, continue with existing local-file logic
     player_name = correct_player_name(player_name)
     formatted_name = player_name.lower().replace(" ", "_")
     if HEADSHOTS_DIR and os.path.exists(HEADSHOTS_DIR):
@@ -267,14 +355,26 @@ def display_player_section(title, player_df):
         with client_cols[idx % 3]:
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
-                st.markdown(
-                    f"""
-                    <div style="text-align:center;">
-                        <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}"
-                             style="width:200px; height:200px; display:block; margin:auto;"/>
-                    </div>
-                    """, unsafe_allow_html=True
-                )
+                # If the path is a URL override, embed directly
+                if img_path.startswith("http"):
+                    st.markdown(
+                        f"""
+                        <div style="text-align:center;">
+                            <img src="{img_path}"
+                                 style="width:200px; height:200px; display:block; margin:auto;"/>
+                        </div>
+                        """, unsafe_allow_html=True
+                    )
+                else:
+                    # Otherwise, assume it's a local file
+                    st.markdown(
+                        f"""
+                        <div style="text-align:center;">
+                            <img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}"
+                                 style="width:200px; height:200px; display:block; margin:auto;"/>
+                        </div>
+                        """, unsafe_allow_html=True
+                    )
             else:
                 st.markdown(
                     f"""
@@ -522,7 +622,7 @@ def second_contracts_leaderboard_page():
         {"Agent Name": "Craig Oster",                    "Dollar Index": 1.06, "Total Contract Value": 72500000},
         {"Agent Name": "Darren Ferris",                  "Dollar Index": 1.10, "Total Contract Value": 54465000},
         {"Agent Name": "Patrick Morris",                 "Dollar Index": 1.13, "Total Contract Value": 29000000},
-        {"Agent Name": "Allain Roy",                      "Dollar Index": 1.18, "Total Contract Value": 30000000},
+        {"Agent Name": "Allain Roy",                     "Dollar Index": 1.18, "Total Contract Value": 30000000},
         {"Agent Name": "David Gagner",                   "Dollar Index": 1.20, "Total Contract Value": 15750000},
         {"Agent Name": "Philippe Lecavalier",            "Dollar Index": 1.20, "Total Contract Value": 29250000},
         {"Agent Name": "Don Meehan",                     "Dollar Index": 1.29, "Total Contract Value": 22750000},
