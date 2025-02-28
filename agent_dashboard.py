@@ -11,11 +11,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 # ✅ Ensure this is the first Streamlit command
-st.set_page_config(
-    page_title="Agent Insights Dashboard",
-    page_icon="https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Nashville_Predators_Logo_%282011%29.svg/1200px-Nashville_Predators_Logo_%282011%29.svg.png",
-    layout="wide"
-)
+st.set_page_config(page_title="Agent Insights Dashboard", page_icon="https://www.dropbox.com/s/o1u29fyz5kzffze/2011NP.png?dl=1", layout="wide")
 
 # Global variables for images
 HEADSHOTS_DIR = "headshots_cache"  # For player headshots
@@ -779,6 +775,73 @@ def overall_visualizations():
         "Olivier Fortier",
         "Ron Salcer",
         "J.P. Barry"
+    ]
+    
+    with col1:
+        st.markdown("<h3 style='color:#006400; text-align:center;'>Team Friendly</h3>", unsafe_allow_html=True)
+        for name in team_friendly:
+            st.markdown(f"<div style='border: 1px solid #006400; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("<h3 style='color:black; text-align:center;'>Market-Oriented</h3>", unsafe_allow_html=True)
+        for name in market_oriented:
+            st.markdown(f"<div style='border: 1px solid black; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("<h3 style='color:#8B0000; text-align:center;'>Player-Friendly</h3>", unsafe_allow_html=True)
+        for name in player_friendly:
+            st.markdown(f"<div style='border: 1px solid #8B0000; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
+    # ----- End Agent Tendency Classifications Section -----
+    
+    # ----- Agency Tendency Classifications (STATIC) -----
+    st.subheader("Agency Tendency Classifications")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    team_friendly = [
+        "KMJ Sports & Entertainment AB",
+        "Forward Hockey",
+        "Eclipse Sports Management",
+        "Alpha Hockey Inc.",
+        "Buckley Sports Management",
+        "WIN Hockey Agency",
+        "Raze Sports",
+        "WD Sports & Entertainment",
+        "Thunder Creek Professional Player Management",
+        "Sports Professional Management Inc.",
+        "MPR-Hockey Oy",
+        "Wasserman Media Group, LLC",
+        "Wintersports Ltd. Operating as Raze Sports",
+    ]
+    
+    market_oriented = [
+        "CAA Hockey",
+        "TMI, LLC",
+        "Newport Sports Management Inc.",
+        "Quartexx Management",
+        "Sports Consulting Group Inc.",
+        "KO Sports, Inc.",
+        "4Sports Hockey AG",
+        "O2K Worldwide Management Group, LLC",
+        "International Sports Advisors Co.",
+        "R.W.G. Sport Management",
+        "Edge Sports Management, LLC",
+        "Octagon Athlete Representation",
+        "Alterno Global Management LLC",
+        "Paraphe Sports-Management",
+        "RSG Hockey, LLC",
+        "Global Hockey Consultants",
+        "Gold Star Hockey",
+    ]
+    
+    player_friendly = [
+               "Achieve Sports Management",
+        "Puck Agency, LLC",
+        "The Sports Corporation",
+        "I-C-E Hockey Agency",
+        "The Orr Hockey Group",
+        "Titan Sports Management, Inc.",
+        "The Will Sports Group",
     ]
     
     with col1:
