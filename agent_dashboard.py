@@ -11,7 +11,11 @@ import plotly.graph_objects as go
 import numpy as np
 
 # ✅ Ensure this is the first Streamlit command
-st.set_page_config(page_title="Agent Insights Dashboard", page_icon="https://www.dropbox.com/s/o1u29fyz5kzffze/2011NP.png?dl=1", layout="wide")
+st.set_page_config(
+    page_title="Agent Insights Dashboard", 
+    page_icon="https://www.dropbox.com/s/o1u29fyz5kzffze/2011NP.png?dl=1", 
+    layout="wide"
+)
 
 # Global variables for images
 HEADSHOTS_DIR = "headshots_cache"  # For player headshots
@@ -592,9 +596,6 @@ def leaderboard_page():
                     </div>
                     """, unsafe_allow_html=True)
 
-# --------------------------------------------------------------------
-# 4) NEW: Second Contracts Leaderboard Page
-# --------------------------------------------------------------------
 def second_contracts_leaderboard_page():
     st.title("Second Contracts Leaderboard")
     st.subheader("Overall Standings - Second Contracts (by Dollar Index)")
@@ -835,7 +836,7 @@ def overall_visualizations():
     ]
     
     player_friendly = [
-               "Achieve Sports Management",
+        "Achieve Sports Management",
         "Puck Agency, LLC",
         "The Sports Corporation",
         "I-C-E Hockey Agency",
@@ -858,7 +859,7 @@ def overall_visualizations():
         st.markdown("<h3 style='color:#8B0000; text-align:center;'>Player-Friendly</h3>", unsafe_allow_html=True)
         for name in player_friendly:
             st.markdown(f"<div style='border: 1px solid #8B0000; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
-    # ----- End Agent Tendency Classifications Section -----
+    # ----- End Agency Tendency Classifications Section -----
     
     # ----- SCATTER PLOT with Yellow Trend Line -----
     _, ranks_data, _ = load_data()
