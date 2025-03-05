@@ -36,7 +36,7 @@ manual_photo_overrides = {
     "gustav rydahl": "https://assets.leaguestat.com/ahl/240x240/9495.jpg",
     "lucas wallmark": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3151037.png",
     "cole bardreau": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3942676.png&w=350&h=254",
-    "andrew oglevie": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4392269.png&w=350&h=254",
+    "andrew oglevie": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4392269.png?w=350&h=254",
     "mikkel boedker": "https://a.espncdn.com/i/headshots/nhl/players/full/3976.png",
     "strauss mann": "https://lscluster.hockeytech.com/download.php?client_code=ahl&file_path=media/ce280ff2dbcf376687996c79d462797d.png",
     "ian mccoshen": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3041989.png",
@@ -388,11 +388,13 @@ def display_player_section(title, player_df):
                     """, unsafe_allow_html=True
                 )
             display_name = correct_player_name(player['Combined Names'])
-            # Override the cost for Evgeny Svechnikov
+            # Override the cost (and agent delivery) for Evgeny Svechnikov
             if display_name == "Evgeny Svechnikov":
                 cost_value = 2300000
+                delivery_value = 2300000
             else:
                 cost_value = player['Total Cost']
+                delivery_value = player['Dollars Captured Above/ Below Value']
             st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{display_name}</h4>", unsafe_allow_html=True)
             try:
                 vcp_value = (cost_value / player['Total PC']) * 100
@@ -401,7 +403,7 @@ def display_player_section(title, player_df):
             box_html = f"""
             <div style="border: 2px solid #ddd; padding: 10px; border-radius: 10px;">
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
-                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
+                <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(delivery_value)}</p>
                 <p><strong>Six-Year Player Cost:</strong> ${cost_value:,.0f}</p>
                 <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
             </div>
@@ -924,6 +926,23 @@ def project_definitions():
         st.markdown("---")
 
 # --------------------------------------------------------------------
+# New: Takeaways Page
+# --------------------------------------------------------------------
+def takeaways_page():
+    st.title("Takeaways")
+    st.write("Write your multi-paragraph report of your findings below.")
+    # A text area for entering your report
+    report = st.text_area("Your Report:", height=400, value="""Type your report here.
+You can include multiple paragraphs.
+For example:
+
+Paragraph 1: ...
+Paragraph 2: ...
+""")
+    st.markdown("### Report Preview")
+    st.markdown(report)
+
+# --------------------------------------------------------------------
 # 5) Navigation
 # --------------------------------------------------------------------
 st.sidebar.title("Navigation")
@@ -934,7 +953,8 @@ page = st.sidebar.radio("Go to", [
     "Leaderboard",
     "Second Contracts Leaderboard",
     "Classifications",
-    "Project Definitions"
+    "Project Definitions",
+    "Takeaways"
 ])
 
 if page == "Home":
@@ -951,3 +971,5 @@ elif page == "Classifications":
     overall_visualizations()
 elif page == "Project Definitions":
     project_definitions()
+elif page == "Takeaways":
+    takeaways_page()
