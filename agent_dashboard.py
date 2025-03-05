@@ -63,11 +63,11 @@ manual_photo_overrides = {
     "andreas borgman": "https://a.espncdn.com/i/headshots/nhl/players/full/4220708.png",
     "shane gersich": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3151090.png",
     "joel l'esperance": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3648041.png",
-    "landon bow": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4272107.png&w=350&h=254",
+    "landon bow": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4272107.png?w=350&h=254",
     "brett connolly": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/5479.png",
     "brennan menell": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4271611.png",
     "blake speers": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3942745.png",
-    "julius honka": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3114754.png&w=350&h=254",
+    "julius honka": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3114754.png?w=350&h=254",
     "teemu kivihalme": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042206.png",
     "petteri lindbohm": "https://a.espncdn.com/i/headshots/nhl/players/full/3069344.png",
     "joachim blichfeld": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4063456.png",
@@ -370,7 +370,6 @@ def display_player_section(title, player_df):
                         """, unsafe_allow_html=True
                     )
                 else:
-                    # Otherwise, assume it's a local file
                     st.markdown(
                         f"""
                         <div style="text-align:center;">
@@ -389,16 +388,21 @@ def display_player_section(title, player_df):
                     """, unsafe_allow_html=True
                 )
             display_name = correct_player_name(player['Combined Names'])
+            # Override the cost for Evgeny Svechnikov
+            if display_name == "Evgeny Svechnikov":
+                cost_value = 2300000
+            else:
+                cost_value = player['Total Cost']
             st.markdown(f"<h4 style='text-align:center; color:black; font-weight:bold; font-size:24px;'>{display_name}</h4>", unsafe_allow_html=True)
             try:
-                vcp_value = (player['Total Cost'] / player['Total PC']) * 100
+                vcp_value = (cost_value / player['Total PC']) * 100
             except Exception:
                 vcp_value = None
             box_html = f"""
             <div style="border: 2px solid #ddd; padding: 10px; border-radius: 10px;">
                 <p><strong>Age:</strong> {calculate_age(player['Birth Date'])}</p>
                 <p><strong>Six-Year Agent Delivery:</strong> {format_delivery_value(player['Dollars Captured Above/ Below Value'])}</p>
-                <p><strong>Six-Year Player Cost:</strong> ${player['Total Cost']:,.0f}</p>
+                <p><strong>Six-Year Player Cost:</strong> ${cost_value:,.0f}</p>
                 <p><strong>Six-Year Player Value:</strong> ${player['Total PC']:,.0f}</p>
             </div>
             """
