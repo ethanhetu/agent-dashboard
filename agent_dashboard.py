@@ -926,23 +926,6 @@ def project_definitions():
         st.markdown("---")
 
 # --------------------------------------------------------------------
-# New: Takeaways Page
-# --------------------------------------------------------------------
-def takeaways_page():
-    st.title("Takeaways")
-    st.write("Write your multi-paragraph report of your findings below.")
-    # A text area for entering your report
-    report = st.text_area("Your Report:", height=400, value="""Type your report here.
-You can include multiple paragraphs.
-For example:
-
-Paragraph 1: ...
-Paragraph 2: ...
-""")
-    st.markdown("### Report Preview")
-    st.markdown(report)
-
-# --------------------------------------------------------------------
 # 5) Navigation
 # --------------------------------------------------------------------
 st.sidebar.title("Navigation")
@@ -954,7 +937,6 @@ page = st.sidebar.radio("Go to", [
     "Second Contracts Leaderboard",
     "Classifications",
     "Project Definitions",
-    "Takeaways"
 ])
 
 if page == "Home":
@@ -971,5 +953,3 @@ elif page == "Classifications":
     overall_visualizations()
 elif page == "Project Definitions":
     project_definitions()
-elif page == "Takeaways":
-    takeaways_page()
