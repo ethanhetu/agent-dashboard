@@ -667,7 +667,7 @@ def second_contracts_leaderboard_page():
 # 5) Visualizations and Project Definitions
 # --------------------------------------------------------------------
 def overall_visualizations():
-    st.title("Visualizations and Takeaways")
+    st.title("Classifications")
     st.write("""
     The scatter plot below shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
     and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
@@ -929,7 +929,7 @@ page = st.sidebar.radio("Go to", [
     "Agency Dashboard",
     "Leaderboard",
     "Second Contracts Leaderboard",
-    "Visualizations and Takeaways",
+    "Classifications",
     "Project Definitions"
 ])
 
@@ -943,7 +943,7 @@ elif page == "Leaderboard":
     leaderboard_page()
 elif page == "Second Contracts Leaderboard":
     second_contracts_leaderboard_page()
-elif page == "Visualizations and Takeaways":
+elif page == "Classifications":
     overall_visualizations()
 elif page == "Project Definitions":
     project_definitions()
