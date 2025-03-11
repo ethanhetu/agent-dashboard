@@ -412,7 +412,7 @@ def display_player_section(title, player_df):
                 st.markdown(f"<p style='font-weight:bold; text-align:center;'>Percent of Value Captured: <span style='color:{color};'>{vcp_value:.0f}%</span></p>", unsafe_allow_html=True)
 
 # --------------------------------------------------------------------
-# New: Arbitration Page
+# Arbitration Page
 # --------------------------------------------------------------------
 def arbitration_page():
     st.title("Arbitration")
