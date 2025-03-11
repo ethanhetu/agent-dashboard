@@ -417,7 +417,7 @@ def display_player_section(title, player_df):
 # --------------------------------------------------------------------
 def arbitration_page():
     st.title("Arbitration")
-    st.subheader("Overall Standings - Arbitration (Arb Filings Per Client)")
+    st.subheader("Which Agents are most likely to engage in the Arbitration process?")
     
     # Load data to get CT and Agency info
     _, ranks_data, _ = load_data()
