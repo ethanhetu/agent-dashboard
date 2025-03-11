@@ -783,20 +783,9 @@ def overall_visualizations():
         "Raze Sports",
         "WD Sports & Entertainment",
         "Thunder Creek Professional Player Management",
-        "Sports Professional Management Inc.",
-        "MPR-Hockey Oy",
-        "Wasserman Media Group, LLC",
-        "Wintersports Ltd. Operating as Raze Sports",
     ]
     
     market_oriented = [
-        "CAA Hockey",
-        "TMI, LLC",
-        "Newport Sports Management Inc.",
-        "Quartexx Management",
-        "Sports Consulting Group Inc.",
-        "KO Sports, Inc.",
-        "4Sports Hockey AG",
         "O2K Worldwide Management Group, LLC",
         "International Sports Advisors Co.",
         "R.W.G. Sport Management",
@@ -807,6 +796,10 @@ def overall_visualizations():
         "RSG Hockey, LLC",
         "Global Hockey Consultants",
         "Gold Star Hockey",
+        "Sports Professional Management Inc.",
+        "MPR-Hockey Oy",
+        "Wasserman Media Group, LLC",
+        "Wintersports Ltd. Operating as Raze Sports",
     ]
     
     player_friendly = [
@@ -817,6 +810,14 @@ def overall_visualizations():
         "The Orr Hockey Group",
         "Titan Sports Management, Inc.",
         "The Will Sports Group",
+        "CAA Hockey",
+        "TMI, LLC",
+        "Newport Sports Management Inc.",
+        "Quartexx Management",
+        "Sports Consulting Group Inc.",
+        "KO Sports, Inc.",
+        "4Sports Hockey AG",
+        "O2K Worldwide Management Group, LLC",
     ]
     
     with col1:
