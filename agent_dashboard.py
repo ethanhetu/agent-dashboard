@@ -10,7 +10,6 @@ import difflib
 import plotly.graph_objects as go
 import numpy as np
 
-# ✅ Ensure this is the first Streamlit command
 st.set_page_config(
     page_title="Agent Insights Dashboard", 
     page_icon="https://www.dropbox.com/s/o1u29fyz5kzffze/2011NP.png?dl=1", 
@@ -625,7 +624,6 @@ def agency_dashboard():
     col3.metric("Contracts Tracked Rank", f"#{int(agency_info['CTR'])}/74")
     col4.metric("Total Contract Value Rank", f"#{int(agency_info['TCV R'])}/74")
     col5.metric("Total Player Value Rank", f"#{int(agency_info['TPV R'])}/74")
-    st.subheader("📅 Year-by-Year VCP Trend")
     agency_players = piba_data[piba_data['Agency Name'] == selected_agency]
     vcp_for_agency = compute_vcp_for_agent(agency_players)
     plot_vcp_line_graph(vcp_for_agency)
