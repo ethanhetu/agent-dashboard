@@ -795,11 +795,6 @@ def second_contracts_leaderboard_page():
 # --------------------------------------------------------------------
 def overall_visualizations():
     st.title("Classifications")
-    st.write("""
-    The scatter plot below shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
-    and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
-    tend to have a higher Dollar Index.
-    """)
     # ----- Agent Tendency Classifications (STATIC) -----
     st.subheader("Agent Tendency Classifications")
     col1, col2, col3 = st.columns(3)
@@ -931,6 +926,11 @@ def overall_visualizations():
         for name in player_friendly:
             st.markdown(f"<div style='border: 1px solid #8B0000; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
     # ----- End Agency Tendency Classifications Section -----
+      st.write("""
+    The scatter plot below shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
+    and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
+    tend to have a higher Dollar Index.
+    """)
     # ----- SCATTER PLOT with Yellow Trend Line -----
     _, ranks_data, _ = load_data()
     fig = go.Figure(data=go.Scatter(
