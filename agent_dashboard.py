@@ -927,11 +927,6 @@ def overall_visualizations():
             st.markdown(f"<div style='border: 1px solid #8B0000; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
     # ----- End Agency Tendency Classifications Section -----
     # ----- SCATTER PLOT with Yellow Trend Line -----
-        st.write("""
-    The scatter plot below shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
-    and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
-    tend to have a higher Dollar Index.
-    """)
     _, ranks_data, _ = load_data()
     fig = go.Figure(data=go.Scatter(
         x=ranks_data['CT'],
@@ -968,6 +963,12 @@ def overall_visualizations():
         st.write("Not enough data to compute a trend line.")
     st.plotly_chart(fig, use_container_width=True)
     # ----- End Scatter Plot Section -----
+
+            st.write("""
+    The scatter plot above shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
+    and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
+    tend to have a higher Dollar Index.
+    """)
 
 def project_definitions():
     st.title("📚 Project Definitions")
