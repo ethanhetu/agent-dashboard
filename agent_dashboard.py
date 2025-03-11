@@ -584,7 +584,6 @@ def agent_dashboard():
     col3.metric("Contracts Tracked Rank", f"#{int(rank_info['CTR'])}/90")
     col4.metric("Total Contract Value Rank", f"#{int(rank_info['TCV R'])}/90")
     col5.metric("Total Player Value Rank", f"#{int(rank_info['TPV R'])}/90")
-    st.subheader("📅 Year-by-Year VCP Trend")
     agent_players = piba_data[piba_data['Agent Name'] == selected_agent]
     vcp_for_agent = compute_vcp_for_agent(agent_players)
     plot_vcp_line_graph(vcp_for_agent)
