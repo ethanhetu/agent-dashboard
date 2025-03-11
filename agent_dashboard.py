@@ -737,7 +737,7 @@ def leaderboard_page():
 
 def second_contracts_leaderboard_page():
     st.title("Second Contracts Leaderboard")
-    st.subheader("Overall Standings - Second Contracts (by Dollar Index)")
+    st.subheader("Which agents are delivering the most surplus value to clients with second contracts?")
     st.write("The 'second contract' is often a high-leverage game of risk and reward. Teams, players, and their representatives often grapple with how to appropriately price future performance. Given the inherent uncertainty of that exercise, one side of the equation typically ends up disproportionately benefitting from the agreement. Below, agents are ranked based on their Dollar Index, but ONLY looking at long-term contracts signed for RFA players coming off of their entry-level deals.")
     agents_data, ranks_data, piba_data = load_data()
     agency_map = dict(zip(ranks_data["Agent Name"].str.strip(), ranks_data["Agency Name"].str.strip()))
