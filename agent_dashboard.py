@@ -786,7 +786,6 @@ def overall_visualizations():
     ]
     
     market_oriented = [
-        "O2K Worldwide Management Group, LLC",
         "International Sports Advisors Co.",
         "R.W.G. Sport Management",
         "Edge Sports Management, LLC",
