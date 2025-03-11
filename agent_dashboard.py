@@ -417,8 +417,7 @@ def display_player_section(title, player_df):
 # --------------------------------------------------------------------
 def arbitration_page():
     st.title("Arbitration")
-    st.subheader("Which Agents are most likely to engage in the Arbitration process?")
-    st.write("Agents are ranked based on the number of times they file for arbitration per client. The agents who less frequently file for arbitration, who therefore more frequently come to agreements before needing arbitration, are ranked more highly.")
+    st.subheader("Overall Standings - Arbitration (Arb Filings Per Client)")
     
     # Load data to get CT and Agency info
     _, ranks_data, _ = load_data()
@@ -520,24 +519,21 @@ def arbitration_page():
         {"Agent Name": "Matthew Ebbs", "Arb": 1.0000},
     ]
     
-    # Checkbox to filter out agents with 0 Arb value
+    # Filter out agents with 0 Arb if desired
     filter_zero = st.checkbox("Only show agents with non-zero Arb Filings Per Client", value=True)
-    
-    # Optionally filter the arb_data list
     if filter_zero:
         arb_data = [d for d in arb_data if d["Arb"] > 0]
     
-    # Enrich arb_data with CT and Agency values (default to "N/A" if not found)
+    # Enrich arb_data with CT (formatted as an integer) and Agency info
     for d in arb_data:
         agent = d["Agent Name"].strip()
-        d["CT"] = ct_map.get(agent, "N/A")
+        d["CT"] = int(ct_map.get(agent, 0))
         d["Agency"] = agency_map.get(agent, "N/A")
     
-    # Sort in descending order by Arb Filings Per Client
-    arb_data_sorted = sorted(arb_data, key=lambda x: x["Arb"], reverse=True)
+    # Sort the data in ascending order so that lower Arb values (0's) appear at the top
+    arb_data_sorted = sorted(arb_data, key=lambda x: x["Arb"])
     
     st.write("### Arbitration Leaderboard")
-    # Display each agent's card (similar layout to Agent Leaderboard)
     for rank, d in enumerate(arb_data_sorted, start=1):
         card_html = f"""
         <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
