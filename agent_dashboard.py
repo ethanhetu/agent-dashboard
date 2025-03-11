@@ -43,17 +43,17 @@ manual_photo_overrides = {
     "marc michaelis": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4319942.png",
     "keith yandle": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3330.png",
     "bryan little": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3508.png",
-    "michael dal colle": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3114733.png&w=350&h=254",
+    "michael dal colle": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3114733.png?w=350&h=254",
     "phil di giuseppe": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3069834.png&w=350&h=254",
     "philippe desrosiers": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042047.png&w=350&h=254",
     "jeremy bracco": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4392564.png",
     "sami niku": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3942047.png",
     "joel kellman": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4421961.png",
-    "german rubtsov": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4024976.png&w=350&h=254",
+    "german rubtsov": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4024976.png?w=350&h=254",
     "otto somppi": "https://lscluster.hockeytech.com/download.php?client_code=ahl&file_path=media/5b9d58ab2a1abc1549ebc64c0eab7752.jpg",
     "ty ronning": "https://lscluster.hockeytech.com/download.php?client_code=ahl&file_path=media/38cec9f5a8ff976e9518678a7c717182.png",
     "matt tennyson": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3020635.png",
-    "chris bigras": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3041990.png&w=350&h=254",
+    "chris bigras": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3041990.png?w=350&h=254",
     "tyler persons": "https://lscluster.hockeytech.com/download.php?client_code=ahl&file_path=media/4b6fc4df5795f36b4e0678e32ba38fbe.jpg",
     "chase pearson": "https://b.fssta.com/uploads/application/nhl/headshots/6279.vresize.350.350.medium.81.png",
     "taylor fedun": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/2304599.png",
@@ -359,7 +359,6 @@ def display_player_section(title, player_df):
         with client_cols[idx % 3]:
             img_path = get_headshot_path(player['Combined Names'])
             if img_path:
-                # If the path is a URL override, embed directly
                 if img_path.startswith("http"):
                     st.markdown(
                         f"""
@@ -412,6 +411,150 @@ def display_player_section(title, player_df):
             if vcp_value is not None:
                 color = "#006400" if vcp_value >= 100 else "#8B0000"
                 st.markdown(f"<p style='font-weight:bold; text-align:center;'>Percent of Value Captured: <span style='color:{color};'>{vcp_value:.0f}%</span></p>", unsafe_allow_html=True)
+
+# --------------------------------------------------------------------
+# New: Arbitration Page
+# --------------------------------------------------------------------
+def arbitration_page():
+    st.title("Arbitration")
+    st.subheader("Overall Standings - Arbitration (Arb Filings Per Client)")
+    
+    # Load data to get CT and Agency info
+    _, ranks_data, _ = load_data()
+    # Build lookup dictionaries from ranks data:
+    ct_map = dict(zip(ranks_data["Agent Name"].str.strip(), ranks_data["CT"]))
+    agency_map = dict(zip(ranks_data["Agent Name"].str.strip(), ranks_data["Agency Name"].str.strip()))
+    
+    # Manual arbitration data (agent name and Arb Filings Per Client)
+    arb_data = [
+        {"Agent Name": "Gerry Johannson", "Arb": 0.0000},
+        {"Agent Name": "Ben Hankinson", "Arb": 0.0000},
+        {"Agent Name": "Paul Capizzano", "Arb": 0.0000},
+        {"Agent Name": "Brian & Scott Bartlett", "Arb": 0.0000},
+        {"Agent Name": "Andrew Scott", "Arb": 0.0000},
+        {"Agent Name": "Ian Pulver", "Arb": 0.0000},
+        {"Agent Name": "Kevin Epp", "Arb": 0.0000},
+        {"Agent Name": "Matt Keator", "Arb": 0.0000},
+        {"Agent Name": "Peter Wallen", "Arb": 0.0000},
+        {"Agent Name": "Philippe Lecavalier", "Arb": 0.0000},
+        {"Agent Name": "Joseph Resnick", "Arb": 0.0000},
+        {"Agent Name": "Jason Davidson", "Arb": 0.0000},
+        {"Agent Name": "Ritchie Winter", "Arb": 0.0000},
+        {"Agent Name": "David Gagner", "Arb": 0.0000},
+        {"Agent Name": "Richard Evans", "Arb": 0.0000},
+        {"Agent Name": "Jarrett Bousquet", "Arb": 0.0000},
+        {"Agent Name": "Andre Rufener", "Arb": 0.0000},
+        {"Agent Name": "Ross Gurney", "Arb": 0.0000},
+        {"Agent Name": "Dean Grillo", "Arb": 0.0000},
+        {"Agent Name": "Murray Koontz", "Arb": 0.0000},
+        {"Agent Name": "Michael Deutsch", "Arb": 0.0000},
+        {"Agent Name": "Pete Rutili", "Arb": 0.0000},
+        {"Agent Name": "Olivier Fortier", "Arb": 0.0000},
+        {"Agent Name": "Doug Shepherd", "Arb": 0.0000},
+        {"Agent Name": "Allan Walsh", "Arb": 0.0000},
+        {"Agent Name": "Paul Theofanous", "Arb": 0.0000},
+        {"Agent Name": "Mark Gandler", "Arb": 0.0000},
+        {"Agent Name": "Neil Sheehy", "Arb": 0.0000},
+        {"Agent Name": "Richard Curran", "Arb": 0.0000},
+        {"Agent Name": "Jordan Neumann & George Bazos", "Arb": 0.0000},
+        {"Agent Name": "Ray (Raynold) Petkau", "Arb": 0.0000},
+        {"Agent Name": "Eustace King", "Arb": 0.0000},
+        {"Agent Name": "Bayne Pettinger", "Arb": 0.0000},
+        {"Agent Name": "John Thornton", "Arb": 0.0000},
+        {"Agent Name": "Matthew Oates", "Arb": 0.0000},
+        {"Agent Name": "Kevin Magnuson", "Arb": 0.0000},
+        {"Agent Name": "Rick Valette", "Arb": 0.0000},
+        {"Agent Name": "Michael Curran", "Arb": 0.0000},
+        {"Agent Name": "Scott Bartlett", "Arb": 0.0000},
+        {"Agent Name": "Marc Levine", "Arb": 0.0000},
+        {"Agent Name": "Stephen Screnci", "Arb": 0.0000},
+        {"Agent Name": "Stephen Bartlett", "Arb": 0.0000},
+        {"Agent Name": "Shawn Hunwick", "Arb": 0.0000},
+        {"Agent Name": "Ron Salcer", "Arb": 0.0000},
+        {"Agent Name": "Robert Murray", "Arb": 0.0000},
+        {"Agent Name": "Robert Sauve", "Arb": 0.0000},
+        {"Agent Name": "Maxim Moliver", "Arb": 0.0000},
+        {"Agent Name": "Monir Kalgoum", "Arb": 0.0000},
+        {"Agent Name": "Erik Lupien", "Arb": 0.0000},
+        {"Agent Name": "Stephen F. Reich", "Arb": 0.0000},
+        {"Agent Name": "Paul Corbeil", "Arb": 0.0000},
+        {"Agent Name": "Mark Stowe", "Arb": 0.0000},
+        {"Agent Name": "Robert Norton", "Arb": 0.0000},
+        {"Agent Name": "Justin Duberman", "Arb": 0.0000},
+        {"Agent Name": "Jerry Buckley", "Arb": 0.0000},
+        {"Agent Name": "Peter MacTavish", "Arb": 0.0000},
+        {"Agent Name": "Brian MacDonald", "Arb": 0.0000},
+        {"Agent Name": "Dave Cowan", "Arb": 0.0000},
+        {"Agent Name": "Jeff Helperl", "Arb": 0.0000},
+        {"Agent Name": "Jiri Hamal", "Arb": 0.0000},
+        {"Agent Name": "Andrew Maloney", "Arb": 0.0000},
+        {"Agent Name": "Cameron Stewart", "Arb": 0.0000},
+        {"Agent Name": "Jay Grossman", "Arb": 0.0000},
+        {"Agent Name": "Matthew Federico", "Arb": 0.0000},
+        {"Agent Name": "Georges Mueller", "Arb": 0.0000},
+        {"Agent Name": "Eric Quinlan & Nicholas Martino", "Arb": 0.0000},
+        {"Agent Name": "Allain Roy", "Arb": 0.0167},
+        {"Agent Name": "Pat Brisson", "Arb": 0.0182},
+        {"Agent Name": "J.P. Barry", "Arb": 0.0217},
+        {"Agent Name": "Craig Oster", "Arb": 0.0278},
+        {"Agent Name": "Markus Lehto", "Arb": 0.0417},
+        {"Agent Name": "Darren Ferris", "Arb": 0.0435},
+        {"Agent Name": "Lewis Gross", "Arb": 0.0526},
+        {"Agent Name": "Patrick Morris", "Arb": 0.0556},
+        {"Agent Name": "Wade Arnott", "Arb": 0.0556},
+        {"Agent Name": "Daniel Milstein", "Arb": 0.0571},
+        {"Agent Name": "Judd Moldaver", "Arb": 0.0588},
+        {"Agent Name": "Claude Lemieux", "Arb": 0.0690},
+        {"Agent Name": "Peter Fish", "Arb": 0.0833},
+        {"Agent Name": "Kurt Overhardt", "Arb": 0.0909},
+        {"Agent Name": "Todd Diamond", "Arb": 0.0909},
+        {"Agent Name": "Robert Hooper", "Arb": 0.1000},
+        {"Agent Name": "Daniel Plante", "Arb": 0.1000},
+        {"Agent Name": "Todd Reynolds", "Arb": 0.1111},
+        {"Agent Name": "Mika Rautakallio", "Arb": 0.1429},
+        {"Agent Name": "Don Meehan", "Arb": 0.2000},
+        {"Agent Name": "Joakim Persson", "Arb": 0.2500},
+        {"Agent Name": "Serge Payer", "Arb": 0.2500},
+        {"Agent Name": "Thane Campbell", "Arb": 0.5000},
+        {"Agent Name": "Matthew Ebbs", "Arb": 1.0000},
+    ]
+    
+    # Checkbox to filter out agents with 0 Arb value
+    filter_zero = st.checkbox("Only show agents with non-zero Arb Filings Per Client", value=True)
+    
+    # Optionally filter the arb_data list
+    if filter_zero:
+        arb_data = [d for d in arb_data if d["Arb"] > 0]
+    
+    # Enrich arb_data with CT and Agency values (default to "N/A" if not found)
+    for d in arb_data:
+        agent = d["Agent Name"].strip()
+        d["CT"] = ct_map.get(agent, "N/A")
+        d["Agency"] = agency_map.get(agent, "N/A")
+    
+    # Sort in descending order by Arb Filings Per Client
+    arb_data_sorted = sorted(arb_data, key=lambda x: x["Arb"], reverse=True)
+    
+    st.write("### Arbitration Leaderboard")
+    # Display each agent's card (similar layout to Agent Leaderboard)
+    for rank, d in enumerate(arb_data_sorted, start=1):
+        card_html = f"""
+        <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+            <div style="flex: 0 0 40px; text-align: center; font-size: 18px; font-weight: bold;">
+                {rank}.
+            </div>
+            <div style="flex: 1; margin-left: 16px; font-size: 18px; font-weight: bold;">
+                {d["Agent Name"]} <br/><span style="font-size: 14px; font-weight: normal;">{d["Agency"]}</span>
+            </div>
+            <div style="flex: 0 0 170px; text-align: right; font-size: 16px;">
+                <div style="border-left: 1px solid #ccc; padding-left: 8px;">
+                    <div style="font-weight: bold;">{d["Arb"]:.4f}</div>
+                    <div style="font-size: 14px;">CT: {d["CT"]}</div>
+                </div>
+            </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
 
 # --------------------------------------------------------------------
 # 3) Main Dashboard Pages
@@ -511,25 +654,19 @@ def leaderboard_page():
     if agents_data is None or ranks_data is None or piba_data is None:
         st.error("Error loading data for leaderboard.")
         st.stop()
-
     # Define manual exclusion list.
     excluded_agents = {"Patrik Aronsson", "Chris McAlpine", "David Kaye", "Thomas Lynn", "Patrick Sullivan"}
-
-    # Build valid agent list from the Agents tab and exclude manually.
-    valid_agents = set(agents_data['Agent Name'].dropna().str.strip())
-    valid_agents = valid_agents - excluded_agents
-    # Filter out agents not in valid_agents from both ranks_data and piba_data.
+    valid_agents = set(agents_data['Agent Name'].dropna().str.strip()) - excluded_agents
     ranks_data = ranks_data[ranks_data['Agent Name'].str.strip().isin(valid_agents)]
     piba_data = piba_data[piba_data['Agent Name'].str.strip().isin(valid_agents)]
     
     st.subheader("Overall Standings (by Dollar Index)")
     filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
-
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
     if filter_option:
         overall_table = overall_table[overall_table['CT'] >= 10]
     overall_table = overall_table.head(90)
-
+    
     for rank, (_, row) in enumerate(overall_table.iterrows(), start=1):
         agent_name = row['Agent Name']
         agency = row['Agency Name']
@@ -552,25 +689,22 @@ def leaderboard_page():
         </div>
         """
         st.markdown(card_html, unsafe_allow_html=True)
-
+    
     st.markdown("---")
     st.subheader("Year-by-Year, Which Agents Did Best and Worst?")
-    # Create mapping from agent name to agency using filtered ranks_data.
     agency_map = dict(zip(ranks_data["Agent Name"].str.strip(), ranks_data["Agency Name"].str.strip()))
     agent_vcp_by_season = compute_agent_vcp_by_season(piba_data)
-
+    
     for season in sorted(agent_vcp_by_season.keys(), reverse=True):
         df = agent_vcp_by_season[season]
         st.markdown(f"### {season}")
         winners = df.sort_values(by='VCP', ascending=False).head(5).reset_index(drop=True)
         losers = df.sort_values(by='VCP', ascending=True).head(5).reset_index(drop=True)
-
         col_head1, col_head2 = st.columns(2)
         with col_head1:
             st.markdown("#### Five Biggest 'Winners' of the Year")
         with col_head2:
             st.markdown("#### Five Biggest 'Losers' of the Year")
-
         for i in range(max(len(winners), len(losers))):
             cols = st.columns(2)
             with cols[0]:
@@ -605,52 +739,39 @@ def leaderboard_page():
 def second_contracts_leaderboard_page():
     st.title("Second Contracts Leaderboard")
     st.subheader("Overall Standings - Second Contracts (by Dollar Index)")
-
-    # 1) Load main data so we can build the agency_map
     agents_data, ranks_data, piba_data = load_data()
-
-    # 2) Create a map from agent name -> agency name
     agency_map = dict(zip(ranks_data["Agent Name"].str.strip(), ranks_data["Agency Name"].str.strip()))
-
-    # 3) Manually defined data from your attached image (without Agency Name).
-    #    We'll look up the Agency Name using the map above.
     second_contracts_data = [
-        {"Agent Name": "Peter Wallen",                   "Dollar Index": 0.68, "Total Contract Value": 35600000},
-        {"Agent Name": "Mika Rautakallio",               "Dollar Index": 0.72, "Total Contract Value": 42270000},
-        {"Agent Name": "Brian & Scott Bartlett",         "Dollar Index": 0.81, "Total Contract Value": 86500000},
-        {"Agent Name": "Jordan Neumann & George Bazos",  "Dollar Index": 0.82, "Total Contract Value": 82500000},
-        {"Agent Name": "Judd Moldaver",                  "Dollar Index": 0.83, "Total Contract Value": 133170000},
-        {"Agent Name": "Pat Brisson",                    "Dollar Index": 0.87, "Total Contract Value": 116885714},
-        {"Agent Name": "Richard Evans",                  "Dollar Index": 0.95, "Total Contract Value": 85000000},
-        {"Agent Name": "Paul Capizzano",                 "Dollar Index": 0.97, "Total Contract Value": 17825000},
-        {"Agent Name": "Kurt Overhardt",                 "Dollar Index": 1.00, "Total Contract Value": 97650000},
-        {"Agent Name": "Claude Lemieux",                 "Dollar Index": 1.02, "Total Contract Value": 48000000},
-        {"Agent Name": "Andre Rufener",                  "Dollar Index": 1.06, "Total Contract Value": 36000000},
-        {"Agent Name": "Craig Oster",                    "Dollar Index": 1.06, "Total Contract Value": 72500000},
-        {"Agent Name": "Darren Ferris",                  "Dollar Index": 1.10, "Total Contract Value": 54465000},
-        {"Agent Name": "Patrick Morris",                 "Dollar Index": 1.13, "Total Contract Value": 29000000},
-        {"Agent Name": "Allain Roy",                     "Dollar Index": 1.18, "Total Contract Value": 30000000},
-        {"Agent Name": "David Gagner",                   "Dollar Index": 1.20, "Total Contract Value": 15750000},
-        {"Agent Name": "Philippe Lecavalier",            "Dollar Index": 1.20, "Total Contract Value": 29250000},
-        {"Agent Name": "Don Meehan",                     "Dollar Index": 1.29, "Total Contract Value": 22750000},
-        {"Agent Name": "Markus Lehto",                   "Dollar Index": 1.39, "Total Contract Value": 27350000},
-        {"Agent Name": "Kevin Magnuson",                 "Dollar Index": 1.42, "Total Contract Value": 61666668},
-        {"Agent Name": "Robert Norton",                  "Dollar Index": 1.49, "Total Contract Value": 40800000},
-        {"Agent Name": "Matt Keator",                    "Dollar Index": 1.51, "Total Contract Value": 35600000},
-        {"Agent Name": "Jordan Neumann & George Bazos",  "Dollar Index": 1.60, "Total Contract Value": 80000000},
+        {"Agent Name": "Peter Wallen", "Dollar Index": 0.68, "Total Contract Value": 35600000},
+        {"Agent Name": "Mika Rautakallio", "Dollar Index": 0.72, "Total Contract Value": 42270000},
+        {"Agent Name": "Brian & Scott Bartlett", "Dollar Index": 0.81, "Total Contract Value": 86500000},
+        {"Agent Name": "Jordan Neumann & George Bazos", "Dollar Index": 0.82, "Total Contract Value": 82500000},
+        {"Agent Name": "Judd Moldaver", "Dollar Index": 0.83, "Total Contract Value": 133170000},
+        {"Agent Name": "Pat Brisson", "Dollar Index": 0.87, "Total Contract Value": 116885714},
+        {"Agent Name": "Richard Evans", "Dollar Index": 0.95, "Total Contract Value": 85000000},
+        {"Agent Name": "Paul Capizzano", "Dollar Index": 0.97, "Total Contract Value": 17825000},
+        {"Agent Name": "Kurt Overhardt", "Dollar Index": 1.00, "Total Contract Value": 97650000},
+        {"Agent Name": "Claude Lemieux", "Dollar Index": 1.02, "Total Contract Value": 48000000},
+        {"Agent Name": "Andre Rufener", "Dollar Index": 1.06, "Total Contract Value": 36000000},
+        {"Agent Name": "Craig Oster", "Dollar Index": 1.06, "Total Contract Value": 72500000},
+        {"Agent Name": "Darren Ferris", "Dollar Index": 1.10, "Total Contract Value": 54465000},
+        {"Agent Name": "Patrick Morris", "Dollar Index": 1.13, "Total Contract Value": 29000000},
+        {"Agent Name": "Allain Roy", "Dollar Index": 1.18, "Total Contract Value": 30000000},
+        {"Agent Name": "David Gagner", "Dollar Index": 1.20, "Total Contract Value": 15750000},
+        {"Agent Name": "Philippe Lecavalier", "Dollar Index": 1.20, "Total Contract Value": 29250000},
+        {"Agent Name": "Don Meehan", "Dollar Index": 1.29, "Total Contract Value": 22750000},
+        {"Agent Name": "Markus Lehto", "Dollar Index": 1.39, "Total Contract Value": 27350000},
+        {"Agent Name": "Kevin Magnuson", "Dollar Index": 1.42, "Total Contract Value": 61666668},
+        {"Agent Name": "Robert Norton", "Dollar Index": 1.49, "Total Contract Value": 40800000},
+        {"Agent Name": "Matt Keator", "Dollar Index": 1.51, "Total Contract Value": 35600000},
+        {"Agent Name": "Jordan Neumann & George Bazos", "Dollar Index": 1.60, "Total Contract Value": 80000000},
     ]
-
-    # 4) Sort the data in descending order by Dollar Index (highest first)
     second_contracts_data_sorted = sorted(second_contracts_data, key=lambda x: x["Dollar Index"], reverse=True)
-
-    # 5) Build a styled card for each row
     for rank, row in enumerate(second_contracts_data_sorted, start=1):
         agent_name = row['Agent Name']
-        # Auto-lookup agency name using the agency_map
         agency = agency_map.get(agent_name.strip(), "N/A")
         dollar_index = row['Dollar Index']
         total_val = row['Total Contract Value']
-        
         card_html = f"""
         <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
             <div style="flex: 0 0 40px; text-align: center; font-size: 18px; font-weight: bold;">
@@ -679,12 +800,9 @@ def overall_visualizations():
     and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
     tend to have a higher Dollar Index.
     """)
-    
     # ----- Agent Tendency Classifications (STATIC) -----
     st.subheader("Agent Tendency Classifications")
-    
     col1, col2, col3 = st.columns(3)
-    
     team_friendly = [
         "Joakim Persson",
         "Dean Grillo",
@@ -700,7 +818,6 @@ def overall_visualizations():
         "Jason Davidson",
         "Murray Koontz",
     ]
-    
     market_oriented = [
         "Craig Oster",
         "Ross Gurney",
@@ -723,7 +840,6 @@ def overall_visualizations():
         "Mika Rautakallio",
         "Lewis Gross",
     ]
-    
     player_friendly = [
         "Matthew Oates",
         "Justin Duberman",
@@ -751,28 +867,22 @@ def overall_visualizations():
         "Claude Lemieux",
         "Philippe Lecavalier",
     ]
-    
     with col1:
         st.markdown("<h3 style='color:#006400; text-align:center;'>Team Friendly</h3>", unsafe_allow_html=True)
         for name in team_friendly:
             st.markdown(f"<div style='border: 1px solid #006400; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
-    
     with col2:
         st.markdown("<h3 style='color:black; text-align:center;'>Market-Oriented</h3>", unsafe_allow_html=True)
         for name in market_oriented:
             st.markdown(f"<div style='border: 1px solid black; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
-    
     with col3:
         st.markdown("<h3 style='color:#8B0000; text-align:center;'>Player-Friendly</h3>", unsafe_allow_html=True)
         for name in player_friendly:
             st.markdown(f"<div style='border: 1px solid #8B0000; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
     # ----- End Agent Tendency Classifications Section -----
-    
     # ----- Agency Tendency Classifications (STATIC) -----
     st.subheader("Agency Tendency Classifications")
-    
     col1, col2, col3 = st.columns(3)
-    
     team_friendly = [
         "KMJ Sports & Entertainment AB",
         "Forward Hockey",
@@ -784,7 +894,6 @@ def overall_visualizations():
         "WD Sports & Entertainment",
         "Thunder Creek Professional Player Management",
     ]
-    
     market_oriented = [
         "International Sports Advisors Co.",
         "R.W.G. Sport Management",
@@ -800,7 +909,6 @@ def overall_visualizations():
         "Wasserman Media Group, LLC",
         "Wintersports Ltd. Operating as Raze Sports",
     ]
-    
     player_friendly = [
         "Achieve Sports Management",
         "Puck Agency, LLC",
@@ -809,32 +917,20 @@ def overall_visualizations():
         "The Orr Hockey Group",
         "Titan Sports Management, Inc.",
         "The Will Sports Group",
-        "CAA Hockey",
-        "TMI, LLC",
-        "Newport Sports Management Inc.",
-        "Quartexx Management",
-        "Sports Consulting Group Inc.",
-        "KO Sports, Inc.",
-        "4Sports Hockey AG",
-        "O2K Worldwide Management Group, LLC",
     ]
-    
     with col1:
         st.markdown("<h3 style='color:#006400; text-align:center;'>Team Friendly</h3>", unsafe_allow_html=True)
         for name in team_friendly:
             st.markdown(f"<div style='border: 1px solid #006400; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
-    
     with col2:
         st.markdown("<h3 style='color:black; text-align:center;'>Market-Oriented</h3>", unsafe_allow_html=True)
         for name in market_oriented:
             st.markdown(f"<div style='border: 1px solid black; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
-    
     with col3:
         st.markdown("<h3 style='color:#8B0000; text-align:center;'>Player-Friendly</h3>", unsafe_allow_html=True)
         for name in player_friendly:
             st.markdown(f"<div style='border: 1px solid #8B0000; padding: 8px; margin: 4px; border-radius: 5px; text-align:center;'>{name}</div>", unsafe_allow_html=True)
     # ----- End Agency Tendency Classifications Section -----
-    
     # ----- SCATTER PLOT with Yellow Trend Line -----
     _, ranks_data, _ = load_data()
     fig = go.Figure(data=go.Scatter(
@@ -851,7 +947,6 @@ def overall_visualizations():
         yaxis=dict(range=[0.5, 1.5]),
         template="plotly_white"
     )
-    
     x = ranks_data['CT'].astype(float)
     y = ranks_data['Dollar Index'].astype(float)
     mask = np.isfinite(x) & np.isfinite(y)
@@ -871,10 +966,9 @@ def overall_visualizations():
             st.write("Trend line could not be computed due to a numerical error.")
     else:
         st.write("Not enough data to compute a trend line.")
-    
     st.plotly_chart(fig, use_container_width=True)
     # ----- End Scatter Plot Section -----
-    
+
 def project_definitions():
     st.title("📚 Project Definitions")
     definitions = [
@@ -904,6 +998,7 @@ page = st.sidebar.radio("Go to", [
     "Leaderboard",
     "Second Contracts Leaderboard",
     "Classifications",
+    "Arbitration",
     "Project Definitions",
 ])
 
@@ -919,5 +1014,7 @@ elif page == "Second Contracts Leaderboard":
     second_contracts_leaderboard_page()
 elif page == "Classifications":
     overall_visualizations()
+elif page == "Arbitration":
+    arbitration_page()
 elif page == "Project Definitions":
     project_definitions()
