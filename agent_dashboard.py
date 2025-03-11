@@ -796,7 +796,8 @@ def second_contracts_leaderboard_page():
 def overall_visualizations():
     st.title("Classifications")
     # ----- Agent Tendency Classifications (STATIC) -----
-    st.subheader("Agent Tendency Classifications")
+    st.subheader("Looking at player performance and cost between 2017-18 and 2023-24, how can agent behavior be classified?")
+    st.write("Ultimately, every agent is acting on behalf of the best interests of his or her client. Often, that best interest means extracting as much money as possible. But sometimes it does not, such as when a client is willing to accept a lower wage in exchange for stability measures, such as no-trade protection. With all that said, looking broadly at the work of each agent, as has been done in this project, trends emerge. Below, each agent and agency has been sorted into one of three general tendency categories: "Team Friendly" which are agents whose work generally favors NHL clubs, "Market Aligned" which are agents whose work generally aligns with proper player value, and "Player Friendly" which are agents whose work generally tends to favor their clients."
     col1, col2, col3 = st.columns(3)
     team_friendly = [
         "Joakim Persson",
