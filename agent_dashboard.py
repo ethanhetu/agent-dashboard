@@ -963,13 +963,6 @@ def overall_visualizations():
         st.write("Not enough data to compute a trend line.")
     st.plotly_chart(fig, use_container_width=True)
     # ----- End Scatter Plot Section -----
-
-            st.write("""
-    The scatter plot above shows each agent as a dot. The X axis represents the number of Contracts Tracked (CT),
-    and the Y axis represents the Dollar Index. This chart helps reveal whether agents with more contracts 
-    tend to have a higher Dollar Index.
-    """)
-
 def project_definitions():
     st.title("📚 Project Definitions")
     definitions = [
