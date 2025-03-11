@@ -534,7 +534,7 @@ def arbitration_page():
     # Sort the data in ascending order so that lower Arb values (0's) appear at the top
     arb_data_sorted = sorted(arb_data, key=lambda x: x["Arb"])
     
-    st.write("### Arbitration Leaderboard                             Arb Filings Per Client")
+    st.write("### Arbitration Leaderboard - Agents ranked by # of Arbitration Filings Per Client")
     for rank, d in enumerate(arb_data_sorted, start=1):
         card_html = f"""
         <div style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
