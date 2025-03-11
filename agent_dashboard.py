@@ -962,7 +962,7 @@ def overall_visualizations():
     st.plotly_chart(fig, use_container_width=True)
     # ----- End Scatter Plot Section -----
 def project_definitions():
-    st.title("Project Definitions - What Do All These Terms Mean?")
+    st.title("Project Definitions")
     definitions = [
         ("Dollar Index", "This metric evaluates agent performance. It answers: For every dollar of on-ice value a client provides, how many dollars does the agent capture?"),
         ("Win %", "The percentage of contract years considered a 'win' for the agent. A win occurs when the dollars captured exceed the player's on-ice value."),
