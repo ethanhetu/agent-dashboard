@@ -417,7 +417,7 @@ def display_player_section(title, player_df):
 # --------------------------------------------------------------------
 def arbitration_page():
     st.title("Arbitration")
-    st.subheader("Which Agents most frequently utilize the process of Arbitration?")
+    st.subheader("Which agents most frequently utilize the arbitration process?")
     st.write("Agents are ranked based on the number of times they file for arbitration per client. The agents who less frequently file for arbitration, who therefore more frequently come to agreements before needing arbitration, are ranked more highly.")
     
     # Load data to get CT and Agency info
