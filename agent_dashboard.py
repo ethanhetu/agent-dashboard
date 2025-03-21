@@ -745,7 +745,7 @@ def second_contracts_leaderboard_page():
         {"Agent Name": "Jordan Neumann & George Bazos", "Dollar Index": 0.82, "Total Contract Value": 24150000},
         {"Agent Name": "Judd Moldaver", "Dollar Index": 0.83, "Total Contract Value": 133170000},
         {"Agent Name": "Pat Brisson", "Dollar Index": 0.87, "Total Contract Value": 116885714},
-        {"Agent Name": "Richard Evans", "Dollar Index": 0.92, "Total Contract Value":  $35714285},
+        {"Agent Name": "Richard Evans", "Dollar Index": 0.92, "Total Contract Value":  35714285},
         {"Agent Name": "Paul Capizzano", "Dollar Index": 0.95, "Total Contract Value": 17825000},
         {"Agent Name": "Kurt Overhardt", "Dollar Index": 0.96, "Total Contract Value": 97650000},
         {"Agent Name": "Claude Lemieux", "Dollar Index": 1.02, "Total Contract Value": 48200000},
