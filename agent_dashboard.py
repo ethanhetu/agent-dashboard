@@ -988,7 +988,7 @@ def project_definitions():
         ("Contracts Tracked", "The number of negotiated contracts that qualify for this project (excluding entry-level contracts but including two-way contracts)."),
         ("VCP", "Value Capture Percentage – the percentage of a player's on-ice value that the agent is able to capture as compensation."),
         ("Six-Year Agent Delivery", "An aggregate measure over six seasons (2018-19 through 2023-24) of the dollars delivered by an agent relative to on-ice contribution."),
-        ("Player Contributions", "Also known as 'PC', this metric assigns a financial value to a player's on-ice performance using comprehensive NHL and AHL data. The PC values come courtesy of BenchRates.com")
+        ("Player Contributions", "Also known as 'PC', this metric assigns a financial value to a player's on-ice performance using comprehensive NHL and AHL data. The PC values come courtesy of Benchrates.com")
     ]
     for term, definition in definitions:
         col1, col2 = st.columns([1, 3])
