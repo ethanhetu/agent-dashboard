@@ -116,6 +116,7 @@ manual_photo_overrides = {
     "jake virtanen": "https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/05_NHL_Shield.svg/1200px-05_NHL_Shield.svg.png",
     "hunter miska": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4197166.png",
     "colle dal": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3114733.png&w=350&h=254",
+    "tyler parsons": "https://lscluster.hockeytech.com/download.php?client_code=ahl&file_path=media/6a151b7d2ede020ae087381a1d054598.png",
     "reid duke": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3150433.png"
 }
 
