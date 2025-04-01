@@ -206,8 +206,8 @@ def correct_player_name(name):
         "lias andersson l": "Lias Andersson",
         "jesper boqvist j": "Jesper Boqvist",
         "sompel vande": "Mitch Vande Sompel",
-        "Colle Dal": "Michael Dal Colle",
-        "Giuseppe Di": "Phil Di Giuseppe",
+        "colle dal": "Michael Dal Colle",
+        "giuseppe di": "Phil Di Giuseppe",
     }
     lower_name = name.lower().strip()
     return corrections.get(lower_name, name)
