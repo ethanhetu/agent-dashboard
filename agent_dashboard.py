@@ -120,6 +120,7 @@ manual_photo_overrides = {
     "evan cormier": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4064851.png&w=350&h=254",
     "nelson nogier": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3150129.png&w=350&h=254",
     "josh healey": "https://assets.leaguestat.com/ahl/240x240/6687.jpg",
+    "nick wolff": "https://assets.leaguestat.com/ahl/240x240/8495.jpg",
     "reid duke": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3150433.png"
 }
 
