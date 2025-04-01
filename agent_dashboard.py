@@ -1016,7 +1016,7 @@ page = st.sidebar.radio("Go to", [
 if page == "Home":
     st.title("Landing Page - Agent Analysis Project")
     st.subheader("Please use the sidebar to navigate to your desired page.")
-    st.write("Project created by Ethan Hetu, 2024-25 Hockey Operations Intern, Nashville Predators. Project created under the supervision of Jeff Zavatsky, Director of Hockey Administration, Nashville Predators.")
+    st.write("Project created by Ethan Hetu, 2024-25 Hockey Operations Intern, Nashville Predators.")
 elif page == "Agent Dashboard":
     agent_dashboard()
 elif page == "Agency Dashboard":
