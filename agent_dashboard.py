@@ -1001,7 +1001,7 @@ def project_definitions():
 # --------------------------------------------------------------------
 # 5) Navigation
 # --------------------------------------------------------------------
-st.sidebar.title("Main Menu")
+st.sidebar.title("Sitemap")
 page = st.sidebar.radio("Go to", [
     "Home",
     "Agent Dashboard",
