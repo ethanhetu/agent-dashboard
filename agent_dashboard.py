@@ -104,6 +104,7 @@ manual_photo_overrides = {
     "josh currie": "https://a.espncdn.com/i/headshots/nhl/players/full/4063257.png",
     "marko dano": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042058.png",
     "adam huska": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4588215.png&w=350&h=254"
+    "reid duke": "https://lscluster.hockeytech.com/download.php?client_code=ahl&file_path=media/757b436f30c29e8665c735ecb7ab2eb5.png"
 }
 
 # --------------------------------------------------------------------
