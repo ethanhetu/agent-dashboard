@@ -118,6 +118,7 @@ manual_photo_overrides = {
     "colle dal": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3114733.png&w=350&h=254",
     "tyler parsons": "https://lscluster.hockeytech.com/download.php?client_code=ahl&file_path=media/6a151b7d2ede020ae087381a1d054598.png",
     "evan cormier": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4064851.png&w=350&h=254",
+    "nelson nogier": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3150129.png&w=350&h=254",
     "reid duke": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3150433.png"
 }
 
