@@ -983,7 +983,7 @@ def overall_visualizations():
 def project_definitions():
     st.title("Project Definitions")
     definitions = [
-        ("Dollar Index", "This metric evaluates agent performance. The 'Dollar Index' number answers the following question: For every dollar of on-ice value a client provides, how many dollars does the agent capture?"),
+        ("Dollar Index", "This is the central metric to evaluating. The 'Dollar Index' answers the following question: For every dollar of on-ice value an agent's client provides to his NHL club, how many dollars has the agent managed to capture for his client?"),
         ("Win %", "The percentage of contract years considered a 'win' for the agent. A win occurs when the dollars captured exceed the player's on-ice value."),
         ("Contracts Tracked", "The number of negotiated contracts that qualify for this project (excluding entry-level contracts but including two-way contracts)."),
         ("VCP", "Value Capture Percentage – the percentage of a player's on-ice value that the agent is able to capture as compensation."),
