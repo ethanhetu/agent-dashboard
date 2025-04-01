@@ -107,7 +107,7 @@ manual_photo_overrides = {
     "adam werner": "https://a.espncdn.com/i/headshots/nhl/players/full/4272283.png",
     "jordan weal": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/5557.png",
     "callum booth": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4392501.png",
-    "cal foote": "https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/05_NHL_Shield.svg/1200px-05_NHL_Shield.svg.png",
+    "cal foote": "https://e7.pngegg.com/pngimages/56/770/png-clipart-california-state-university-los-angeles-business-company-management-information-headshot-silhouette-angle-company-thumbnail.png",
     "carter hart": "https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/05_NHL_Shield.svg/1200px-05_NHL_Shield.svg.png",
     "dillon dube": "https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/05_NHL_Shield.svg/1200px-05_NHL_Shield.svg.png",
     "michael mcLeod": "https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/05_NHL_Shield.svg/1200px-05_NHL_Shield.svg.png",
