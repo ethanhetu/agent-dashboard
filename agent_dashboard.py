@@ -105,6 +105,7 @@ manual_photo_overrides = {
     "marko dano": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3042058.png",
     "adam huska": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4588215.png&w=350&h=254",
     "adam werner": "https://a.espncdn.com/i/headshots/nhl/players/full/4272283.png",
+    "jordan weal": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/5557.png",
     "reid duke": "https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3150433.png"
 }
 
