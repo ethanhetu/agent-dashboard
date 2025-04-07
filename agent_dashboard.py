@@ -539,7 +539,7 @@ def arbitration_page():
     ]
     
     # Filter out agents with 0 Arb if desired
-    filter_zero = st.checkbox("Only show agents with non-zero Arb Filings Per Client", value=True)
+    filter_zero = st.checkbox("Exclude agents who did not file for arbitration in the six-year project sample size", value=True)
     if filter_zero:
         arb_data = [d for d in arb_data if d["Arb"] > 0]
     
