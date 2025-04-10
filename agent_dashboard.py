@@ -675,7 +675,7 @@ def leaderboard_page():
     piba_data = piba_data[piba_data['Agent Name'].str.strip().isin(valid_agents)]
     
     st.subheader("Which agents are delivering the most value to their clients?")
-    st.write("Agents are ranked based on Dollar Index. (see 'definitions' tab for more information) The higher an agent's Dollar Index, the more effective he or she is at delivering surplus value to clients - in some cases, more dollars than their clients are actually worth on the ice.")
+    st.write("Agents are ranked based on Dollar Index. (see 'definitions' tab for more information) The higher an agent's Dollar Index, the more effective he or she is at delivering surplus value to clients. In some cases, an agent manages to deliver more dollars to their client than that client was worth on the ice.")
     filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
     if filter_option:
