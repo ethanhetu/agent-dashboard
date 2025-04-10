@@ -676,7 +676,7 @@ def leaderboard_page():
     
     st.subheader("Which agents are delivering the most value to their clients?")
     st.write("Agents are ranked based on Dollar Index. (see 'definitions' tab for more information) The higher an agent's Dollar Index, the more effective he or she is at delivering surplus value to clients. In some cases, agents end up delivering more dollars to their client than a client may have been worth on the ice.")
-    filter_option = st.checkbox("Only show agents with at least 10 Contracts Tracked", value=False)
+    filter_option = st.checkbox("Only show agents with at least 10 contracts tracked", value=False)
     overall_table = ranks_data[['Agent Name', 'Agency Name', 'Dollar Index', 'CT']].sort_values(by='Dollar Index', ascending=False)
     if filter_option:
         overall_table = overall_table[overall_table['CT'] >= 10]
