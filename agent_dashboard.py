@@ -1014,7 +1014,7 @@ page = st.sidebar.radio("Go to", [
 ])
 
 if page == "Home":
-    st.title("Landing Page - Agent Analysis Project")
+    st.title("Landing Page - Agent Insights Project")
     st.subheader("Please use the sidebar to navigate to your desired page.")
     st.write("Project created by Ethan Hetu, 2024-25 Nashville Predators Hockey Operations Intern.")
 elif page == "Agent Dashboard":
